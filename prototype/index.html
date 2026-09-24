@@ -1026,7 +1026,7 @@ Notes for you
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
-    if (api.on) call("/api/profile", { name: S.name || null, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null }, "PATCH").then(refreshProfile).catch(() => {});
+    if (api.on) call("/api/profile", { name: S.name || null, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel }, "PATCH").then(refreshProfile).catch(() => {});
     $("weekLater").hidden = !api.on;
     renderHello();
     setLevel(chosenLevel);

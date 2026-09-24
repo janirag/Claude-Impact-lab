@@ -4,7 +4,7 @@ import { classifyIntent } from "./agents/intent";
 import { offlineAnswer, offlineCoach } from "./agents/offline";
 import { runTask, IMAGE_TYPES, type Attachment } from "./agents/task";
 import { situationById } from "./catalog";
-import { decide } from "./policy";
+import { decide, touchSession } from "./policy";
 import type { CoachMode } from "./prompts";
 import type { CoachAction, CoachEvent, User } from "./types";
 
@@ -55,6 +55,7 @@ function remember(user: User, input: TurnInput, answer: string) {
 
 // One chat turn: task agent streams the answer, then the coach suggests and the policy decides.
 export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, signal?: AbortSignal) {
+  touchSession(user);
   user.turn++;
   const intent = user.turn === 1 && !user.mode && !config.offline
     ? classifyIntent(input.message, signal).catch(() => undefined)
@@ -90,6 +91,6 @@ export async function mascotChat(user: User, message: string): Promise<CoachEven
 
 // Return visit ("one week later" in the demo).
 export async function returnVisit(user: User): Promise<CoachEvent[]> {
-  user.session = { started_turn: user.turn, tips: 0 }; // a new visit gets a fresh interruption budget
+  user.session = { started_turn: user.turn, tips: 0, last_at: new Date().toISOString() }; // a new visit gets a fresh budget
   return decide(user, await coach(user, "return"), "return");
 }

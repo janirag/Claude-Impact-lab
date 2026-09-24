@@ -23,8 +23,18 @@ const BUTTONS: Partial<Record<CoachActionName, CoachEvent["buttons"]>> = {
 
 const neverKey = (a: CoachAction) => (a.ref ? `${a.action}:${a.ref}` : a.action);
 
-// "Just get it done" users get the quieter level unless they chose otherwise.
-export const effectiveLevel = (user: User): Level => (user.level === "guide" && user.mode === "do" ? "useful" : user.level);
+// "Just get it done" users get the quieter level, unless they explicitly chose a level themselves.
+export const effectiveLevel = (user: User): Level =>
+  user.level === "guide" && user.mode === "do" && !user.level_set_by_user ? "useful" : user.level;
+
+// One visit = one interruption budget. A long pause (or a return visit) starts a new one.
+export function touchSession(user: User, now = new Date()) {
+  const last = user.session.last_at ? Date.parse(user.session.last_at) : NaN;
+  if (!Number.isFinite(last) || now.getTime() - last > policy.sessionIdleMinutes * 60_000) {
+    user.session = { started_turn: user.turn, tips: 0 };
+  }
+  user.session.last_at = now.toISOString();
+}
 
 function isValid(user: User, a: CoachAction): boolean {
   switch (a.action) {

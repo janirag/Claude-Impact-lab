@@ -493,7 +493,7 @@ Checked the build against [`user-flows.html`](user-flows.html) on 2026-09-24. Wh
 | Flow | Map | Build now |
 |---|---|---|
 | 1 and 3 | Flag wave ends onboarding; confetti when the Lab is saved | Same (the poses were the other way round) |
-| 2 and 6 | "Not now" doubles the gap for that tip type; per-level budget "to test" | Same. Guide me: 3 turns between tips, max 3 per session. Only when useful: 1 per session. A return visit starts a new session. Values live in `web/src/lib/config.ts`. |
+| 2 and 6 | "Not now" doubles the gap for that tip type; per-level budget "to test" | Same, tuned after playtesting: Guide me gets 2 turns between tips (the map's 3 felt too quiet) and max 3 per visit; Only when useful gets 1 per visit. A visit ends after 30 minutes without a turn, or with a return visit. An explicit level choice always beats the automatic "just get it done" guess. Values live in `web/src/lib/config.ts`. |
 | 4 | Clawd sometimes says what it used from the profile | The coach may do this in one line ("Kept it formal, like you asked") |
 | Entry point E3 | Pick a situation (letter, bill, trip…) | Situations with a guided first step in `web/src/lib/catalog.ts` |
 | 8 | Missions and coming back, "one week later" shortcut | Challenges in the panel, "One week later" in the banner |

@@ -60,7 +60,7 @@ describe("turn flow (offline)", () => {
   it("a return visit starts a fresh interruption budget", async () => {
     await withUser("turn-user-0007", async (u) => { u.turn = 9; u.session = { started_turn: 0, tips: 3 }; });
     await withUser("turn-user-0007", (u) => returnVisit(u));
-    expect((await loadUser("turn-user-0007")).session).toEqual({ started_turn: 9, tips: 0 });
+    expect((await loadUser("turn-user-0007")).session).toMatchObject({ started_turn: 9, tips: 0 });
   });
 
   it("return visit greets the user", async () => {

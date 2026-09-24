@@ -26,7 +26,7 @@ export async function PATCH(req: Request) {
       if (b[k] === null) delete u.profile[k];
       else if (b[k] !== undefined) (u.profile as Record<string, unknown>)[k] = k === "name" ? String(b[k]).slice(0, 60) : b[k];
     }
-    if (b.level) { u.level = b.level; u.dismissals_in_a_row = 0; }
+    if (b.level) { u.level = b.level; u.level_set_by_user = true; u.dismissals_in_a_row = 0; }
     if (b.mode === null) delete u.mode;
     else if (b.mode) u.mode = b.mode; // from onboarding: "I have something to get done" -> do
     return view(u);
