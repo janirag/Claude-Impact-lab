@@ -105,9 +105,6 @@
   .main:not(.ftue-on) .thread-inner { padding-bottom: 56px; } /* room for Clawd sitting on the composer, so it never covers the last message */
   .hello { text-align: center; padding: 40px 0 8px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
   .hello h1 { font-family: var(--read); font-weight: 400; font-size: 32px; margin: 0; text-wrap: balance; }
-  .suggest { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .suggest button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-size: 13px; }
-  .suggest button:hover { border-color: var(--accent); }
   .hello .ask { margin: -6px 0 0; color: var(--muted); font-size: 15px; }
   .situations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; text-align: left; }
   .situation { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--text); font: inherit; min-height: 92px; }
@@ -579,7 +576,7 @@ ${t("notesAfter")}`;
       labIntro: "Here's my Lab. Pick a mission when you have two minutes, or just start chatting.",
       tapDots: "Tap anything with an orange dot, like this one, and I'll explain it in one line.",
       morning: "Good morning", afternoon: "Good afternoon", evening: "Good evening", greetName: "{part}, {name}",
-      helpToday: "What do you need help with today?", suggestTranslate: "Translate an email to Catalan",
+      helpToday: "What do you need help with today?",
       request: "Translate this to Catalan:",
       takePhoto: "Take a photo of it, or pick one from your phone. Then press send.",
       addDetails: "Add a few details at the end, then press send.",
@@ -753,7 +750,7 @@ ${t("notesAfter")}`;
       labIntro: "Aquí tienes mi Lab. Elige una misión cuando tengas dos minutos, o ponte a chatear directamente.",
       tapDots: "Toca cualquier cosa con un punto naranja, como este, y te la explico en una línea.",
       morning: "Buenos días", afternoon: "Buenas tardes", evening: "Buenas noches", greetName: "{part}, {name}",
-      helpToday: "¿Con qué te ayudo hoy?", suggestTranslate: "Traducir un correo al catalán",
+      helpToday: "¿Con qué te ayudo hoy?",
       request: "Traduce esto al catalán:",
       takePhoto: "Hazle una foto o elige una del móvil, y luego envíala.",
       addDetails: "Añade algunos detalles al final y luego envíalo.",
@@ -923,7 +920,7 @@ ${t("notesAfter")}`;
       labIntro: "Aquí tens el meu Lab. Tria una missió quan tinguis dos minuts, o posa't a xatejar directament.",
       tapDots: "Toca qualsevol cosa amb un punt taronja, com aquest, i te l'explico en una línia.",
       morning: "Bon dia", afternoon: "Bona tarda", evening: "Bona nit", greetName: "{part}, {name}",
-      helpToday: "Amb què t'ajudo avui?", suggestTranslate: "Tradueix un correu al català",
+      helpToday: "Amb què t'ajudo avui?",
       request: "Tradueix això al català:",
       takePhoto: "Fes-li una foto o tria'n una del mòbil, i després envia-la.",
       addDetails: "Afegeix-hi uns quants detalls al final i després envia-ho.",
@@ -1827,8 +1824,7 @@ ${t("notesAfter")}`;
       <p class="ask">${t("helpToday")}</p>
       <div class="situations">${situationsFirst().map((x) =>
         `<button type="button" class="situation" data-situation="${x.id}"><span class="ic" aria-hidden="true">${x.ic}</span><span class="t">${esc(sits[x.id][0])}</span><span class="d">${esc(sits[x.id][1])}</span></button>`).join("")}
-      </div>
-      <div class="suggest"><button type="button" data-suggest="translate">${t("suggestTranslate")}</button></div></div>`;
+      </div></div>`;
   }
 
   // Picking a situation fills in a first message; the ones about a document open the camera / photo picker straight away.
@@ -1853,12 +1849,7 @@ ${t("notesAfter")}`;
     const fc = e.target.closest("[data-file]");
     if (fc) { openFile(fc.dataset.file); return; }
     const sit = e.target.closest("[data-situation]");
-    if (sit) { pickSituation(sit.dataset.situation); return; }
-    const s = e.target.closest("[data-suggest]");
-    if (!s) return;
-    S.situation = null;
-    prompt.value = request();
-    prompt.focus();
+    if (sit) pickSituation(sit.dataset.situation);
   });
 
   function afterPrompt(text) {
