@@ -26,6 +26,8 @@ export function freshUser(id: string): User {
     tip_history: [],
     never: [],
     dismissals_in_a_row: 0,
+    session: { started_turn: 0, tips: 0 },
+    gaps: {},
     pending: {},
     history: [],
   };

@@ -44,11 +44,12 @@ The coach only **proposes**. `src/lib/policy.ts` **decides** what reaches the sc
 | `POST /api/mascot` | `{ message }` | `{ events }`: Clawd's reply when the user taps it and asks something |
 | `GET /api/lab/:missionId` | | Mission and steps (same content as the prototype's Lab) |
 | `POST /api/lab/:missionId` | `{ answers: { [stepKey]: option \| option[] } }` | `{ saved: ["From now on, Claude will …"], events }` |
-| `GET /api/profile` | | Level, profile, skills, cards, challenges, Labs ("What Clawd remembers") |
+| `GET /api/profile` | | Level, profile, skills, cards (`cards_total`), every challenge with its status, Labs ("What Clawd remembers") |
 | `PATCH /api/profile` | `{ name?, language?, answer_style?, context?, level?, mode? }` (`null` clears a field) | Same as GET |
 | `DELETE /api/profile` | `?fact=<id>` \| `?skill=<id>` \| `?all=1` | Same as GET |
 | `GET /api/profile/export` | | "My AI profile" as plain text for any assistant |
-| `POST /api/session/return` | | `{ events }`: greeting and challenge check-in (the demo's "one week later") |
+| `POST /api/session/return` | | `{ events }`: greeting and challenge check-in (the demo's "One week later" button) |
+| `POST /api/challenges/:id` | | Starts a real-life challenge from the panel; returns the same view as `GET /api/profile`. It's completed through the return visit's check-in, which awards its card. |
 | `POST /api/dev/reset` | | Wipes this browser's user. Off in production unless `CLAWD_ALLOW_RESET=1`. |
 
 The user is identified by an anonymous `clawd_uid` cookie. No account is needed.

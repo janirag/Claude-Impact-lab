@@ -419,6 +419,7 @@ Status on 2026-09-24. Everything below is on `main`.
 | Clawd Guide prototype v1 | [`prototype/index.html`](../prototype/index.html) (PR #1) | Janira | Working one-file clickable prototype. Details below. |
 | Mascot animation clips | [`animations/`](../animations/) (7 × MP4, 1920 px wide, 2–21 s) | Ridvan | Pixel-art Clawd animation states. Details below. |
 | Desk research | [`research/barcelona-ai-users.md`](barcelona-ai-users.md) | Francesc | Who basic chat users in Barcelona are, with 4 personas |
+| User flow map | [`research/user-flows.html`](user-flows.html) (PR #4) | Janira | Every flow from first visit to coming back, with triggers, edge cases and status (prototype / MVP / later), plus Carmen's stage-by-stage experience map. The build follows it (see "Reconciled with the flow map" below). |
 
 ### Clawd Guide prototype v1
 
@@ -452,8 +453,8 @@ Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs)
 | `1C8B…` | 2 s | Clawd standing, front view | **Resting** (idle) |
 | `294D…` | 5 s | Clawd tilting and wobbling in place | **Busy** or walking |
 | `61C1…` | 6 s | Clawd with a blue sweatband and round black props, side and front view; reads as "training" | **Lab / practising** |
-| `7FB0…` | 4 s | Clawd in side view with confetti | **Celebrating** (card or save) |
-| `88A6…` | 4 s | Happy closed eyes (^ ^), holding a checkered flag | **Mission complete** |
+| `7FB0…` | 4 s | Clawd in side view with confetti | **Celebrating**: new card, Lab saved, "after" answer |
+| `88A6…` | 4 s | Happy closed eyes (^ ^), holding a checkered flag | **Flag wave** at the end of onboarding, while walking to the message box |
 | `9B28…` | 21 s | All the states together on one canvas | Showreel / overview |
 | `BE89…` | 11 s | Clawd moving across the screen: left, centre, top right | **Roaming** (moving around the screen) |
 
@@ -485,6 +486,20 @@ Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs)
 
 ---
 
+### Reconciled with the flow map
+
+Checked the build against [`user-flows.html`](user-flows.html) on 2026-09-24. Where they differed, the build now follows the map:
+
+| Flow | Map | Build now |
+|---|---|---|
+| 1 and 3 | Flag wave ends onboarding; confetti when the Lab is saved | Same (the poses were the other way round) |
+| 2 and 6 | "Not now" doubles the gap for that tip type; per-level budget "to test" | Same, tuned after playtesting: Guide me gets 2 turns between tips (the map's 3 felt too quiet) and max 3 per visit; Only when useful gets 1 per visit. A visit ends after 30 minutes without a turn, or with a return visit. An explicit level choice always beats the automatic "just get it done" guess. Values live in `web/src/lib/config.ts`. |
+| 4 | Clawd sometimes says what it used from the profile | The coach may do this in one line ("Kept it formal, like you asked") |
+| Entry point E3 | Pick a situation (letter, bill, trip…) | Situations with a guided first step in `web/src/lib/catalog.ts` |
+| 8 | Missions and coming back, "one week later" shortcut | Challenges in the panel, "One week later" in the banner |
+
+Still open from the map: asking the user's language during onboarding (decision 12).
+
 ## 5. Open decisions
 
 | # | Decision | Recommendation |
@@ -500,6 +515,7 @@ Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs)
 | 9 | "Missions" naming | *Lab missions* (in-app) vs *Real-life challenges* (outside) |
 | 10 | Mascot placement | Panel for conversation, plus a small roaming sprite |
 | 11 | Demo runtime | Keep the artifact version as a safe backup; build the backend version alongside it |
+| 12 | Ask language in onboarding? (flow map, Flow 1) | It would be a 4th question, and the map says any 4th question loses her. Today Claude answers in the language she writes in, and the Lab's "Tell Claude about your work" mission can set it. |
 
 ## 6. Next steps
 
@@ -507,4 +523,5 @@ Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs)
 - [x] ~~Interactive prototype of the mascot~~: Clawd Guide v1 is done (chat, side panel, Lab, before/after).
 - [ ] Rename the animation clips by state, and add the missing states (watching, curious, talking, sleeping).
 - [x] ~~Prototype v2 poses~~: the clips are redrawn as pixel-art SVG poses in `prototype/index.html` (idle hop and blink, walk, busy, Lab training, celebrate with confetti, mission-complete flag). Clawd also roams to the coach's `point_at` anchors (upload button, composer, answer, card chip, Lab), stands beside them without covering content, points with its arm, and walks home when the bubble closes.
-- [ ] Build step 1: Next.js project with the task agent and an empty mascot slot, reusing the prototype's look.
+- [x] ~~Build steps 1–5~~: backend in `web/` (orchestrator, task and coach agents, Lab, memory, challenges) serving the prototype, live on the API.
+- [x] ~~Real-life challenges and the return visit~~: start a challenge in the panel, "One week later" in the banner, Clawd checks in and "I did it!" earns the challenge's card. The panel also shows cards and "What Clawd remembers" (forget items, copy the profile).

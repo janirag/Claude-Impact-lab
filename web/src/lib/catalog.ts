@@ -67,6 +67,25 @@ export const CHALLENGES: Challenge[] = [
   { id: "show_a_friend", title: "Show a friend", prompt: "Show someone close to you one trick you learned here.", card: "give_context" },
 ];
 
+// Situations on the home screen: real-life starting points instead of lessons. `guide` is the task agent's first step.
+export type Situation = { id: string; title: string; wants_file: boolean; guide: string };
+
+export const SITUATIONS: Situation[] = [
+  { id: "letter", title: "A letter I don't understand", wants_file: true,
+    guide: "Say who sent it and what it is about in one plain sentence. Then give any amounts and deadlines exactly as written, and the one concrete next step. If no letter was attached or pasted, kindly ask for a photo of it and say nothing else." },
+  { id: "bill", title: "Check a bill", wants_file: true,
+    guide: "Say what the bill is for, the total and the due date. Point out anything unusual (a charge that looks new, higher than normal, or duplicated) and what to do if it looks wrong. If no bill was attached or pasted, kindly ask for a photo of it and say nothing else." },
+  { id: "rent", title: "A rental contract", wants_file: true,
+    guide: "Summarise the key terms: length, monthly rent, deposit (fianza), who pays what, and how to leave early. Flag anything unusual for a rental in Catalonia and suggest the local Oficina d'Habitatge to double-check. If no contract was attached or pasted, kindly ask for a photo or PDF of it and say nothing else." },
+  { id: "doctor", title: "Prepare for the doctor", wants_file: false,
+    guide: "Help them prepare, not diagnose. If they haven't said much yet, ask at most 3 short questions (what is happening, since when, what they already tried). Then give a short list to take to the appointment: what to tell the doctor and what to ask." },
+  { id: "trip", title: "Plan a trip", wants_file: false,
+    guide: "If where, when or budget is missing, ask for just those in one short question. Otherwise give a simple day-by-day plan with rough costs, and say which details (prices, timetables) to check before booking." },
+  { id: "homework", title: "Help with homework", wants_file: true,
+    guide: "The user is usually a parent helping a child. Explain the topic simply so they can help, with one worked example, rather than just giving the answers. If the exercise isn't attached or pasted, ask for a photo of it or the child's school year and subject." },
+];
+
 export const cardById = (id: string) => CARDS.find((c) => c.id === id);
 export const labById = (id: string) => LAB_MISSIONS.find((m) => m.id === id);
 export const challengeById = (id: string) => CHALLENGES.find((c) => c.id === id);
+export const situationById = (id: string) => SITUATIONS.find((s) => s.id === id);

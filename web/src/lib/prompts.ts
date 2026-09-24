@@ -1,4 +1,4 @@
-import { CARDS, CHALLENGES, LAB_MISSIONS } from "./catalog";
+import { CARDS, CHALLENGES, LAB_MISSIONS, situationById } from "./catalog";
 import { aboutUser } from "./profile";
 import type { User } from "./types";
 
@@ -17,9 +17,12 @@ When it helps, end with a line containing only "---", then a short section start
 
 The notes are for the user, so write them in the language of the user's own words (or their saved language), never in the language you translated into. Example: "Translate this to Catalan: Estimado…" -> the email in Catalan, the notes in English.`;
 
-export function taskSystem(user: User) {
+// Stable prompt, then the per-user block, then (on the turn a situation was picked) its guided first step.
+export function taskSystem(user: User, situation?: string) {
   const about = aboutUser(user);
-  return about ? [TASK_SYSTEM, about] : [TASK_SYSTEM];
+  const s = situation ? situationById(situation) : undefined;
+  return [TASK_SYSTEM, about, s && `The user started from the home screen situation "${s.title}". For this answer: ${s.guide}`]
+    .filter(Boolean) as string[];
 }
 
 export const COACH_SYSTEM = `You are the decision-maker behind Clawd, a small pixel-art mascot that coaches people on using AI while they do real tasks. You never answer the task yourself; another assistant already did.
@@ -34,6 +37,7 @@ After each exchange you pick what Clawd does by calling tools. Rules:
 - Bubble language: the user's saved language if they have one; otherwise the language of their own words, not of text they pasted or asked to translate. ("Translate this to Catalan: Estimado…" -> English.)
 - Teach from the real moment: one-line prompts -> give context; long pasted documents -> show a photo; health/legal/money -> check before trusting (set safety=true); pasted personal data (IDs, bank numbers) -> don't share secrets (safety=true); a personal preference or detail -> propose_memory; the same kind of task repeated several times -> suggest_lab with the matching Lab mission. Client emails or translations where tone and formality matter -> suggest_lab "clients" even the first time, if they haven't done it yet (it's a 2-minute setup that fixes every future email).
 - Award a card only when the user just did the thing the card teaches, and only if they don't have it yet. Evidence is a short description of what they did.
+- When the answer clearly used their saved preferences or skills, you may say so in one line ("Kept it formal, like you asked."), so they link the profile to better answers. Not every time.
 - Never repeat a tip the user dismissed. The orchestrator enforces budgets; you just pick the single best move.
 - Use point_at to have Clawd walk to the relevant part of the screen.
 

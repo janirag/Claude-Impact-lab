@@ -1,3 +1,6 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Clawd Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,6 +56,7 @@
     padding: 8px 16px; background: var(--text); color: var(--bg); font-size: 12px;
   }
   .banner strong { font-weight: 600; letter-spacing: .02em; }
+  .banner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .banner button { background: none; border: 1px solid currentColor; border-radius: 6px; padding: 3px 10px; font-size: 12px; color: var(--bg); }
 
   .main { display: grid; grid-template-columns: 272px minmax(0, 1fr) 320px; min-height: 0; }
@@ -101,6 +105,13 @@
   .suggest { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
   .suggest button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-size: 13px; }
   .suggest button:hover { border-color: var(--accent); }
+  .hello .ask { margin: -6px 0 0; color: var(--muted); font-size: 15px; }
+  .situations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; text-align: left; }
+  .situation { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--text); font: inherit; min-height: 92px; }
+  .situation:hover, .situation:focus-visible { border-color: var(--accent); }
+  .situation .ic { font-size: 20px; line-height: 1; }
+  .situation .t { font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .situation .d { font-size: 12px; color: var(--muted); line-height: 1.35; }
   .msg-user { align-self: flex-end; max-width: 85%; background: var(--sunk); border: 1px solid var(--line); border-radius: 16px 16px 4px 16px; padding: 12px 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.55; }
   .msg-claude { font-family: var(--read); font-size: 16px; line-height: 1.65; white-space: pre-wrap; }
   .msg-claude .who { font-family: var(--ui); font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-bottom: 6px; white-space: normal; }
@@ -129,6 +140,15 @@
   .icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 16px; line-height: 1; }
   .send { margin-left: auto; width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; font-size: 16px; }
   .ftue-on .composer-wrap { opacity: .35; pointer-events: none; }
+  .attach { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; margin-bottom: 8px; padding: 4px 6px 4px 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); font-size: 12px; color: var(--muted); }
+  .attach[hidden] { display: none; }
+  .attach img, .attach .doc { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex: none; }
+  .attach .doc { display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); font-size: 10px; font-weight: 600; color: var(--accent-ink); }
+  .attach .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+  .attach button { border: 0; background: none; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 4px; }
+  .msg-user .att { display: block; max-width: 220px; max-height: 220px; border-radius: 10px; margin-bottom: 8px; object-fit: cover; }
+  .msg-user .att-doc { display: inline-block; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+  .pop button { margin-top: 6px; }
 
   /* Guide-me explainables */
   .guide [data-explain] { position: relative; }
@@ -235,6 +255,8 @@
   .clawd.big .say { top: calc(100% + 14px); left: 50%; transform: translateX(-50%); max-width: min(400px, calc(100vw - 48px)); width: min(400px, calc(100vw - 48px)); }
   .clawd:not(.big) .say { bottom: calc(100% + 10px); right: 0; }
   .clawd:not(.big).say-start .say { right: auto; left: 0; }
+  /* Walk first, then speak: the bubble waits until Clawd arrives, so it never trails off-screen mid-walk. */
+  .clawd.walking .say { visibility: hidden; }
   .clawd:not(.big).say-below .say { bottom: auto; top: calc(100% + 10px); }
   /* Pointing at an anchor: the raised arm (flipped with Clawd when it faces left) points at it. */
   .clawd.pointing:not(.walking) .cw-arm-up { display: inline; }
@@ -290,6 +312,15 @@
   .mission .m { grid-row: 1 / 3; grid-column: 2; align-self: center; font-size: 11px; color: var(--accent-ink); font-weight: 500; }
   .mission.done { opacity: 1; }
   .mission.done .m { color: var(--green-ink); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+  .card-chip { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 11px; line-height: 1.4; color: var(--muted); background: var(--surface); }
+  .card-chip b { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .mem { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .mem li { display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; background: var(--surface); }
+  .mem small { display: block; font-size: 11px; color: var(--muted); }
+  .mem .x { border: 0; background: none; font-size: 18px; line-height: 1; color: var(--muted); padding: 2px 6px; border-radius: 6px; }
+  .mem .x:hover { background: var(--sunk); color: var(--text); }
+  .copy-box { width: 100%; min-height: 110px; margin-top: 8px; font: 12px/1.4 var(--ui); border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg); color: var(--text); }
   .tip { font-size: 12px; color: var(--muted); background: var(--sunk); border-radius: 10px; padding: 10px 12px; margin: 0; }
 
   .lab-head { display: flex; flex-direction: column; gap: 6px; background: var(--sunk); border-radius: 12px; padding: 12px; }
@@ -343,6 +374,11 @@
     .composer-wrap { padding: 8px 16px 16px; }
     .hello { padding-top: 24px; }
     .hello h1 { font-size: 26px; }
+    .situations { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .situation { min-height: 0; padding: 10px 12px; gap: 3px; }
+    .situation .ic { font-size: 18px; }
+    .situation .t { font-size: 13px; }
+    .situation .d { font-size: 11.5px; }
     .compare { grid-template-columns: 1fr; }
     .panel {
       position: fixed; left: 0; right: 0; bottom: 0; height: 72%; z-index: 50;
@@ -367,7 +403,7 @@
 <div class="app">
   <div class="banner" role="note">
     <span><strong>Concept prototype</strong> for the Claude Impact Lab hackathon, Barcelona 2026. Not an Anthropic product.</span>
-    <button type="button" id="reset">Restart as a new user</button>
+    <span class="banner-actions"><button type="button" id="weekLater" hidden>One week later</button><button type="button" id="reset">Restart as a new user</button></span>
   </div>
 
   <div class="main ftue-on no-panel" id="main">
@@ -411,6 +447,8 @@
 
       <div class="composer-wrap" id="composerWrap">
         <form class="composer" id="composer">
+          <div class="attach" id="attach" hidden></div>
+          <input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
           <textarea id="prompt" rows="4" aria-label="Message Claude" placeholder="How can I help you today?"></textarea>
           <div class="composer-row">
             <button class="icon-btn" type="button" data-explain="attach" aria-label="Add a file">+</button>
@@ -503,17 +541,39 @@ Notes for you
 
   const MISSIONS = [
     { id: "clients", t: "Teach Claude how you write to clients", d: "Your tone and rules. 2 min", ready: true },
-    { id: "you", t: "Tell Claude about your work", d: "Your role and languages. 1 min", ready: false },
+    { id: "you", t: "Tell Claude who you are", d: "What you use it for, your language and style. 1 min", ready: true },
     { id: "connect", t: "Connect a tool you use", d: "Claude reads your calendar. 3 min", ready: false }
   ];
 
-  const STEPS = [
+  const LABS = {
+    clients: { title: "Teach Claude how you write to clients", steps: [
     { key: "role", q: "Who are you when you write to clients?", help: "Pick the closest one.", multi: false,
       options: ["Office admin", "Accounts", "Sales", "Reception"] },
     { key: "tone", q: "How should your emails sound?", help: "Claude will write every client email this way.", multi: false,
       options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"] },
     { key: "rules", q: "What must never go wrong?", help: "Pick as many as you like.", multi: true,
       options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] }
+    ] },
+    you: { title: "Tell Claude who you are", steps: [
+      { key: "context", q: "What do you mostly use it for?", help: "You can change this any time.", multi: false,
+        options: ["Personal life", "Work", "Studies"] },
+      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
+        options: ["Català", "Español", "English"] },
+      { key: "style", q: "How do you like answers?", help: "Pick one.", multi: false,
+        options: ["Short", "Detailed", "Visual, with lists"] }
+    ] }
+  };
+  const blankAnswers = () => Object.fromEntries(Object.entries(LABS).map(([id, l]) =>
+    [id, Object.fromEntries(l.steps.map((st) => [st.key, st.multi ? [] : null]))]));
+
+  // Home screen: real-life starting points. Ids match SITUATIONS in web/src/lib/catalog.ts, which adds the guided first step.
+  const SITUATIONS = [
+    { id: "letter",   ic: "✉️", t: "A letter I don't understand", d: "Send a photo, I'll explain it", file: true,  starter: "I got this letter. What does it say and what do I need to do?" },
+    { id: "bill",     ic: "🧾", t: "Check a bill",                d: "Anything unusual?",            file: true,  starter: "Can you check this bill? Is anything unusual?" },
+    { id: "rent",     ic: "🏠", t: "A rental contract",           d: "What to watch out for",        file: true,  starter: "This is my rental contract. What should I watch out for?" },
+    { id: "doctor",   ic: "🩺", t: "Prepare for the doctor",      d: "What to say and ask",          file: false, starter: "I have a doctor's appointment. Help me prepare. It's about: " },
+    { id: "trip",     ic: "🧳", t: "Plan a trip",                 d: "A simple plan with costs",     file: false, starter: "Help me plan a trip to " },
+    { id: "homework", ic: "📚", t: "Help with homework",          d: "So you can help your child",   file: true,  starter: "Help me understand this homework so I can explain it to my child." }
   ];
 
   const LEVELS = {
@@ -540,8 +600,8 @@ Notes for you
 
   const fresh = () => ({
     ftue: 0, name: "", intent: null, language: guessLanguage(), firstTask: null,
-    phase: "start", view: "home", step: 0,
-    answers: { role: null, tone: null, rules: [] },
+    phase: "start", view: "home", step: 0, lab: "clients", labsDone: [], situation: null,
+    answers: blankAnswers(), file: null,
     dismissals: 0, noSuggest: false, before: "", after: ""
   });
   let S = fresh();
@@ -602,14 +662,70 @@ Notes for you
   if (location.protocol.startsWith("http")) {
     fetch("/api/profile", { headers: { accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { api.on = !!d && (!d.backend?.offline || forceBackend); })
+      .then((d) => {
+        api.on = !!d && (!d.backend?.offline || forceBackend);
+        if (api.on) { $("clawdBody").setAttribute("aria-label", "Ask Clawd"); refreshProfile(); }
+      })
       .catch(() => {});
   }
 
+  // ---------- Attachments: a photo or a PDF for Claude to read (backend only) ----------
+  const MAX_BYTES = 5 * 1024 * 1024; // same limit as the backend
+  const readB64 = (blob) => new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+  // Phone photos are often over 5 MB (and HEIC on iPhones), so images are redrawn as a JPEG of at most 1600 px.
+  async function shrinkImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return await new Promise((res) => c.toBlob(res, "image/jpeg", 0.85));
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function pickFile(file) {
+    if (!file) return;
+    const isPdf = file.type === "application/pdf";
+    let blob = file;
+    if (!isPdf) blob = await shrinkImage(file).catch(() => null);
+    if (!blob || blob.size > MAX_BYTES) {
+      clawd.hidden = false;
+      speakSmall(isPdf ? "That PDF is too big for me (5 MB max). Could you send just the pages that matter?" : "I couldn't read that picture. Could you try another one?", true);
+      return;
+    }
+    const data = await readB64(blob);
+    const media_type = isPdf ? "application/pdf" : "image/jpeg";
+    S.file = { media_type, data, name: file.name || (isPdf ? "document.pdf" : "photo.jpg"), preview: isPdf ? null : `data:${media_type};base64,${data}` };
+    renderAttach();
+    prompt.focus();
+  }
+  function renderAttach() {
+    const box = $("attach"), f = S.file;
+    box.hidden = !f;
+    box.innerHTML = f ? `${f.preview ? `<img src="${f.preview}" alt="">` : `<span class="doc">PDF</span>`}
+      <span class="name">${esc(f.name)}</span><button type="button" id="dropFile" aria-label="Remove file">&times;</button>` : "";
+  }
+  function openPicker() { $("fileInput").value = ""; $("fileInput").click(); }
+  $("fileInput").addEventListener("change", (e) => pickFile(e.target.files[0]));
+  $("attach").addEventListener("click", (e) => { if (e.target.closest("#dropFile")) { S.file = null; renderAttach(); } });
+  $("composer").querySelector('[data-explain="attach"]').addEventListener("click", () => {
+    // On touch screens in "Guide me" the first tap shows the explainer; its "Choose a photo or PDF" button opens the picker.
+    if (api.on && (level !== "guide" || matchMedia("(hover: hover)").matches)) openPicker();
+  });
+
   // POST /api/turn streams server-sent events: token*, answer_done, coach*, done | error.
-  async function askBackend(text, el, whoEl) {
-    el.innerHTML = `<span class="thinking">Thinking...</span>`;
-    const res = await fetch("/api/turn", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text }) });
+  async function askBackend(text, el, whoEl, file) {
+    el.innerHTML = `<span class="thinking">${file ? "Reading your " + (file.media_type === "application/pdf" ? "PDF" : "photo") + "..." : "Thinking..."}</span>`;
+    const attachment = file ? { media_type: file.media_type, data: file.data } : undefined;
+    const situation = S.situation || undefined;
+    S.situation = null;
+    const res = await fetch("/api/turn", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text, attachment, situation }) });
     if (!res.ok || !res.body) throw new Error("turn failed");
     const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
     let buf = "", out = "";
@@ -655,10 +771,115 @@ Notes for you
     if (level === "useful") clawd.hidden = true;
     const r = await call("/api/coach/ack", { event_id: id, response: resp }).catch(() => null);
     if (!r?.ok) return;
-    if (r.effect?.open_lab) openLab();
+    if (r.effect?.open_lab) openLab(r.effect.open_lab);
     if (r.effect?.level) setLevel(r.effect.level, true);
     if (r.effect?.saved_fact) addChip("Memory updated");
+    if (r.effect?.mission) addChip("Challenge started");
     for (const ev of r.events || []) showCoach(ev);
+    refreshProfile();
+  }
+
+  // ---------- Progress from the backend: challenges, cards, what Clawd remembers ----------
+  function refreshProfile() {
+    if (!api.on) return Promise.resolve();
+    return fetch("/api/profile").then((r) => r.json())
+      .then((d) => { api.profile = d; if (S.view === "home") renderPanel(); })
+      .catch(() => {});
+  }
+
+  const LANG_NAMES = { ca: "Català", es: "Español", en: "English" };
+  function progressHtml() {
+    const p = api.on && api.profile;
+    if (!p) return "";
+    const challenges = p.challenges.map((c) => `<button class="mission ${c.status === "done" ? "done" : ""}" data-challenge="${esc(c.id)}" ${c.status ? "disabled" : ""}>
+        <span class="t">${esc(c.title)}</span><span class="d">${esc(c.status === "open" ? "I'll ask you how it went next time." : c.status === "done" ? "Completed. You earned a card for it." : c.prompt)}</span>
+        <span class="m">${c.status === "done" ? "Done" : c.status === "open" ? "Open" : "Start"}</span></button>`).join("");
+    const cards = p.cards.length
+      ? `<div class="cards">${p.cards.map((c) => `<div class="card-chip"><b>${esc(c.title)}</b>${esc(c.lesson || "")}</div>`).join("")}</div>`
+      : `<p class="q-help">No cards yet. You earn them by doing things, not by studying.</p>`;
+    const pr = p.profile || {};
+    const items = [
+      pr.name && ["Your name", pr.name, null],
+      pr.language && ["Language", LANG_NAMES[pr.language] || pr.language, null],
+      pr.answer_style && ["Answers", pr.answer_style, null],
+      ...(pr.facts || []).map((f) => [`Learned from ${f.learned_from || "chat"}`, f.text, `fact=${f.id}`]),
+      ...(p.skills || []).map((sk) => ["Skill", sk.title, `skill=${sk.id}`]),
+    ].filter(Boolean);
+    const memory = items.length
+      ? `<ul class="mem">${items.map(([k, v, del]) => `<li><span><small>${esc(k)}</small>${esc(v)}</span>${del ? `<button class="x" type="button" data-forget="${esc(del)}" aria-label="Forget ${esc(v)}">&times;</button>` : ""}</li>`).join("")}</ul>`
+      : `<p class="q-help">Nothing yet. I only remember what you say yes to.</p>`;
+    return `<div><p class="section-label">Real-life challenges</p><div class="missions">${challenges}</div></div>
+      <div class="cards-wrap"><p class="section-label">Your cards · ${p.cards.length} of ${p.cards_total}</p>${cards}</div>
+      <div><p class="section-label">What Clawd remembers</p>${memory}<button class="btn" type="button" data-act="copyprofile">Copy my AI profile</button></div>`;
+  }
+
+  async function startChallenge(id) {
+    const r = await call(`/api/challenges/${encodeURIComponent(id)}`).catch(() => null);
+    if (!r?.challenges) return;
+    api.profile = { ...api.profile, ...r };
+    renderPanel();
+    const c = r.challenges.find((x) => x.id === id);
+    addChip(`Challenge started: ${c.title}`);
+    clawd.hidden = false; roam(null); pose("hop", 700);
+    speakSmall(`Deal! ${c.prompt} I'll ask you how it went next time.`, true);
+  }
+
+  async function forget(query) {
+    const r = await fetch(`/api/profile?${query}`, { method: "DELETE" }).then((x) => x.json()).catch(() => null);
+    if (r?.profile) { api.profile = { ...api.profile, ...r }; renderPanel(); }
+  }
+
+  async function copyProfile() {
+    const text = await fetch("/api/profile/export").then((r) => r.text()).catch(() => "");
+    if (!text) return;
+    clawd.hidden = false; roam(null);
+    try {
+      await navigator.clipboard.writeText(text);
+      speakSmall(`Copied! Paste it into any assistant's custom instructions, even ChatGPT or Gemini.`, true);
+    } catch {
+      speak(`<p>Copy this into any assistant's custom instructions:</p><textarea class="copy-box" readonly>${esc(text)}</textarea><button class="skip" type="button" data-act="hush">Done</button>`);
+    }
+  }
+
+  // Demo button: jump to the user's next visit. Clawd greets them and checks in on an open challenge.
+  async function weekLater() {
+    if (!api.on || S.ftue !== "done") return;
+    speak("");
+    addChip("One week later...");
+    const r = await call("/api/session/return").catch(() => null);
+    if (level === "off") setLevel("useful");
+    for (const ev of r?.events || []) showCoach(ev);
+    if (!r?.events?.length) { clawd.hidden = false; roam(null); speakSmall(`Welcome back, ${who()}! What do you need help with today?`, true); }
+    refreshProfile();
+  }
+  $("weekLater").addEventListener("click", weekLater);
+
+  // Tapping Clawd: ask it anything. POST /api/mascot runs the coach in chat mode and returns its reply.
+  function askClawd() {
+    pose("hop", 700);
+    speak(`<p class="lead">Ask me anything</p><p>About Claude, the Lab, or something I said.</p>
+      <form id="askForm"><input type="text" id="askInput" maxlength="300" autocomplete="off" placeholder="e.g. What's a skill?" aria-label="Ask Clawd">
+      <div class="actions"><button class="btn primary" type="submit">Ask</button><button class="btn ghost" type="button" data-act="panel">Lab and settings</button></div></form>`);
+    setTimeout(() => $("askInput")?.focus(), 50);
+  }
+
+  async function sendToClawd(text) {
+    text = (text || "").trim();
+    if (!text) { $("askInput")?.focus(); return; }
+    speak(`<p class="thinking">Hmm, let me think...</p>`);
+    pose("busy");
+    const r = await call("/api/mascot", { message: text }).catch(() => null);
+    pose(null);
+    if (!r?.events?.length) { speakSmall(`I couldn't come up with an answer just now. Try again in a moment?`, true); return; }
+    // Cards and other moves go through the usual path; the reply itself offers a follow-up question.
+    const reply = r.events.find((ev) => ev.action === "show_tip" && !ev.buttons);
+    for (const ev of r.events) if (ev !== reply) showCoach(ev);
+    if (reply) {
+      clawd.hidden = false;
+      roam(reply.point_at);
+      pose(reply.mood === "celebrate" ? "celebrate" : "hop", reply.mood === "celebrate" ? 2600 : 700);
+      speakSmall(reply.text || "", false, `<button class="btn primary" data-act="ask">Ask more</button><button class="btn ghost" data-act="hush">Got it</button>`);
+    }
   }
 
   function addChip(text) {
@@ -718,7 +939,7 @@ Notes for you
     upload_button: () => shown($("composer").querySelector('[data-explain="attach"]')),
     composer: () => null, // Clawd's home spot, next to the send button
     answer_notes: () => shown(last(".notes")) || shown(last(".msg-claude")),
-    card_shelf: () => shown(last(".sys")),
+    card_shelf: () => shown(body.querySelector(".cards-wrap")) || shown(last(".sys")),
     lab_button: () => shown(body.querySelector("[data-mission]:not(:disabled)")) || shown($("navClawd")),
     explain_dot: () => shown(document.querySelector(".chat-head [data-explain]")),
   };
@@ -840,9 +1061,11 @@ Notes for you
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
-    if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null }, "PATCH").catch(() => {});
+    if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel }, "PATCH").then(refreshProfile).catch(() => {});
+    $("weekLater").hidden = !api.on;
     renderHello();
     setLevel(chosenLevel);
+    if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
     const ft = S.firstTask;
     if (ft === "translate") prompt.value = REQUEST;
     else if (ft === "client") prompt.value = "Reply to a client: ";
@@ -873,6 +1096,7 @@ Notes for you
       if (typed) pickTask(null, typed.slice(0, 500));
       return;
     }
+    if (e.target.id === "askForm") { e.preventDefault(); sendToClawd($("askInput").value); return; }
     if (e.target.id !== "nameForm") return;
     e.preventDefault();
     S.name = ($("nameInput").value || "").trim().slice(0, 40);
@@ -884,27 +1108,43 @@ Notes for you
     const h = new Date().getHours();
     const part = h < 12 ? "Good morning" : h < 20 ? "Good afternoon" : "Good evening";
     thread.innerHTML = `<div class="hello" id="hello"><h1>${part}${S.name ? ", " + esc(S.name) : ""}</h1>
-      <div class="suggest">
-        <button type="button" data-suggest="translate">Translate an email to Catalan</button>
-        <button type="button" data-suggest="other">Reply to a client</button>
-        <button type="button" data-suggest="other">Explain a document</button>
-      </div></div>`;
+      <p class="ask">What do you need help with today?</p>
+      <div class="situations">${SITUATIONS.map((x) =>
+        `<button type="button" class="situation" data-situation="${x.id}"><span class="ic" aria-hidden="true">${x.ic}</span><span class="t">${esc(x.t)}</span><span class="d">${esc(x.d)}</span></button>`).join("")}
+      </div>
+      <div class="suggest"><button type="button" data-suggest="translate">Translate an email to Catalan</button></div></div>`;
+  }
+
+  // Picking a situation fills in a first message; the ones about a document open the camera / photo picker straight away.
+  function pickSituation(id) {
+    const x = SITUATIONS.find((s) => s.id === id);
+    if (!x) return;
+    S.situation = x.id;
+    $("chatTitle").textContent = x.t;
+    prompt.value = x.starter;
+    lastTyped = Date.now();
+    if (x.file && api.on) {
+      openPicker();
+      if (level !== "off") { clawd.hidden = false; roam("upload_button"); speakSmall(`Take a photo of it, or pick one from your phone. Then press send.`, true); }
+    } else {
+      prompt.focus();
+      prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+      if (level === "guide") { clawd.hidden = false; roam("composer"); speakSmall(`Add a few details at the end, then press send.`, true); }
+    }
   }
 
   thread.addEventListener("click", (e) => {
+    const sit = e.target.closest("[data-situation]");
+    if (sit) { pickSituation(sit.dataset.situation); return; }
     const s = e.target.closest("[data-suggest]");
     if (!s) return;
-    if (s.dataset.suggest === "translate") {
-      prompt.value = REQUEST;
-      prompt.focus();
-    } else {
-      prompt.value = s.textContent + ": ";
-      prompt.focus();
-    }
+    S.situation = null;
+    prompt.value = REQUEST;
+    prompt.focus();
   });
 
   function afterPrompt(text) {
-    const a = S.answers;
+    const a = S.answers.clients;
     const rules = a.rules.length ? a.rules.map((r) => "- " + r).join("\n") : "- (none given)";
     return `You are helping ${S.name || "the user"}, who writes to clients at work. They saved these standing preferences:
 - Role: ${a.role || "Office admin"}
@@ -958,11 +1198,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   function scrollDown() { const t = $("thread"); t.scrollTop = t.scrollHeight; }
 
-  function addUser(text) {
+  function addUser(text, file) {
     $("hello")?.remove();
     const d = document.createElement("div");
     d.className = "msg-user";
-    d.textContent = text;
+    if (file) d.innerHTML = file.preview ? `<img class="att" src="${file.preview}" alt="Your photo">` : `<span class="att-doc">📄 ${esc(file.name)}</span><br>`;
+    d.append(text);
     thread.append(d);
   }
 
@@ -978,7 +1219,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   $("composer").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const text = prompt.value.trim();
-    if (!text || busy || S.ftue !== "done") return;
+    const file = api.on ? S.file : null;
+    if ((!text && !file) || busy || S.ftue !== "done") return;
     busy = true; $("send").disabled = true;
     speak("");
     pose("busy");
@@ -987,21 +1229,29 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       $("chatTitle").textContent = "Translate client email";
       $("recents").innerHTML = `<button class="side-btn recent" type="button">Translate client email</button>`;
     }
-    addUser(text);
+    if (api.on && S.phase === "start" && !text.startsWith("Translate")) {
+      const pickedTitle = SITUATIONS.find((x) => x.id === S.situation)?.t;
+      const title = pickedTitle || (text ? text.split("\n")[0].slice(0, 40) : file.media_type === "application/pdf" ? "Read a PDF" : "Read a photo");
+      $("chatTitle").textContent = title;
+      $("recents").innerHTML = `<button class="side-btn recent" type="button">${esc(title)}</button>`;
+    }
+    addUser(text, file);
     prompt.value = "";
+    S.file = null; renderAttach();
     const [el, whoEl] = addClaude(isAfter ? "after" : "before");
     let out;
     api.coachSpoke = false;
     if (api.on) {
       // The backend adds the saved Lab skill to Claude's instructions itself, so the plain request is enough.
       if (api.labSave) await api.labSave.catch(() => {});
-      try { out = await askBackend(text, el, whoEl); }
+      try { out = await askBackend(text, el, whoEl, file); }
       catch (e) { out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl); }
     } else {
       out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl);
     }
     busy = false; $("send").disabled = false;
     pose(null);
+    if (api.on) refreshProfile(); // cards can be awarded during a turn
     if (isAfter) {
       S.after = out; S.phase = "after";
       if (level !== "off") pose("celebrate", 2600);
@@ -1014,7 +1264,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     } else {
       S.before = out; S.phase = "before";
       // With the backend the coach decides; the scripted nudge is only the demo's safety net if it stayed silent.
-      if (!api.on || !api.coachSpoke) setTimeout(() => { if (!api.coachSpoke) nudge(); }, 900);
+      // It is about translating client emails, so it only fires for a translation request.
+      if (!api.on || (!api.coachSpoke && !file && /translat/i.test(text))) setTimeout(() => { if (!api.coachSpoke) nudge(); }, 900);
     }
     scrollDown();
   });
@@ -1062,26 +1313,27 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (level === "off") { body.innerHTML = ""; return; }
     if (S.view === "lab") return renderLab();
     if (S.view === "done") return renderDone();
-    const doneClients = S.phase === "saved" || S.phase === "after";
+    const isDone = (id) => S.labsDone.includes(id) || (id === "clients" && (S.phase === "saved" || S.phase === "after")) ||
+      !!api.profile?.labs?.find((l) => l.id === id)?.done;
     body.innerHTML = (level === "guide" ? `<p class="tip">Tap anything with an orange dot for a one-line explanation.</p>` : "") +
       `<div><p class="section-label">Lab missions</p><div class="missions">` + MISSIONS.map((m) => {
-        const done = m.id === "clients" && doneClients;
+        const done = isDone(m.id);
         return `<button class="mission ${done ? "done" : ""}" data-mission="${m.id}" ${m.ready && !done ? "" : "disabled"}>
           <span class="t">${m.t}</span><span class="d">${m.d}</span><span class="m">${done ? "Done" : m.ready ? "Start" : "Soon"}</span></button>`;
-      }).join("") + `</div></div>`;
+      }).join("") + `</div></div>` + progressHtml();
   }
 
   function renderLab() {
-    const st = STEPS[S.step];
-    const val = S.answers[st.key];
+    const lab = LABS[S.lab], steps = lab.steps, st = steps[S.step];
+    const val = S.answers[S.lab][st.key];
     const picked = (o) => st.multi ? val.includes(o) : val === o;
     const canNext = st.multi ? val.length > 0 : !!val;
     body.innerHTML = `
       <div class="lab-head">
         <span class="k">Lab · separate conversation</span>
-        <h3>Teach Claude how you write to clients</h3>
+        <h3>${esc(lab.title)}</h3>
         <p>Practice here never touches your real chat. You keep what you save.</p>
-        <div class="progress">${STEPS.map((_, i) => `<span class="${i <= S.step ? "on" : ""}"></span>`).join("")}</div>
+        <div class="progress">${steps.map((_, i) => `<span class="${i <= S.step ? "on" : ""}"></span>`).join("")}</div>
       </div>
       <div>
         <p class="q">${esc(st.q)}</p>
@@ -1091,12 +1343,30 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       </div>
       <div class="lab-nav">
         <button class="btn ghost" data-act="${S.step === 0 ? "quit" : "back"}">${S.step === 0 ? "Leave the Lab" : "Back"}</button>
-        <button class="btn primary" data-act="next" ${canNext ? "" : "disabled"}>${S.step === STEPS.length - 1 ? "Save" : "Next"}</button>
+        <button class="btn primary" data-act="next" ${canNext ? "" : "disabled"}>${S.step === steps.length - 1 ? "Save" : "Next"}</button>
       </div>`;
   }
 
   function renderDone() {
-    const a = S.answers;
+    if (S.lab === "you") {
+      const a = S.answers.you;
+      body.innerHTML = `
+      <div class="win">
+        <h3>Mission complete</h3>
+        <div class="saved">
+          <strong>From now on, Claude will:</strong>
+          <ul>
+            <li>remember you use it mostly for ${esc(a.context.toLowerCase())}</li>
+            <li>answer in ${esc(a.language)}</li>
+            <li>keep answers ${esc(a.style.toLowerCase())}</li>
+          </ul>
+          <div class="row"><span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span></div>
+        </div>
+      </div>
+      <button class="btn primary" data-act="backtochat">Back to my chat</button>`;
+      return;
+    }
+    const a = S.answers.clients;
     body.innerHTML = `
       <div class="win">
         <h3>Mission complete</h3>
@@ -1128,8 +1398,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     requestAnimationFrame(() => placeClawd(true));
   }
 
-  function openLab() {
-    S.view = "lab"; S.step = 0;
+  function openLab(id = "clients") {
+    S.view = "lab"; S.step = 0; S.lab = LABS[id] ? id : "clients";
     setBasePose("train");
     clawd.hidden = false; placeClawd();
     speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
@@ -1155,6 +1425,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       if (level === "useful" && S.phase === "start" && S.view === "home") clawd.hidden = true;
       return;
     }
+    if (a === "ask") { askClawd(); return; }
+    if (a === "copyprofile") { copyProfile(); return; }
+    if (a === "panel") {
+      speak(""); showPanel(true); roam("lab_button");
+      return;
+    }
     if (a === "lab") { openLab(); return; }
     if (a === "later" || a === "never") {
       S.dismissals++;
@@ -1172,16 +1448,27 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (a === "keep") { S.dismissals = 0; speak(""); return; }
     if (a === "quit") { S.view = "home"; speak(""); setBasePose(null); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
     if (a === "back") { S.step--; renderLab(); return; }
+    if (a === "backtochat") { showPanel(false); act("quit"); prompt.focus(); return; }
     if (a === "next") {
-      if (S.step < STEPS.length - 1) { S.step++; renderLab(); }
-      else {
+      if (S.step < LABS[S.lab].steps.length - 1) { S.step++; renderLab(); }
+      else if (S.lab !== "clients") {
+        const id = S.lab;
+        if (!S.labsDone.includes(id)) S.labsDone.push(id);
+        S.view = "done"; renderPanel();
+        setBasePose(null); pose("celebrate", 2600);
+        speakSmall(`Saved! I'll answer in ${S.answers.you.language} and keep it ${S.answers.you.style.toLowerCase()}.`, true);
+        if (api.on) {
+          api.labSave = call(`/api/lab/${id}`, { answers: S.answers[id] })
+            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); refreshProfile(); });
+        }
+      } else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
-        setBasePose(null); pose("flag", 3400);
+        setBasePose(null); pose("celebrate", 2600);
         speakSmall(`Saved! I'll remember this every time you write to a client.`, true);
         if (api.on) {
           // Saves the skill on the server; the next turn waits for this before sending.
-          api.labSave = call("/api/lab/clients", { answers: S.answers })
-            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); });
+          api.labSave = call("/api/lab/clients", { answers: S.answers.clients })
+            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); refreshProfile(); });
         }
       }
       return;
@@ -1206,22 +1493,28 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   body.addEventListener("click", (e) => {
     const opt = e.target.closest("[data-opt]");
     if (opt) {
-      const st = STEPS[S.step], o = opt.dataset.opt;
+      const st = LABS[S.lab].steps[S.step], o = opt.dataset.opt, ans = S.answers[S.lab];
       if (st.multi) {
-        const arr = S.answers[st.key];
-        S.answers[st.key] = arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o];
-      } else S.answers[st.key] = o;
+        const arr = ans[st.key];
+        ans[st.key] = arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o];
+      } else ans[st.key] = o;
       renderLab();
       return;
     }
+    const ch = e.target.closest("[data-challenge]");
+    if (ch && !ch.disabled) { startChallenge(ch.dataset.challenge); return; }
+    const fg = e.target.closest("[data-forget]");
+    if (fg) { forget(fg.dataset.forget); return; }
     const m = e.target.closest("[data-mission]");
-    if (m && !m.disabled) { openLab(); return; }
+    if (m && !m.disabled) { openLab(m.dataset.mission); return; }
     const a = e.target.closest("[data-act]");
     if (a) act(a.dataset.act);
   });
 
   $("clawdBody").addEventListener("click", () => {
     if (S.ftue !== "done") return;
+    if (api.on && !say.hidden) { speak(""); return; }
+    if (api.on) { askClawd(); return; }
     if (!say.hidden && !mobile()) { speak(""); return; }
     showPanel(!panelOpen);
   });
@@ -1232,7 +1525,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     const [title, text] = EXPLAIN[el.dataset.explain] || [];
     if (!title) return;
     popFor = el;
-    pop.innerHTML = `<b>${esc(title)}</b>${esc(text)}${S.phase === "start" || S.phase === "before" ? `<br><button type="button" data-lab>Try it in the Lab</button>` : ""}`;
+    const pick = el.dataset.explain === "attach" && api.on;
+    pop.innerHTML = `<b>${esc(title)}</b>${esc(text)}${pick ? `<br><button type="button" data-pick>Choose a photo or PDF</button>`
+      : S.phase === "start" || S.phase === "before" ? `<br><button type="button" data-lab>Try it in the Lab</button>` : ""}`;
     pop.hidden = false;
     const r = el.getBoundingClientRect(), p = pop.getBoundingClientRect();
     const left = Math.min(Math.max(8, r.left), innerWidth - p.width - 8);
@@ -1244,6 +1539,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-lab]")) { hidePop(); openLab(); return; }
+    if (e.target.closest("[data-pick]")) { hidePop(); openPicker(); return; }
     if (e.target.closest("#pop")) return;
     const el = e.target.closest("[data-explain]");
     if (el && level === "guide" && S.ftue === "done") { e.preventDefault(); popFor === el ? hidePop() : showPop(el); return; }
@@ -1279,7 +1575,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   function start() {
     S = fresh();
-    api.pending.clear(); api.labSave = null; api.coachSpoke = false;
+    api.pending.clear(); api.labSave = null; api.coachSpoke = false; api.profile = null;
+    $("weekLater").hidden = true;
     setBasePose(null);
     level = "guide";
     $("lv-guide").checked = true;
@@ -1289,6 +1586,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     hidePop();
     thread.innerHTML = "";
     prompt.value = "";
+    renderAttach();
     $("chatTitle").textContent = "New chat";
     $("recents").innerHTML = `<p class="side-empty">Your chats will appear here.</p>`;
     $("avatar").textContent = "?"; $("meName").textContent = "Guest";

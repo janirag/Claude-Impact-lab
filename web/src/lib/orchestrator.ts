@@ -3,11 +3,12 @@ import { runCoach } from "./agents/coach";
 import { classifyIntent } from "./agents/intent";
 import { offlineAnswer, offlineCoach } from "./agents/offline";
 import { runTask, IMAGE_TYPES, type Attachment } from "./agents/task";
-import { decide } from "./policy";
+import { situationById } from "./catalog";
+import { decide, touchSession } from "./policy";
 import type { CoachMode } from "./prompts";
 import type { CoachAction, CoachEvent, User } from "./types";
 
-export type TurnInput = { message: string; attachment?: Attachment };
+export type TurnInput = { message: string; attachment?: Attachment; situation?: string };
 
 export type TurnEmit = {
   token: (text: string) => void;
@@ -25,7 +26,9 @@ export function validateTurn(input: unknown): TurnInput | string {
     if ((att.data.length * 3) / 4 > policy.maxAttachmentBytes) return "attachment too large (max 5 MB)";
   }
   if (!message && !att) return "empty message";
-  return { message, attachment: att };
+  const situation = i?.situation;
+  if (situation !== undefined && (typeof situation !== "string" || !situationById(situation))) return "unknown situation";
+  return situation ? { message, attachment: att, situation } : { message, attachment: att };
 }
 
 async function coach(user: User, mode: CoachMode, latest?: { user: string; assistant?: string }, signal?: AbortSignal): Promise<CoachAction[]> {
@@ -38,14 +41,21 @@ async function coach(user: User, mode: CoachMode, latest?: { user: string; assis
   }
 }
 
-function remember(user: User, userText: string, answer: string, attachment?: Attachment) {
-  const marker = attachment ? `[sent a ${attachment.media_type === "application/pdf" ? "PDF" : "photo"}] ` : "";
-  user.history.push({ role: "user", text: marker + userText }, { role: "assistant", text: answer || "(no answer)" });
+// "[picked: …] [sent a photo] text", so the history and the coach both see how the request started.
+function marked(input: TurnInput) {
+  const s = input.situation ? situationById(input.situation) : undefined;
+  const a = input.attachment;
+  return (s ? `[picked: ${s.title}] ` : "") + (a ? `[sent a ${a.media_type === "application/pdf" ? "PDF" : "photo"}] ` : "") + input.message;
+}
+
+function remember(user: User, input: TurnInput, answer: string) {
+  user.history.push({ role: "user", text: marked(input) }, { role: "assistant", text: answer || "(no answer)" });
   if (user.history.length > policy.historyLimit) user.history.splice(0, user.history.length - policy.historyLimit);
 }
 
 // One chat turn: task agent streams the answer, then the coach suggests and the policy decides.
 export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, signal?: AbortSignal) {
+  touchSession(user);
   user.turn++;
   const intent = user.turn === 1 && !user.mode && !config.offline
     ? classifyIntent(input.message, signal).catch(() => undefined)
@@ -54,10 +64,10 @@ export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, s
   let answer: string;
   let refused = false;
   if (config.offline) {
-    answer = offlineAnswer(input.message, input.attachment);
+    answer = offlineAnswer(input.message, input.attachment, input.situation);
     for (const chunk of answer.match(/.{1,24}/gs) ?? []) emit.token(chunk);
   } else {
-    const res = await runTask(user, input.message, input.attachment, emit.token, signal);
+    const res = await runTask(user, input.message, input.attachment, emit.token, signal, input.situation);
     answer = res.text;
     refused = res.refused;
   }
@@ -67,8 +77,8 @@ export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, s
   if (mode) user.mode = mode;
 
   // History is updated after the coach reads it, so "recent requests" includes this one via `latest`.
-  const proposals = refused ? [] : await coach(user, "after_turn", { user: input.message, assistant: answer }, signal);
-  remember(user, input.message, answer, input.attachment);
+  const proposals = refused ? [] : await coach(user, "after_turn", { user: marked(input), assistant: answer }, signal);
+  remember(user, input, answer);
   for (const e of decide(user, proposals, "after_turn")) emit.coach(e);
 }
 
@@ -81,5 +91,6 @@ export async function mascotChat(user: User, message: string): Promise<CoachEven
 
 // Return visit ("one week later" in the demo).
 export async function returnVisit(user: User): Promise<CoachEvent[]> {
+  user.session = { started_turn: user.turn, tips: 0, last_at: new Date().toISOString() }; // a new visit gets a fresh budget
   return decide(user, await coach(user, "return"), "return");
 }

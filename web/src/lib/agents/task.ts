@@ -31,10 +31,11 @@ export async function runTask(
   attachment: Attachment | undefined,
   onText: (delta: string) => void,
   signal?: AbortSignal,
+  situation?: string,
 ): Promise<TaskResult> {
-  const [stable, about] = taskSystem(user);
+  const [stable, ...rest] = taskSystem(user, situation);
   const system: Anthropic.Beta.BetaTextBlockParam[] = [{ type: "text", text: stable, cache_control: { type: "ephemeral" } }];
-  if (about) system.push({ type: "text", text: about });
+  for (const text of rest) system.push({ type: "text", text });
 
   const messages: Anthropic.Beta.BetaMessageParam[] = [
     ...user.history.map((h) => ({ role: h.role, content: h.text })),

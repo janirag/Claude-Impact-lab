@@ -57,8 +57,29 @@ describe("turn flow (offline)", () => {
     expect(r.coach[0]).toMatchObject({ action: "show_tip", point_at: "upload_button" });
   });
 
+  it("a return visit starts a fresh interruption budget", async () => {
+    await withUser("turn-user-0007", async (u) => { u.turn = 9; u.session = { started_turn: 0, tips: 3 }; });
+    await withUser("turn-user-0007", (u) => returnVisit(u));
+    expect((await loadUser("turn-user-0007")).session).toMatchObject({ started_turn: 9, tips: 0 });
+  });
+
   it("return visit greets the user", async () => {
     const events = await withUser("turn-user-0004", (u) => returnVisit(u));
     expect(events[0]).toMatchObject({ action: "show_tip", deliver: "now" });
+  });
+});
+
+describe("situations (home screen)", () => {
+  it("accepts a known situation and rejects an unknown one", () => {
+    expect(validateTurn({ message: "I got this letter", situation: "letter" })).toMatchObject({ situation: "letter" });
+    expect(validateTurn({ message: "hi", situation: "rocket" })).toBe("unknown situation");
+  });
+
+  it("asks for a photo when a photo situation has none, and records the situation", async () => {
+    const id = "turn-user-0101";
+    let text = "";
+    await withUser(id, (u) => handleTurn(u, { message: "I got this letter", situation: "letter" }, { token: (t) => { text += t; }, answerDone: () => {}, coach: () => {} }));
+    expect(text).toMatch(/photo/);
+    expect((await loadUser(id)).history[0].text).toBe("[picked: A letter I don't understand] I got this letter");
   });
 });

@@ -1,20 +1,9 @@
-import { CARDS, CHALLENGES, LAB_MISSIONS } from "@/lib/catalog";
 import { config } from "@/lib/config";
 import { json, userIdFrom } from "@/lib/session";
 import { withUser } from "@/lib/store";
-import type { User } from "@/lib/types";
+import { view } from "@/lib/view";
 
 export const runtime = "nodejs";
-
-const view = (u: User) => ({
-  level: u.level,
-  mode: u.mode ?? null,
-  profile: u.profile,
-  skills: u.skills,
-  cards: u.cards.map((c) => ({ ...c, ...CARDS.find((x) => x.id === c.id) })),
-  missions: u.missions.map((m) => ({ ...m, ...CHALLENGES.find((x) => x.id === m.id) })),
-  labs: LAB_MISSIONS.map(({ steps, ...m }) => ({ ...m, done: u.labs_done.includes(m.id) })),
-});
 
 // GET -> "What Clawd remembers" + progress. `backend.offline` tells the prototype whether answers are canned.
 export async function GET(req: Request) {
@@ -37,7 +26,7 @@ export async function PATCH(req: Request) {
       if (b[k] === null) delete u.profile[k];
       else if (b[k] !== undefined) (u.profile as Record<string, unknown>)[k] = k === "name" ? String(b[k]).slice(0, 60) : b[k];
     }
-    if (b.level) { u.level = b.level; u.dismissals_in_a_row = 0; }
+    if (b.level) { u.level = b.level; u.level_set_by_user = true; u.dismissals_in_a_row = 0; }
     if (b.mode === null) delete u.mode;
     else if (b.mode) u.mode = b.mode; // from onboarding: "I have something to get done" -> do
     return view(u);
