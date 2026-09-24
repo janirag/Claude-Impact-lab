@@ -53,10 +53,18 @@ function allowedAtLevel(level: Level, a: CoachAction, mode: CoachMode): boolean 
   return !!a.safety || ["suggest_lab", "propose_memory", "check_in_mission", "award_card"].includes(a.action);
 }
 
-function withinBudget(user: User, a: CoachAction, mode: CoachMode): boolean {
-  if (a.safety || mode !== "after_turn" || a.action === "award_card") return true;
-  const last = [...user.tip_history].reverse().find((t) => t.outcome !== "never" && t.action !== "award_card");
-  return !last || user.turn - last.turn >= policy.minTurnsBetweenTips;
+const typeKey = (action: string, ref?: string) => (ref ? `${action}:${ref}` : action);
+
+// Unprompted bubbles only: a gap between any two, a longer gap per tip type after "Not now", and a cap per session.
+function withinBudget(user: User, a: CoachAction, mode: CoachMode, level: Level): boolean {
+  if (a.safety || mode !== "after_turn" || a.action === "award_card" || a.action === "suggest_step_down") return true;
+  if (user.session.tips >= policy.tipsPerSession[level]) return false;
+  const shown = user.tip_history.filter((t) => t.action !== "award_card" && t.action !== "suggest_step_down");
+  const last = shown[shown.length - 1];
+  if (last && user.turn - last.turn < policy.minTurnsBetweenTips[level]) return false;
+  const gap = user.gaps[neverKey(a)];
+  const lastOfType = [...shown].reverse().find((t) => typeKey(t.action, t.ref) === neverKey(a));
+  return !gap || !lastOfType || user.turn - lastOfType.turn >= gap;
 }
 
 // User-started exchanges (tap on Clawd, return visit) answer right away; unprompted tips wait for a pause.
@@ -99,7 +107,7 @@ export function decide(user: User, proposals: CoachAction[], mode: CoachMode): C
   const events: CoachEvent[] = [];
   const card = candidates.find((a) => a.action === "award_card");
   const visible = candidates
-    .filter((a) => a.action !== "award_card" && withinBudget(user, a, mode))
+    .filter((a) => a.action !== "award_card" && withinBudget(user, a, mode, level))
     .sort((a, b) => Number(!!b.safety) - Number(!!a.safety) || PRIORITY.indexOf(a.action) - PRIORITY.indexOf(b.action))[0];
 
   if (card && awardCard(user, card.ref!, card.evidence ?? "")) {
@@ -111,6 +119,7 @@ export function decide(user: User, proposals: CoachAction[], mode: CoachMode): C
   if (visible) {
     const e = toEvent(visible, false, mode);
     record(user, e);
+    if (mode === "after_turn" && !e.safety && e.action !== "suggest_step_down") user.session.tips++;
     events.push(e);
   }
   return events;
@@ -131,11 +140,18 @@ export function acknowledge(user: User, eventId: string, response: "accept" | "l
   if (response !== "accept") {
     if (e.action === "suggest_step_down") { user.dismissals_in_a_row = 0; return result; } // "Keep guiding me"
     if (!e.safety) user.dismissals_in_a_row++;
+    if (response === "later" && !e.safety) {
+      // "Not now": wait twice as long before this kind of tip comes back.
+      const base = policy.minTurnsBetweenTips[effectiveLevel(user)];
+      const now = user.gaps[neverKey(e)] ?? (Number.isFinite(base) ? base : 3);
+      user.gaps[neverKey(e)] = Math.min(now * 2, policy.maxTypeGap);
+    }
     if (response === "never") user.never.push(neverKey(e));
     return result;
   }
 
   user.dismissals_in_a_row = 0;
+  delete user.gaps[neverKey(e)]; // accepted: this kind of tip may come sooner again
   switch (e.action) {
     case "propose_memory": {
       const f = addFact(user, e.fact ?? "", e.fact_category, "chat");

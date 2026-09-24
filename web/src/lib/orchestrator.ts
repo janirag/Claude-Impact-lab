@@ -90,5 +90,6 @@ export async function mascotChat(user: User, message: string): Promise<CoachEven
 
 // Return visit ("one week later" in the demo).
 export async function returnVisit(user: User): Promise<CoachEvent[]> {
+  user.session = { started_turn: user.turn, tips: 0 }; // a new visit gets a fresh interruption budget
   return decide(user, await coach(user, "return"), "return");
 }

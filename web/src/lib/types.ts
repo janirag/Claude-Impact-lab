@@ -39,6 +39,8 @@ export type User = {
   tip_history: TipRecord[];
   never: string[]; // "action" or "action:ref" keys the user asked never to see again
   dismissals_in_a_row: number;
+  session: { started_turn: number; tips: number }; // unprompted bubbles shown since the last return visit
+  gaps: Record<string, number>; // per tip type: turns to wait before showing it again (doubles on "Not now")
   pending: Record<string, CoachEvent>; // shown events awaiting the user's tap
   history: HistoryItem[];
 };

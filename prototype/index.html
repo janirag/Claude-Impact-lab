@@ -1030,6 +1030,7 @@ Notes for you
     $("weekLater").hidden = !api.on;
     renderHello();
     setLevel(chosenLevel);
+    if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
     setTimeout(() => {
       if (level === "off") return;
       if (S.intent === "learn") {
@@ -1386,7 +1387,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
         const id = S.lab;
         if (!S.labsDone.includes(id)) S.labsDone.push(id);
         S.view = "done"; renderPanel();
-        setBasePose(null); pose("flag", 3400);
+        setBasePose(null); pose("celebrate", 2600);
         speakSmall(`Saved! I'll answer in ${S.answers.you.language} and keep it ${S.answers.you.style.toLowerCase()}.`, true);
         if (api.on) {
           api.labSave = call(`/api/lab/${id}`, { answers: S.answers[id] })
@@ -1394,7 +1395,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
         }
       } else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
-        setBasePose(null); pose("flag", 3400);
+        setBasePose(null); pose("celebrate", 2600);
         speakSmall(`Saved! I'll remember this every time you write to a client.`, true);
         if (api.on) {
           // Saves the skill on the server; the next turn waits for this before sending.

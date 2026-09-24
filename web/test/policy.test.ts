@@ -20,14 +20,52 @@ describe("decide", () => {
     expect(u.pending[out[0].id]).toBeDefined();
   });
 
-  it("enforces the tip budget but lets safety through", () => {
+  it("enforces the gap between tips but lets safety through", () => {
     const u = user();
     expect(decide(u, [tip], "after_turn")).toHaveLength(1);
     u.turn++;
     expect(decide(u, [tip], "after_turn")).toHaveLength(0);
     expect(decide(u, [safety], "after_turn")).toHaveLength(1);
     u.turn += 2;
+    expect(decide(u, [tip], "after_turn")).toHaveLength(0); // 2 turns after the safety bubble: still too soon
+    u.turn += 1;
     expect(decide(u, [tip], "after_turn")).toHaveLength(1);
+  });
+
+  it("Guide me: at most 3 unprompted bubbles per session, reset by a return visit", () => {
+    const u = user();
+    for (let i = 0; i < 3; i++) { expect(decide(u, [tip], "after_turn")).toHaveLength(1); u.turn += 3; }
+    expect(decide(u, [tip], "after_turn")).toEqual([]);
+    expect(decide(u, [safety], "after_turn")).toHaveLength(1); // safety is never capped
+    u.session = { started_turn: u.turn, tips: 0 }; // what returnVisit() does
+    u.turn += 3;
+    expect(decide(u, [tip], "after_turn")).toHaveLength(1);
+  });
+
+  it("Only when useful: one unprompted bubble per session", () => {
+    const u = { ...user(), level: "useful" as const };
+    const mem = (fact: string): CoachAction => ({ action: "propose_memory", fact, fact_category: "x", text: "Remember?", mood: "curious" });
+    expect(decide(u, [mem("Vegetarian")], "after_turn")).toHaveLength(1);
+    u.turn += 5;
+    expect(decide(u, [mem("Has two kids")], "after_turn")).toEqual([]);
+  });
+
+  it("'Not now' doubles the wait for that tip type only; accepting resets it", () => {
+    const u = user();
+    const lab: CoachAction = { action: "suggest_lab", ref: "clients", text: "Teach me?", mood: "curious" };
+    const [e] = decide(u, [lab], "after_turn");
+    acknowledge(u, e.id, "later");
+    expect(u.gaps["suggest_lab:clients"]).toBe(6);
+    u.turn += 3;
+    expect(decide(u, [lab], "after_turn")).toEqual([]); // same type: needs 6 turns
+    const [other] = decide(u, [tip], "after_turn"); // another type: the normal 3-turn gap applies
+    expect(other.action).toBe("show_tip");
+    acknowledge(u, other.id, "accept");
+    u.turn += 3;
+    const [again] = decide(u, [lab], "after_turn");
+    expect(again.action).toBe("suggest_lab");
+    acknowledge(u, again.id, "accept");
+    expect(u.gaps["suggest_lab:clients"]).toBeUndefined();
   });
 
   it("level off shows nothing, level useful drops generic tips", () => {
@@ -74,7 +112,7 @@ describe("decide", () => {
     for (let i = 0; i < 2; i++) {
       const [e] = decide(u, [tip], "after_turn");
       acknowledge(u, e.id, "later");
-      u.turn += 2;
+      u.turn += 12; // past the doubled gap for this tip type
     }
     const [e] = decide(u, [tip], "after_turn");
     expect(e.action).toBe("suggest_step_down");
