@@ -12,6 +12,7 @@ export type TurnInput = { message: string; attachment?: Attachment; situation?: 
 
 export type TurnEmit = {
   token: (text: string) => void;
+  searching?: () => void; // the task agent started a web search, so the next tokens may take a while
   answerDone: (info: { refused: boolean; offline: boolean }) => void;
   coach: (event: CoachEvent) => void;
 };
@@ -67,7 +68,7 @@ export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, s
     answer = offlineAnswer(input.message, input.attachment, input.situation);
     for (const chunk of answer.match(/.{1,24}/gs) ?? []) emit.token(chunk);
   } else {
-    const res = await runTask(user, input.message, input.attachment, emit.token, signal, input.situation);
+    const res = await runTask(user, input.message, input.attachment, emit.token, signal, input.situation, emit.searching);
     answer = res.text;
     refused = res.refused;
   }

@@ -39,7 +39,7 @@ The coach only **proposes**. `src/lib/policy.ts` **decides** what reaches the sc
 
 | Endpoint | Body | Returns |
 |---|---|---|
-| `POST /api/turn` | `{ message, attachment?: { media_type, data (base64) } }` (images or PDF, up to 5 MB) | SSE: `token` `{text}` … `answer_done` `{refused, offline}` → `coach` (CoachEvent) … → `done` (or `error`) |
+| `POST /api/turn` | `{ message, attachment?: { media_type, data (base64) } }` (images or PDF, up to 5 MB) | SSE: `token` `{text}` and `searching` `{}` (a web search started) … `answer_done` `{refused, offline}` → `coach` (CoachEvent) … → `done` (or `error`) |
 | `POST /api/coach/ack` | `{ event_id, response: "accept" \| "later" \| "never" }` | `{ ok, effect?: { open_lab, level, saved_fact, mission }, events }` |
 | `POST /api/mascot` | `{ message }` | `{ events }`: Clawd's reply when the user taps it and asks something |
 | `GET /api/lab/:missionId` | | Mission and steps (same content as the prototype's Lab) |
