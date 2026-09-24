@@ -128,6 +128,15 @@
   .sys { align-self: center; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
   .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  button.chip.file { cursor: pointer; font: 12px var(--ui); }
+  button.chip.file:hover { border-color: var(--accent); color: var(--text); }
+  .chip.file code, .file-row code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+  .files { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .file-row { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
+  .file-row.open { border-color: var(--accent); }
+  .file-row .d { display: block; color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
+  .file-row .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .file-row pre { margin: 8px 0 0; max-height: 240px; overflow: auto; white-space: pre-wrap; font: 11.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border-radius: 8px; padding: 8px; }
   .compare-btn { align-self: center; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--surface); border-radius: 999px; padding: 8px 16px; font-weight: 500; }
   .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .compare > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-family: var(--read); font-size: 14px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -553,7 +562,7 @@ ${t("notesAfter")}`;
       badPhoto: "I couldn't read that picture. Could you try another one?",
       removeFile: "Remove file", readingPdf: "Reading your PDF...", readingPhoto: "Reading your photo...", thinking: "Thinking...",
       offlineBackend: "Offline backend", offlineExample: "Example answer, offline",
-      memoryUpdated: "Memory updated", challengeStarted: "Challenge started", challengeStartedNamed: "Challenge started: {title}", newCard: "New card",
+      challengeStarted: "Challenge started", challengeStartedNamed: "Challenge started: {title}", newCard: "New card",
       challengeOpen: "I'll ask you how it went next time.", challengeDone: "Completed. You earned a card for it.",
       statusDone: "Done", statusOpen: "Open", statusStart: "Start", statusSoon: "Soon",
       noCards: "No cards yet. You earn them by doing things, not by studying.",
@@ -587,7 +596,7 @@ ${t("notesAfter")}`;
       labKicker: "Lab · separate conversation", labNote: "Practice here never touches your real chat. You keep what you save.",
       leaveLab: "Leave the Lab", save: "Save", next: "Next",
       missionComplete: "Mission complete", fromNowOn: "From now on, Claude will:", backToChat: "Back to my chat",
-      skillSaved: "Skill saved", skillSavedClients: "Skill saved: client email to Catalan", tryIt: "Try it on your email",
+      tryIt: "Try it on your email",
       inLab: "We're in the Lab now. Nothing here touches your chat.", panelRight: "My Lab and settings are in the panel on the right.",
       savedClients: "Saved! I'll remember this every time you write to a client.",
       clawdGuide: "Tap anything with an orange dot and I'll explain it. My Lab is in the panel on the right.",
@@ -639,6 +648,24 @@ ${t("notesAfter")}`;
         steps: ["Step by step", "One thing at a time, in order", "Explain things step by step."],
         detailed: ["With all the details", "The full picture", "Give me all the details."]
       },
+      filesLabel: "Your Claude files",
+      filesNote: "Everything Clawd set up for you, as the files Claude uses. Take them with you.",
+      filesHowTo: "Claude Code: put CLAUDE.md in ~/.claude/ and each skill folder in ~/.claude/skills/. Other assistants: use \"Copy my AI profile\".",
+      filesEmpty: "No files yet. Your guide and your skills will appear here.",
+      fileGuideDesc: "Your guide and what Claude remembers about you",
+      fileSkillDesc: "Skill: {title}",
+      view: "View",
+      hide: "Hide",
+      copy: "Copy",
+      download: "Download",
+      downloadAll: "Download all (.zip)",
+      copiedFile: "Copied {path}. Paste it wherever you need it.",
+      fileCreated: "{path} created",
+      fileUpdated: "{path} updated",
+      skillCreated: "Skill created: {path}",
+      memoryAdded: "Added to {path}: {fact}",
+      mdAboutMe: "About me",
+      mdRemember: "Things to remember",
       langNames: { ca: "Catalan", es: "Spanish", en: "English" },
       styles: { short: "Short", steps: "Step by step", detailed: "Detailed", visual: "Visual" },
       levels: {
@@ -709,7 +736,7 @@ ${t("notesAfter")}`;
       badPhoto: "No he podido leer esa imagen. ¿Pruebas con otra?",
       removeFile: "Quitar el archivo", readingPdf: "Leyendo tu PDF...", readingPhoto: "Leyendo tu foto...", thinking: "Pensando...",
       offlineBackend: "Servidor sin conexión", offlineExample: "Respuesta de ejemplo, sin conexión",
-      memoryUpdated: "Memoria actualizada", challengeStarted: "Reto empezado", challengeStartedNamed: "Reto empezado: {title}", newCard: "Carta nueva",
+      challengeStarted: "Reto empezado", challengeStartedNamed: "Reto empezado: {title}", newCard: "Carta nueva",
       challengeOpen: "La próxima vez te preguntaré qué tal te fue.", challengeDone: "Completado. Te has ganado una carta.",
       statusDone: "Hecho", statusOpen: "En curso", statusStart: "Empezar", statusSoon: "Pronto",
       noCards: "Aún no tienes cartas. Las ganas haciendo cosas, no estudiando.",
@@ -743,7 +770,7 @@ ${t("notesAfter")}`;
       labKicker: "Lab · conversación aparte", labNote: "Lo que practiques aquí no toca tu chat real. Te quedas con lo que guardes.",
       leaveLab: "Salir del Lab", save: "Guardar", next: "Siguiente",
       missionComplete: "¡Misión cumplida!", fromNowOn: "A partir de ahora, Claude:", backToChat: "Volver a mi chat",
-      skillSaved: "Habilidad guardada", skillSavedClients: "Habilidad guardada: correo de cliente al catalán", tryIt: "Pruébalo con tu correo",
+      tryIt: "Pruébalo con tu correo",
       inLab: "Ya estamos en el Lab. Nada de lo que hagas aquí toca tu chat.", panelRight: "Mi Lab y los ajustes están en el panel de la derecha.",
       savedClients: "¡Guardado! Lo recordaré cada vez que escribas a un cliente.",
       clawdGuide: "Toca cualquier cosa con un punto naranja y te la explico. Mi Lab está en el panel de la derecha.",
@@ -793,6 +820,24 @@ ${t("notesAfter")}`;
         steps: ["Paso a paso", "Una cosa cada vez, en orden", "Explícamelo todo paso a paso."],
         detailed: ["Con todos los detalles", "La imagen completa", "Dame todos los detalles."]
       },
+      filesLabel: "Tus archivos de Claude",
+      filesNote: "Todo lo que Clawd ha configurado para ti, en los archivos que usa Claude. Llévatelos contigo.",
+      filesHowTo: "Claude Code: pon CLAUDE.md en ~/.claude/ y cada carpeta de habilidad en ~/.claude/skills/. Otros asistentes: usa \"Copiar mi perfil de IA\".",
+      filesEmpty: "Aún no hay archivos. Aquí aparecerán tu guía y tus habilidades.",
+      fileGuideDesc: "Tu guía y lo que Claude recuerda de ti",
+      fileSkillDesc: "Habilidad: {title}",
+      view: "Ver",
+      hide: "Ocultar",
+      copy: "Copiar",
+      download: "Descargar",
+      downloadAll: "Descargar todo (.zip)",
+      copiedFile: "{path} copiado. Pégalo donde lo necesites.",
+      fileCreated: "{path} creado",
+      fileUpdated: "{path} actualizado",
+      skillCreated: "Habilidad creada: {path}",
+      memoryAdded: "Añadido a {path}: {fact}",
+      mdAboutMe: "Sobre mí",
+      mdRemember: "Cosas que recordar",
       langNames: { ca: "catalán", es: "español", en: "inglés" },
       styles: { short: "Cortas", steps: "Paso a paso", detailed: "Detalladas", visual: "Visuales" },
       levels: {
@@ -861,7 +906,7 @@ ${t("notesAfter")}`;
       badPhoto: "No he pogut llegir aquesta imatge. En proves una altra?",
       removeFile: "Treu el fitxer", readingPdf: "Llegint el teu PDF...", readingPhoto: "Llegint la teva foto...", thinking: "Pensant...",
       offlineBackend: "Servidor sense connexió", offlineExample: "Resposta d'exemple, sense connexió",
-      memoryUpdated: "Memòria actualitzada", challengeStarted: "Repte començat", challengeStartedNamed: "Repte començat: {title}", newCard: "Carta nova",
+      challengeStarted: "Repte començat", challengeStartedNamed: "Repte començat: {title}", newCard: "Carta nova",
       challengeOpen: "La propera vegada et preguntaré com t'ha anat.", challengeDone: "Completat. T'has guanyat una carta.",
       statusDone: "Fet", statusOpen: "En curs", statusStart: "Comença", statusSoon: "Aviat",
       noCards: "Encara no tens cartes. Les guanyes fent coses, no estudiant.",
@@ -895,7 +940,7 @@ ${t("notesAfter")}`;
       labKicker: "Lab · conversa a part", labNote: "El que practiquis aquí no toca el teu xat real. Et quedes el que desis.",
       leaveLab: "Surt del Lab", save: "Desa", next: "Següent",
       missionComplete: "Missió acomplerta!", fromNowOn: "A partir d'ara, Claude:", backToChat: "Torna al meu xat",
-      skillSaved: "Habilitat desada", skillSavedClients: "Habilitat desada: correu de client al català", tryIt: "Prova-ho amb el teu correu",
+      tryIt: "Prova-ho amb el teu correu",
       inLab: "Ja som al Lab. Res del que facis aquí toca el teu xat.", panelRight: "El meu Lab i la configuració són al panell de la dreta.",
       savedClients: "Desat! Ho recordaré cada vegada que escriguis a un client.",
       clawdGuide: "Toca qualsevol cosa amb un punt taronja i te l'explico. El meu Lab és al panell de la dreta.",
@@ -945,6 +990,24 @@ ${t("notesAfter")}`;
         steps: ["Pas a pas", "Una cosa cada vegada, en ordre", "Explica-m'ho tot pas a pas."],
         detailed: ["Amb tots els detalls", "La imatge completa", "Dona'm tots els detalls."]
       },
+      filesLabel: "Els teus fitxers de Claude",
+      filesNote: "Tot el que en Clawd t'ha configurat, en els fitxers que fa servir Claude. Emporta-te'ls.",
+      filesHowTo: "Claude Code: posa CLAUDE.md a ~/.claude/ i cada carpeta d'habilitat a ~/.claude/skills/. Altres assistents: fes servir \"Copia el meu perfil d'IA\".",
+      filesEmpty: "Encara no hi ha fitxers. Aquí apareixeran la teva guia i les teves habilitats.",
+      fileGuideDesc: "La teva guia i el que Claude recorda de tu",
+      fileSkillDesc: "Habilitat: {title}",
+      view: "Mostra",
+      hide: "Amaga",
+      copy: "Copia",
+      download: "Baixa",
+      downloadAll: "Baixa-ho tot (.zip)",
+      copiedFile: "{path} copiat. Enganxa'l on el necessitis.",
+      fileCreated: "{path} creat",
+      fileUpdated: "{path} actualitzat",
+      skillCreated: "Habilitat creada: {path}",
+      memoryAdded: "Afegit a {path}: {fact}",
+      mdAboutMe: "Sobre mi",
+      mdRemember: "Coses a recordar",
       langNames: { ca: "català", es: "castellà", en: "anglès" },
       styles: { short: "Curtes", steps: "Pas a pas", detailed: "Detallades", visual: "Visuals" },
       levels: {
@@ -1264,7 +1327,7 @@ ${t("notesAfter")}`;
     if (!r?.ok) return;
     if (r.effect?.open_lab) openLab(r.effect.open_lab);
     if (r.effect?.level) setLevel(r.effect.level, true);
-    if (r.effect?.saved_fact) addChip(t("memoryUpdated"));
+    if (r.effect?.saved_fact) addFileChips([["memoryAdded", "CLAUDE.md", r.effect.saved_fact]]);
     if (r.effect?.mission) addChip(t("challengeStarted"));
     for (const ev of r.events || []) showCoach(ev);
     refreshProfile();
@@ -1379,6 +1442,117 @@ ${t("notesAfter")}`;
       roam(reply.point_at);
       pose(reply.mood === "celebrate" ? "celebrate" : "hop", reply.mood === "celebrate" ? 2600 : 700);
       speakSmall(reply.text || "", false, `<button class="btn primary" data-act="ask">${t("askMore")}</button><button class="btn ghost" data-act="hush">${t("gotIt")}</button>`);
+    }
+  }
+
+  // ---------- Your Claude files ----------
+  // What Clawd saved, as the files Claude Code reads: CLAUDE.md (their guide + what Claude remembers)
+  // and one skills/<name>/SKILL.md per skill. Built from the backend profile, or from this page's state offline.
+  const slug = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const CLIENT_SKILL = { title: "Client emails" };
+  const skillPath = (title) => `skills/${slug(title)}/SKILL.md`;
+  // Offline copy of lab.ts's client-email skill, so the files work without the backend too.
+  function clientsSkillText() {
+    const a = S.answers.clients;
+    return [`When the user writes to clients they are: ${a.role}.`, `Tone for client emails: ${a.tone}.`, ...a.rules.map((r) => `Rule: ${r}.`),
+      a.rules.includes("Flag anything a client could misread") ? `After the email, add a line with only "---" and a short "Notes for you" section (max 3 bullets) flagging anything a client could misread. Write the notes in the language of the user's own request, not the email's.` : ""]
+      .filter(Boolean).join("\n");
+  }
+  function configFiles() {
+    const p = api.on ? api.profile : null;
+    const pr = p?.profile || {};
+    const guide = pr.guide || S.guide;
+    const facts = pr.facts || [];
+    const about = guide || [pr.name && t("guideIam", { name: pr.name }), pr.language && t("guideAnswerIn", { lang: tx("langNames")[pr.language] })].filter(Boolean).join("\n");
+    const files = [];
+    if (about || facts.length) {
+      files.push({ path: "CLAUDE.md", desc: t("fileGuideDesc"), text: `# ${t("mdAboutMe")}\n\n${about || "-"}\n` +
+        (facts.length ? `\n## ${t("mdRemember")}\n\n${facts.map((f) => `- ${f.text}`).join("\n")}\n` : "") });
+    }
+    const skills = p ? p.skills || [] : S.phase === "saved" || S.phase === "after" ? [{ ...CLIENT_SKILL, instructions: clientsSkillText() }] : [];
+    for (const sk of skills) {
+      files.push({ path: skillPath(sk.title), desc: t("fileSkillDesc", { title: sk.title }),
+        text: `---\nname: ${slug(sk.title)}\ndescription: ${sk.title}. Use it every time the user asks for this task.\n---\n\n# ${sk.title}\n\n${sk.instructions}\n` });
+    }
+    return files;
+  }
+
+  // A chip in the chat naming the file Clawd just wrote. Tapping it opens that file in "Your Claude files".
+  function fileChipHtml(kind, path, fact) {
+    const label = t(kind, { path: `<code>${esc(path)}</code>`, fact: fact ? esc(fact) : "" });
+    return `<button type="button" class="chip file" data-file="${esc(path)}"><span class="dot"></span>${label}</button>`;
+  }
+  function addFileChips(list) {
+    const d = document.createElement("div");
+    d.className = "sys";
+    d.innerHTML = list.map(([kind, path, fact]) => fileChipHtml(kind, path, fact)).join("");
+    thread.append(d);
+    scrollDown();
+  }
+  function openFile(path) {
+    S.openFile = path;
+    if (S.view !== "lab") S.view = "home";
+    showPanel(true);
+    renderPanel();
+    requestAnimationFrame(() => body.querySelector("#files")?.scrollIntoView({ block: "start", behavior: "smooth" }));
+  }
+
+  function saveFile(name, blob) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  // A tiny .zip writer (stored, no compression): enough for a few text files, no library needed.
+  function zipFiles(files) {
+    const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+    const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = crcTable[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+    const enc = new TextEncoder(), parts = [], central = [];
+    let offset = 0;
+    for (const f of files) {
+      const name = enc.encode("claude-config/" + f.path), data = enc.encode(f.text), crc = crc32(data);
+      const head = new DataView(new ArrayBuffer(30));
+      [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [8, 0, 2], [10, 0, 2], [12, 33, 2], [14, crc, 4], [18, data.length, 4], [22, data.length, 4], [26, name.length, 2], [28, 0, 2]]
+        .forEach(([o, v, n]) => n === 4 ? head.setUint32(o, v, true) : head.setUint16(o, v, true));
+      const cd = new DataView(new ArrayBuffer(46));
+      [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [10, 0, 2], [12, 0, 2], [14, 33, 2], [16, crc, 4], [20, data.length, 4], [24, data.length, 4], [28, name.length, 2], [30, 0, 2], [32, 0, 2], [34, 0, 2], [36, 0, 2], [38, 0, 4], [42, offset, 4]]
+        .forEach(([o, v, n]) => n === 4 ? cd.setUint32(o, v, true) : cd.setUint16(o, v, true));
+      parts.push(head, name, data);
+      central.push(cd, name);
+      offset += 30 + name.length + data.length;
+    }
+    const cdSize = central.reduce((n, x) => n + x.byteLength, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    [[0, 0x06054b50, 4], [4, 0, 2], [6, 0, 2], [8, files.length, 2], [10, files.length, 2], [12, cdSize, 4], [16, offset, 4], [20, 0, 2]]
+      .forEach(([o, v, n]) => n === 4 ? end.setUint32(o, v, true) : end.setUint16(o, v, true));
+    return new Blob([...parts, ...central, end], { type: "application/zip" });
+  }
+
+  function filesHtml() {
+    const files = configFiles();
+    const rows = files.map((f) => {
+      const open = S.openFile === f.path;
+      return `<div class="file-row ${open ? "open" : ""}"><code>${esc(f.path)}</code><span class="d">${esc(f.desc)}</span>
+        <div class="acts"><button class="btn" type="button" data-file-act="view" data-path="${esc(f.path)}">${t(open ? "hide" : "view")}</button>
+        <button class="btn" type="button" data-file-act="copy" data-path="${esc(f.path)}">${t("copy")}</button>
+        <button class="btn" type="button" data-file-act="download" data-path="${esc(f.path)}">${t("download")}</button></div>
+        ${open ? `<pre>${esc(f.text)}</pre>` : ""}</div>`;
+    }).join("");
+    return `<div id="files"><p class="section-label">${t("filesLabel")}</p>
+      ${files.length ? `<p class="q-help">${t("filesNote")}</p><div class="files">${rows}</div>
+        <button class="btn primary" type="button" data-file-act="zip">${t("downloadAll")}</button>
+        <p class="q-help" style="margin-top:8px">${t("filesHowTo")}</p>` : `<p class="q-help">${t("filesEmpty")}</p>`}</div>`;
+  }
+
+  async function fileAct(act, path) {
+    const files = configFiles(), f = files.find((x) => x.path === path);
+    if (act === "zip") { saveFile("claude-config.zip", zipFiles(files)); return; }
+    if (!f) return;
+    if (act === "view") { S.openFile = S.openFile === path ? null : path; renderPanel(); return; }
+    if (act === "download") { saveFile(path.split("/").slice(-2).join("-").replace(/^-/, "") || path, new Blob([f.text], { type: "text/markdown" })); return; }
+    if (act === "copy") {
+      try { await navigator.clipboard.writeText(f.text); clawd.hidden = false; speakSmall(t("copiedFile", { path }), true); } catch { S.openFile = path; renderPanel(); }
     }
   }
 
@@ -1610,6 +1784,7 @@ ${t("notesAfter")}`;
     if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel, ...guide }, "PATCH").then(refreshProfile).catch(() => {});
     $("weekLater").hidden = !api.on;
     renderHello();
+    if (S.guide) addFileChips([["fileCreated", "CLAUDE.md"]]);
     setLevel(chosenLevel);
     if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
     if (S.firstTask?.typed) prompt.value = S.firstTask.typed;
@@ -1677,6 +1852,8 @@ ${t("notesAfter")}`;
   }
 
   thread.addEventListener("click", (e) => {
+    const fc = e.target.closest("[data-file]");
+    if (fc) { openFile(fc.dataset.file); return; }
     const sit = e.target.closest("[data-situation]");
     if (sit) { pickSituation(sit.dataset.situation); return; }
     const s = e.target.closest("[data-suggest]");
@@ -1860,6 +2037,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       (guide ? `<div><p class="section-label">${t("guideAria")}</p><div class="guide-card">${esc(guide)}</div>
         <p class="q-help">${t("guidePanelNote")}</p>
         <button class="btn" type="button" data-mission="you">${t("changeIt")}</button></div>` : "") +
+      filesHtml() +
       `<div><p class="section-label">${t("labMissions")}</p><div class="missions">` + MISSIONS.map((m) => {
         const done = isDone(m.id);
         return `<button class="mission ${done ? "done" : ""}" data-mission="${m.id}" ${m.ready && !done ? "" : "disabled"}>
@@ -1900,7 +2078,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
         <div class="saved">
           <strong>${t("guideReads")}</strong>
           <div class="guide-card">${esc(S.guide)}</div>
-          <div class="row"><span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span></div>
+          <div class="row">${fileChipHtml("fileUpdated", "CLAUDE.md")}</div>
         </div>
       </div>
       <button class="btn primary" data-act="backtochat">${t("backToChat")}</button>`;
@@ -1918,8 +2096,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
             ${a.rules.map((r) => `<li>${esc(optSaid("clients", "rules", r))}</li>`).join("")}
           </ul>
           <div class="row">
-            <span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span>
-            <span class="chip" data-explain="skill"><span class="dot"></span>${t("skillSavedClients")}</span>
+            ${fileChipHtml("skillCreated", skillPath(CLIENT_SKILL.title))}
           </div>
         </div>
       </div>
@@ -1958,7 +2135,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function addSaved() {
     const d = document.createElement("div");
     d.className = "sys";
-    d.innerHTML = `<span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span><span class="chip" data-explain="skill"><span class="dot"></span>${t("skillSaved")}</span>`;
+    d.innerHTML = fileChipHtml("skillCreated", skillPath(CLIENT_SKILL.title));
     thread.append(d);
     scrollDown();
   }
@@ -2010,6 +2187,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
         if (picked !== S.language) setLang(picked, { patch: false });
         S.guide = writeGuide();
         renderPanel();
+        addFileChips([["fileUpdated", "CLAUDE.md"]]);
         setBasePose(null); pose("celebrate", 2600);
         speakSmall(t("savedGuide"), true);
         if (api.on) {
@@ -2070,6 +2248,10 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (ch && !ch.disabled) { startChallenge(ch.dataset.challenge); return; }
     const fg = e.target.closest("[data-forget]");
     if (fg) { forget(fg.dataset.forget); return; }
+    const fc = e.target.closest("[data-file]");
+    if (fc) { openFile(fc.dataset.file); return; }
+    const fa = e.target.closest("[data-file-act]");
+    if (fa) { fileAct(fa.dataset.fileAct, fa.dataset.path); return; }
     const m = e.target.closest("[data-mission]");
     if (m && !m.disabled) { openLab(m.dataset.mission); return; }
     const a = e.target.closest("[data-act]");
