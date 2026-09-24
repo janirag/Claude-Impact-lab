@@ -265,7 +265,8 @@
   .say p { margin: 0; }
   .say .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .say input[type="text"] { width: 100%; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: 14px var(--ui); background: var(--bg); color: var(--text); }
-  .say .skip { display: block; margin-top: 10px; background: none; border: 0; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; }
+  /* Skip / close links always sit on the right, away from the main action. */
+  .say .skip { display: block; width: fit-content; margin: 10px 0 0 auto; background: none; border: 0; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; }
   .say .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
   .say .foot .skip { margin: 0 0 0 auto; }
   .say .ask { margin-top: 10px; font-weight: 500; }
@@ -279,7 +280,10 @@
   .choice { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 12px; font-size: 13px; }
   .choice:hover { border-color: var(--accent); }
   .choice small { display: block; color: var(--muted); font-size: 12px; }
-  .choice.rec { border-color: var(--accent); background: var(--accent-soft); }
+  .choice.rec, .choice[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .choice .ic { margin-right: 8px; }
+  .guide-card { margin-top: 10px; border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.45; white-space: pre-line; }
+  .say textarea.guide-card { width: 100%; min-height: 120px; font: 13px var(--ui); color: var(--text); resize: vertical; }
   .dots { display: flex; gap: 4px; margin-bottom: 8px; }
   .dots span { width: 18px; height: 4px; border-radius: 2px; background: var(--line); }
   .dots span.on { background: var(--accent); }
@@ -539,9 +543,11 @@ Notes for you
     skill:      ["Skill saved", "A recipe Claude follows every time you ask for this task.", null]
   };
 
+  const DOUBLE_CHECK = "Tell me what to double-check and who to ask";
+
   const MISSIONS = [
+    { id: "you", t: "Write your guide for Claude", d: "What you need help with and how you like answers. 1 min", ready: true },
     { id: "clients", t: "Teach Claude how you write to clients", d: "Your tone and rules. 2 min", ready: true },
-    { id: "you", t: "Tell Claude who you are", d: "What you use it for, your language and style. 1 min", ready: true },
     { id: "connect", t: "Connect a tool you use", d: "Claude reads your calendar. 3 min", ready: false }
   ];
 
@@ -554,13 +560,16 @@ Notes for you
     { key: "rules", q: "What must never go wrong?", help: "Pick as many as you like.", multi: true,
       options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] }
     ] },
-    you: { title: "Tell Claude who you are", steps: [
-      { key: "context", q: "What do you mostly use it for?", help: "You can change this any time.", multi: false,
-        options: ["Personal life", "Work", "Studies"] },
-      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
-        options: ["Català", "Español", "English"] },
+    // Same steps as LAB_MISSIONS "you" in web/src/lib/catalog.ts: the longer version of onboarding's guide.
+    you: { title: "Write your guide for Claude", steps: [
+      { key: "helps", q: "What would you like Claude to help you with?", help: "Pick as many as you like.", multi: true,
+        options: ["Letters and paperwork", "Health questions", "Money, bills and taxes", "Home and rent", "Writing messages and emails"] },
       { key: "style", q: "How do you like answers?", help: "Pick one.", multi: false,
-        options: ["Short", "Detailed", "Visual, with lists"] }
+        options: ["Short and simple", "Step by step", "With all the details"] },
+      { key: "always", q: "What should Claude always do for you?", help: "Pick as many as you like.", multi: true,
+        options: [DOUBLE_CHECK, "Use plain words, no jargon", "Keep dates and amounts exactly as written", "Remind me not to share ID or bank numbers"] },
+      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
+        options: ["Català", "Español", "English"] }
     ] }
   };
   const blankAnswers = () => Object.fromEntries(Object.entries(LABS).map(([id, l]) =>
@@ -590,16 +599,28 @@ Notes for you
     return l.startsWith("ca") ? "ca" : l.startsWith("es") ? "es" : "en";
   }
   const LANGS = { ca: "Català", es: "Español", en: "English" };
-  const TASKS = [
-    { id: "translate", label: "Translate an email", intent: "task" },
-    { id: "client", label: "Write or reply to a client", intent: "task" },
-    { id: "doc", label: "Understand a letter or document", intent: "task" },
-    { id: "learn", label: "Show me what AI can do", intent: "learn" },
-    { id: "look", label: "Just looking around", intent: "look" }
+  // Onboarding's "What would you like Claude to help you with?". Ids match TOPICS in web/src/lib/types.ts;
+  // `lab` is the matching option of the "you" Lab mission; `situations` go first on the home screen.
+  const TOPICS = [
+    { id: "paperwork", ic: "✉️", label: "Understand letters and paperwork", lab: "Letters and paperwork", phrase: "letters and paperwork", situations: ["letter", "bill"] },
+    { id: "health",    ic: "🩺", label: "Health questions",                 lab: "Health questions",       phrase: "health questions",                   situations: ["doctor"] },
+    { id: "money",     ic: "💶", label: "Money, bills and taxes",           lab: "Money, bills and taxes", phrase: "money, bills and taxes",             situations: ["bill", "letter"] },
+    { id: "home",      ic: "🏠", label: "Home and rent",                    lab: "Home and rent",          phrase: "home and rent",                      situations: ["rent"] },
+    { id: "writing",   ic: "✍️", label: "Write messages or emails",         lab: "Writing messages and emails", phrase: "writing messages and emails",  situations: [] },
+    { id: "explore",   ic: "✨", label: "Show me what it can do",           phrase: "", situations: [] }
   ];
+  // Picking any of these adds the "double-check" rule by default: the research found this group trusts AI little but rarely checks.
+  const CHECK_TOPICS = ["health", "money", "home"];
+  const STYLES = [
+    { id: "short",    label: "Short and simple",     lab: "Short and simple",     small: "Just the key points", rule: "Keep answers short and simple." },
+    { id: "steps",    label: "Step by step",         lab: "Step by step",         small: "One thing at a time, in order", rule: "Explain things step by step." },
+    { id: "detailed", label: "With all the details", lab: "With all the details", small: "The full picture", rule: "Give me all the details." }
+  ];
+  const LANG_EN = { ca: "Catalan", es: "Spanish", en: "English" };
 
   const fresh = () => ({
     ftue: 0, name: "", intent: null, language: guessLanguage(), firstTask: null,
+    helps: [], other: "", style: null, always: [], guide: "", editingGuide: false,
     phase: "start", view: "home", step: 0, lab: "clients", labsDone: [], situation: null,
     answers: blankAnswers(), file: null,
     dismissals: 0, noSuggest: false, before: "", after: ""
@@ -1013,7 +1034,21 @@ Notes for you
   }
 
   // ---------- First-time experience ----------
-  function ftueDots(i) { return `<div class="dots">${[0, 1, 2].map((n) => `<span class="${n <= i ? "on" : ""}"></span>`).join("")}</div>`; }
+  function ftueDots(i) { return `<div class="dots">${[0, 1, 2, 3, 4].map((n) => `<span class="${n <= i ? "on" : ""}"></span>`).join("")}</div>`; }
+
+  // "Your guide for Claude": the user's CLAUDE.md in plain words, built from their onboarding answers.
+  function writeGuide() {
+    const topics = TOPICS.filter((t) => S.helps.includes(t.id) && t.phrase).map((t) => t.phrase);
+    const lines = [
+      S.name && `I'm ${S.name}.`,
+      topics.length ? `Help me with:\n${topics.map((t) => "• " + t).join("\n")}` : S.helps.includes("explore") && "Help me discover what you can do.",
+      S.other && `Also: ${S.other}.`,
+      STYLES.find((s) => s.id === S.style)?.rule,
+      `Answer in ${LANG_EN[S.language]}.`,
+      ...S.always.map((r) => r === DOUBLE_CHECK ? "For anything important, tell me what to double-check and who to ask." : r + "."),
+    ];
+    return lines.filter(Boolean).join("\n");
+  }
 
   function renderFtue() {
     main.classList.add("ftue-on", "no-panel");
@@ -1023,7 +1058,7 @@ Notes for you
     const skip = `<button class="skip" type="button" data-ftue="skip">Skip for now</button>`;
     if (S.ftue === 0) {
       speak(`${ftueDots(0)}<p class="lead">Hola! I'm Clawd, an AI helper.</p>
-        <p>I help you get good results from Claude, one small step at a time. No account needed.</p>
+        <p>I'll help you get good answers from Claude. It takes one minute, and no account is needed.</p>
         <p class="ask">Which language should I use?</p>
         <div class="langs" role="group" aria-label="Language">${Object.entries(LANGS).map(([k, v]) =>
           `<button class="lang" type="button" data-lang="${k}" aria-pressed="${S.language === k}">${v}</button>`).join("")}</div>
@@ -1037,21 +1072,48 @@ Notes for you
       setTimeout(() => $("nameInput")?.focus(), 50);
     } else if (S.ftue === 2) {
       speak(`${ftueDots(2)}<p class="lead">${S.name ? "Nice to meet you, " + esc(S.name) + "." : "Nice to meet you."}</p>
-        <p>What do you need help with today?</p>
-        <div class="choices">${TASKS.map((t) => `<button class="choice" type="button" data-task="${t.id}">${t.label}</button>`).join("")}</div>
-        <form id="taskForm" class="own"><input type="text" id="taskInput" placeholder="Or type your own" aria-label="Or type what you need help with">
-        <button class="btn" type="submit">Go</button></form>
+        <p class="ask">What would you like Claude to help you with?</p><p class="fine">Pick as many as you like.</p>
+        <div class="choices">${TOPICS.map((t) => `<button class="choice" type="button" data-topic="${t.id}" aria-pressed="${S.helps.includes(t.id)}"><span class="ic" aria-hidden="true">${t.ic}</span>${t.label}</button>`).join("")}</div>
+        <input type="text" id="otherInput" maxlength="200" placeholder="Something else? Type it here" aria-label="Something else Claude could help you with" value="${esc(S.other)}">
+        <div class="foot"><button class="btn primary" type="button" data-ftue="topics">Continue</button>${skip}</div>`);
+    } else if (S.ftue === 3) {
+      speak(`${ftueDots(3)}<p class="lead">How do you like answers?</p><p>Claude will explain things this way.</p>
+        <div class="choices">${STYLES.map((s) => `<button class="choice" type="button" data-style="${s.id}">${s.label}<small>${s.small}</small></button>`).join("")}</div>
         <div class="foot">${skip}</div>`);
+    } else if (S.ftue === 4) {
+      const card = S.editingGuide
+        ? `<textarea class="guide-card" id="guideInput" maxlength="1000" aria-label="Your guide for Claude">${esc(S.guide)}</textarea>`
+        : `<div class="guide-card">${esc(S.guide)}</div>`;
+      speak(`${ftueDots(4)}<p class="lead">Here's your guide for Claude</p>
+        <p>Claude reads this before every answer, so you don't have to repeat yourself. You can change it any time in my panel.</p>
+        ${card}
+        <p class="fine">In Claude Code this is called a CLAUDE.md (or AGENTS.md) file.</p>
+        <div class="foot"><div class="actions" style="margin:0">${S.editingGuide
+          ? `<button class="btn primary" type="button" data-ftue="saveguide">Save</button>`
+          : `<button class="btn primary" type="button" data-ftue="done">Looks good</button><button class="btn" type="button" data-ftue="edit">Edit</button>`}</div>${skip}</div>`);
+      if (S.editingGuide) setTimeout(() => $("guideInput")?.focus(), 50);
     }
   }
 
-  // The help level is not asked: people can't judge it before they've seen Clawd.
-  // A real task starts on "Only when useful"; exploring starts on "Guide me".
-  function pickTask(id, typed) {
-    const t = TASKS.find((x) => x.id === id);
-    S.intent = t ? t.intent : "task";
-    S.firstTask = typed ? { typed } : id;
-    finishFtue(S.intent === "task" ? "useful" : "guide");
+  // Onboarding buttons. Kept apart from act(): the Lab has its own "next".
+  function ftueAct(a) {
+    if (a === "skip") { S.intent = "task"; S.guide = ""; finishFtue("useful"); return; }
+    if (a === "next") { S.ftue = 1; renderFtue(); return; }
+    if (a === "topics") {
+      S.other = ($("otherInput")?.value || "").trim().slice(0, 200);
+      if (!S.helps.length && !S.other) { $("otherInput")?.focus(); return; }
+      if (S.helps.some((t) => CHECK_TOPICS.includes(t)) && !S.always.includes(DOUBLE_CHECK)) S.always.push(DOUBLE_CHECK);
+      S.ftue = 3; renderFtue(); return;
+    }
+    if (a === "edit") { S.editingGuide = true; renderFtue(); return; }
+    if (a === "saveguide") { S.guide = ($("guideInput")?.value || "").trim().slice(0, 1000) || writeGuide(); S.editingGuide = false; renderFtue(); return; }
+    // The help level is not asked: people can't judge it before they've seen Clawd.
+    // Exploring starts on "Guide me"; everyone else on "Only when useful".
+    if (a === "done") {
+      S.intent = S.helps.includes("explore") ? "learn" : "task";
+      if (S.other) S.firstTask = { typed: S.other };
+      finishFtue(S.intent === "learn" ? "guide" : "useful");
+    }
   }
 
   function finishFtue(chosenLevel) {
@@ -1061,21 +1123,18 @@ Notes for you
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
-    if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel }, "PATCH").then(refreshProfile).catch(() => {});
+    const guide = S.guide ? { helps_with: S.helps, answer_style: S.style, always: S.always, guide: S.guide } : {};
+    if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel, ...guide }, "PATCH").then(refreshProfile).catch(() => {});
     $("weekLater").hidden = !api.on;
     renderHello();
     setLevel(chosenLevel);
     if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
-    const ft = S.firstTask;
-    if (ft === "translate") prompt.value = REQUEST;
-    else if (ft === "client") prompt.value = "Reply to a client: ";
-    else if (ft === "doc") prompt.value = "Explain this document in plain words: ";
-    else if (ft && ft.typed) prompt.value = ft.typed;
+    if (S.firstTask?.typed) prompt.value = S.firstTask.typed;
     setTimeout(() => {
       if (level === "off") return;
       if (level === "useful") {
         clawd.hidden = false; placeClawd();
-        speakSmall(`I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.`, true);
+        speakSmall(`${S.guide ? "Your guide is saved. " : ""}I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.`, true);
         return;
       }
       if (S.intent === "learn") {
@@ -1090,12 +1149,6 @@ Notes for you
   }
 
   say.addEventListener("submit", (e) => {
-    if (e.target.id === "taskForm") {
-      e.preventDefault();
-      const typed = ($("taskInput").value || "").trim();
-      if (typed) pickTask(null, typed.slice(0, 500));
-      return;
-    }
     if (e.target.id === "askForm") { e.preventDefault(); sendToClawd($("askInput").value); return; }
     if (e.target.id !== "nameForm") return;
     e.preventDefault();
@@ -1104,12 +1157,18 @@ Notes for you
   });
 
   // ---------- Hello and chat ----------
+  // The situations that match what they picked in onboarding come first (sort is stable, so the rest keep their order).
+  function situationsFirst() {
+    const mine = new Set(TOPICS.filter((t) => S.helps.includes(t.id)).flatMap((t) => t.situations));
+    return [...SITUATIONS].sort((a, b) => mine.has(b.id) - mine.has(a.id));
+  }
+
   function renderHello() {
     const h = new Date().getHours();
     const part = h < 12 ? "Good morning" : h < 20 ? "Good afternoon" : "Good evening";
     thread.innerHTML = `<div class="hello" id="hello"><h1>${part}${S.name ? ", " + esc(S.name) : ""}</h1>
       <p class="ask">What do you need help with today?</p>
-      <div class="situations">${SITUATIONS.map((x) =>
+      <div class="situations">${situationsFirst().map((x) =>
         `<button type="button" class="situation" data-situation="${x.id}"><span class="ic" aria-hidden="true">${x.ic}</span><span class="t">${esc(x.t)}</span><span class="d">${esc(x.d)}</span></button>`).join("")}
       </div>
       <div class="suggest"><button type="button" data-suggest="translate">Translate an email to Catalan</button></div></div>`;
@@ -1315,7 +1374,11 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (S.view === "done") return renderDone();
     const isDone = (id) => S.labsDone.includes(id) || (id === "clients" && (S.phase === "saved" || S.phase === "after")) ||
       !!api.profile?.labs?.find((l) => l.id === id)?.done;
+    const guide = api.profile?.profile?.guide || S.guide;
     body.innerHTML = (level === "guide" ? `<p class="tip">Tap anything with an orange dot for a one-line explanation.</p>` : "") +
+      (guide ? `<div><p class="section-label">Your guide for Claude</p><div class="guide-card">${esc(guide)}</div>
+        <p class="q-help">Claude reads this before every answer. In Claude Code it's your CLAUDE.md (or AGENTS.md).</p>
+        <button class="btn" type="button" data-mission="you">Change it</button></div>` : "") +
       `<div><p class="section-label">Lab missions</p><div class="missions">` + MISSIONS.map((m) => {
         const done = isDone(m.id);
         return `<button class="mission ${done ? "done" : ""}" data-mission="${m.id}" ${m.ready && !done ? "" : "disabled"}>
@@ -1349,17 +1412,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   function renderDone() {
     if (S.lab === "you") {
-      const a = S.answers.you;
       body.innerHTML = `
       <div class="win">
-        <h3>Mission complete</h3>
+        <h3>Your guide is ready</h3>
         <div class="saved">
-          <strong>From now on, Claude will:</strong>
-          <ul>
-            <li>remember you use it mostly for ${esc(a.context.toLowerCase())}</li>
-            <li>answer in ${esc(a.language)}</li>
-            <li>keep answers ${esc(a.style.toLowerCase())}</li>
-          </ul>
+          <strong>Claude will read this before every answer:</strong>
+          <div class="guide-card">${esc(S.guide)}</div>
           <div class="row"><span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span></div>
         </div>
       </div>
@@ -1400,6 +1458,14 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   function openLab(id = "clients") {
     S.view = "lab"; S.step = 0; S.lab = LABS[id] ? id : "clients";
+    // The guide mission starts from what they already told me in onboarding.
+    if (S.lab === "you") {
+      const a = S.answers.you;
+      if (!a.helps.length) a.helps = TOPICS.filter((t) => S.helps.includes(t.id) && t.lab).map((t) => t.lab);
+      if (!a.style) a.style = STYLES.find((s) => s.id === S.style)?.lab ?? null;
+      if (!a.always.length) a.always = [...S.always];
+      if (!a.language) a.language = LANGS[S.language];
+    }
     setBasePose("train");
     clawd.hidden = false; placeClawd();
     speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
@@ -1417,8 +1483,6 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   // ---------- Actions (canvas bubble and panel share them) ----------
   function act(a) {
-    if (a === "skip") { S.intent = "task"; finishFtue("useful"); return; }
-    if (a === "next") { S.ftue = 1; renderFtue(); return; }
     if (a === "hush") {
       speak("");
       // "Only when useful": Clawd leaves again once his one line has been read.
@@ -1452,14 +1516,22 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (a === "next") {
       if (S.step < LABS[S.lab].steps.length - 1) { S.step++; renderLab(); }
       else if (S.lab !== "clients") {
-        const id = S.lab;
+        const id = S.lab, a = S.answers.you;
         if (!S.labsDone.includes(id)) S.labsDone.push(id);
+        // Rewrite their guide from the mission's answers, the same way onboarding did.
+        S.helps = TOPICS.filter((t) => a.helps.includes(t.lab)).map((t) => t.id);
+        S.style = STYLES.find((s) => s.lab === a.style)?.id ?? S.style;
+        S.always = [...a.always];
+        S.language = Object.keys(LANGS).find((k) => LANGS[k] === a.language) ?? S.language;
+        S.guide = writeGuide();
         S.view = "done"; renderPanel();
         setBasePose(null); pose("celebrate", 2600);
-        speakSmall(`Saved! I'll answer in ${S.answers.you.language} and keep it ${S.answers.you.style.toLowerCase()}.`, true);
+        speakSmall(`Saved! Claude will follow your guide from now on.`, true);
         if (api.on) {
-          api.labSave = call(`/api/lab/${id}`, { answers: S.answers[id] })
-            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); refreshProfile(); });
+          api.labSave = call(`/api/lab/${id}`, { answers: a })
+            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); })
+            .then(() => call("/api/profile", { guide: S.guide }, "PATCH"))
+            .then(refreshProfile);
         }
       } else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
@@ -1482,10 +1554,18 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   }
 
   say.addEventListener("click", (e) => {
-    const f = e.target.closest("[data-ftue]"); if (f) { act(f.dataset.ftue); return; }
+    const f = e.target.closest("[data-ftue]"); if (f) { ftueAct(f.dataset.ftue); return; }
     const g = e.target.closest("[data-lang]");
     if (g) { S.language = g.dataset.lang; say.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b === g))); return; }
-    const t = e.target.closest("[data-task]"); if (t) { pickTask(t.dataset.task); return; }
+    const t = e.target.closest("[data-topic]");
+    if (t) {
+      const id = t.dataset.topic;
+      S.helps = S.helps.includes(id) ? S.helps.filter((x) => x !== id) : [...S.helps, id];
+      t.setAttribute("aria-pressed", String(S.helps.includes(id)));
+      return;
+    }
+    const st = e.target.closest("[data-style]");
+    if (st) { S.style = st.dataset.style; S.guide = writeGuide(); S.ftue = 4; renderFtue(); return; }
     const c = e.target.closest("[data-coach]"); if (c) { ackCoach(c.dataset.coach, c.dataset.resp); return; }
     const a = e.target.closest("[data-act]"); if (a) act(a.dataset.act);
   });

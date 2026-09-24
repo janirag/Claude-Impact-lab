@@ -24,7 +24,25 @@ export type LabMission = {
 };
 
 // Mirrors prototype/index.html so the frontend can reuse its Lab flow.
+// Their guide for Claude comes first: it's the plain-words CLAUDE.md that every answer reads.
 export const LAB_MISSIONS: LabMission[] = [
+  {
+    id: "you",
+    title: "Write your guide for Claude",
+    description: "What you need help with and how you like answers. 1 min",
+    ready: true,
+    card: "remember_me",
+    steps: [
+      { key: "helps", q: "What would you like Claude to help you with?", help: "Pick as many as you like.", multi: true,
+        options: ["Letters and paperwork", "Health questions", "Money, bills and taxes", "Home and rent", "Writing messages and emails"] },
+      { key: "style", q: "How do you like answers?", help: "Pick one.", multi: false,
+        options: ["Short and simple", "Step by step", "With all the details"] },
+      { key: "always", q: "What should Claude always do for you?", help: "Pick as many as you like.", multi: true,
+        options: ["Tell me what to double-check and who to ask", "Use plain words, no jargon", "Keep dates and amounts exactly as written", "Remind me not to share ID or bank numbers"] },
+      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
+        options: ["Català", "Español", "English"] },
+    ],
+  },
   {
     id: "clients",
     title: "Teach Claude how you write to clients",
@@ -38,21 +56,6 @@ export const LAB_MISSIONS: LabMission[] = [
         options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"] },
       { key: "rules", q: "What must never go wrong?", help: "Pick as many as you like.", multi: true,
         options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] },
-    ],
-  },
-  {
-    id: "you",
-    title: "Tell Claude who you are",
-    description: "Your role and languages. 1 min",
-    ready: true,
-    card: "remember_me",
-    steps: [
-      { key: "context", q: "What do you mostly use it for?", help: "You can change this any time.", multi: false,
-        options: ["Personal life", "Work", "Studies"] },
-      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
-        options: ["Català", "Español", "English"] },
-      { key: "style", q: "How do you like answers?", help: "Pick one.", multi: false,
-        options: ["Short", "Detailed", "Visual, with lists"] },
     ],
   },
   { id: "connect", title: "Connect a tool you use", description: "Claude reads your calendar. 3 min", ready: false, steps: [] },

@@ -1,17 +1,28 @@
 import { randomUUID } from "node:crypto";
 import { policy } from "./config";
-import type { Fact, Language, User } from "./types";
+import type { Fact, Language, Topic, User } from "./types";
 
 const LANG_NAME: Record<Language, string> = { ca: "Catalan", es: "Spanish", en: "English" };
+const STYLE_NAME = { short: "short and simple", steps: "step by step", detailed: "detailed", visual: "visual, with lists" } as const;
+const TOPIC_NAME: Record<Topic, string> = {
+  paperwork: "letters and paperwork", health: "health questions", money: "money, bills and taxes",
+  home: "home and rent", writing: "writing messages and emails", explore: "discovering what AI can do",
+};
 
 // Plain-text "About the user" block for the agents' system prompts. Empty profile -> empty string.
+// Their guide (what they approved or edited in onboarding) replaces the structured lines it was built from.
 export function aboutUser(user: User): string {
   const p = user.profile;
   const lines: string[] = [];
   if (p.name) lines.push(`Name: ${p.name}`);
   if (p.language) lines.push(`Preferred language: ${LANG_NAME[p.language]} (unless they write in another one)`);
-  if (p.answer_style) lines.push(`Answer style: ${p.answer_style}`);
-  if (p.context) lines.push(`Mostly uses this for: ${p.context}`);
+  if (p.guide) lines.push(`Their guide for Claude, in their words (follow it):\n${p.guide}`);
+  else {
+    if (p.answer_style) lines.push(`Answer style: ${STYLE_NAME[p.answer_style]}`);
+    if (p.context) lines.push(`Mostly uses this for: ${p.context}`);
+    if (p.helps_with?.length) lines.push(`Wants help with: ${p.helps_with.map((t) => TOPIC_NAME[t]).join(", ")}`);
+    for (const r of p.always ?? []) lines.push(`Always: ${r}`);
+  }
   for (const f of p.facts) lines.push(`- ${f.text}`);
   if (!lines.length && !user.skills.length) return "";
   let out = `About the user (they chose to save this):\n${lines.join("\n")}`;

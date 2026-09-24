@@ -1,13 +1,16 @@
 import { cardById, labById } from "./catalog";
 import { awardCard } from "./policy";
-import type { CoachEvent, Language, User } from "./types";
+import type { CoachEvent, Language, Topic, User } from "./types";
 import { randomUUID } from "node:crypto";
 
 export type LabAnswers = Record<string, string | string[]>;
 
 const LANG: Record<string, Language> = { "Català": "ca", "Español": "es", "English": "en" };
-const STYLE = { "Short": "short", "Detailed": "detailed", "Visual, with lists": "visual" } as const;
-const CONTEXT = { "Personal life": "personal", "Work": "work", "Studies": "study" } as const;
+const STYLE = { "Short and simple": "short", "Step by step": "steps", "With all the details": "detailed" } as const;
+const TOPIC: Record<string, Topic> = {
+  "Letters and paperwork": "paperwork", "Health questions": "health", "Money, bills and taxes": "money",
+  "Home and rent": "home", "Writing messages and emails": "writing",
+};
 
 export function validateAnswers(missionId: string, answers: LabAnswers): string | null {
   const m = labById(missionId);
@@ -43,11 +46,14 @@ export function completeLab(user: User, missionId: string, answers: LabAnswers):
     saved.push(`know you write to clients as ${one("role").toLowerCase()}`, `use this tone: ${one("tone").toLowerCase()}`, ...rules.map((r) => r.charAt(0).toLowerCase() + r.slice(1)));
   }
 
+  // The guide text itself is written by the frontend (in the user's UI language) and saved with PATCH /api/profile.
   if (missionId === "you") {
-    user.profile.context = CONTEXT[one("context") as keyof typeof CONTEXT];
-    user.profile.language = LANG[one("language")];
+    user.profile.helps_with = many("helps").map((h) => TOPIC[h]);
     user.profile.answer_style = STYLE[one("style") as keyof typeof STYLE];
-    saved.push(`remember you use it mostly for ${one("context").toLowerCase()}`, `answer in ${one("language")}`, `keep answers ${one("style").toLowerCase()}`);
+    user.profile.always = many("always");
+    user.profile.language = LANG[one("language")];
+    saved.push(`help you with ${many("helps").map((h) => h.toLowerCase()).join(", ")}`, `explain things ${one("style").toLowerCase()}`,
+      ...many("always").map((r) => r.charAt(0).toLowerCase() + r.slice(1)), `answer in ${one("language")}`);
   }
 
   if (!user.labs_done.includes(missionId)) user.labs_done.push(missionId);

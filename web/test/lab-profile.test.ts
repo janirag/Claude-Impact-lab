@@ -25,9 +25,22 @@ describe("lab", () => {
 
   it("the 'you' mission fills the profile and export works", () => {
     const u = freshUser("test-user-0003");
-    completeLab(u, "you", { context: "Work", language: "Català", style: "Short" });
-    expect(u.profile).toMatchObject({ context: "work", language: "ca", answer_style: "short" });
-    expect(exportProfile(u)).toContain("Preferred language: Catalan");
+    const you = { helps: ["Health questions", "Home and rent"], style: "Step by step", always: ["Tell me what to double-check and who to ask"], language: "Español" };
+    expect(validateAnswers("you", you)).toBeNull();
+    completeLab(u, "you", you);
+    expect(u.profile).toMatchObject({ helps_with: ["health", "home"], answer_style: "steps", language: "es" });
+    expect(aboutUser(u)).toContain("Wants help with: health questions, home and rent");
+    expect(aboutUser(u)).toContain("Always: Tell me what to double-check and who to ask");
+    expect(exportProfile(u)).toContain("Preferred language: Spanish");
+  });
+
+  it("their guide replaces the structured lines it was built from", () => {
+    const u = freshUser("test-user-0005");
+    u.profile = { ...u.profile, name: "Carmen", answer_style: "steps", helps_with: ["health"], guide: "I'm Carmen. Explain things step by step." };
+    const about = aboutUser(u);
+    expect(about).toContain("Name: Carmen");
+    expect(about).toContain("I'm Carmen. Explain things step by step.");
+    expect(about).not.toContain("Wants help with");
   });
 
   it("empty profile adds nothing to the prompt", () => {

@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export type Level = "guide" | "useful" | "off";
 export type Language = "ca" | "es" | "en";
+export const TOPICS = ["paperwork", "health", "money", "home", "writing", "explore"] as const;
+export type Topic = (typeof TOPICS)[number];
 
 export type Fact = { id: string; text: string; category: string; learned_from: string; date: string };
 
@@ -10,8 +12,11 @@ export type Skill = { id: string; title: string; instructions: string };
 export type Profile = {
   name?: string;
   language?: Language;
-  answer_style?: "short" | "detailed" | "visual";
+  answer_style?: "short" | "steps" | "detailed" | "visual";
   context?: "personal" | "work" | "study";
+  helps_with?: Topic[]; // from onboarding: what they want Claude's help with
+  always?: string[]; // standing rules, e.g. "Tell me what to double-check and who to ask"
+  guide?: string; // "Your guide for Claude": their CLAUDE.md in plain words, as they approved or edited it
   facts: Fact[];
 };
 
