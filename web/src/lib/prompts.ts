@@ -1,4 +1,4 @@
-import { CARDS, CHALLENGES, LAB_MISSIONS } from "./catalog";
+import { CARDS, CHALLENGES, LAB_MISSIONS, situationById } from "./catalog";
 import { aboutUser } from "./profile";
 import type { User } from "./types";
 
@@ -17,9 +17,12 @@ When it helps, end with a line containing only "---", then a short section start
 
 The notes are for the user, so write them in the language of the user's own words (or their saved language), never in the language you translated into. Example: "Translate this to Catalan: Estimado…" -> the email in Catalan, the notes in English.`;
 
-export function taskSystem(user: User) {
+// Stable prompt, then the per-user block, then (on the turn a situation was picked) its guided first step.
+export function taskSystem(user: User, situation?: string) {
   const about = aboutUser(user);
-  return about ? [TASK_SYSTEM, about] : [TASK_SYSTEM];
+  const s = situation ? situationById(situation) : undefined;
+  return [TASK_SYSTEM, about, s && `The user started from the home screen situation "${s.title}". For this answer: ${s.guide}`]
+    .filter(Boolean) as string[];
 }
 
 export const COACH_SYSTEM = `You are the decision-maker behind Clawd, a small pixel-art mascot that coaches people on using AI while they do real tasks. You never answer the task yourself; another assistant already did.

@@ -1,3 +1,4 @@
+import { situationById } from "../catalog";
 import type { Attachment } from "./task";
 import type { CoachAction, User } from "../types";
 import type { CoachMode } from "../prompts";
@@ -9,7 +10,11 @@ const SENSITIVE = /\b(m[eéè]dic[oa]?s?|metges?|doctor(a|es|s)?|salud|salut|hea
 const PERSONAL_DATA = /\b(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|ES\d{2}[\s\d]{20,})\b/i;
 const TRANSLATE = /\b(tradu|translat)\w*/i;
 
-export function offlineAnswer(text: string, attachment?: Attachment): string {
+export function offlineAnswer(text: string, attachment?: Attachment, situation?: string): string {
+  const s = situation ? situationById(situation) : undefined;
+  if (s?.wants_file && !attachment) {
+    return `(Offline example) Happy to help with "${s.title.toLowerCase()}". Send me a photo of it with the + button and I'll explain it in plain words.`;
+  }
   if (attachment) {
     return `(Offline example) I can see your ${attachment.media_type === "application/pdf" ? "document" : "photo"}. In a live session I'd read it and explain, in plain words, what it says and what you need to do, keeping every date and amount exactly as written.\n---\nNotes for you\n• Check the deadline on the original before acting.`;
   }

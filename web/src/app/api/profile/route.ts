@@ -1,20 +1,9 @@
-import { CARDS, CHALLENGES, LAB_MISSIONS } from "@/lib/catalog";
 import { config } from "@/lib/config";
 import { json, userIdFrom } from "@/lib/session";
 import { withUser } from "@/lib/store";
-import type { User } from "@/lib/types";
+import { view } from "@/lib/view";
 
 export const runtime = "nodejs";
-
-const view = (u: User) => ({
-  level: u.level,
-  mode: u.mode ?? null,
-  profile: u.profile,
-  skills: u.skills,
-  cards: u.cards.map((c) => ({ ...c, ...CARDS.find((x) => x.id === c.id) })),
-  missions: u.missions.map((m) => ({ ...m, ...CHALLENGES.find((x) => x.id === m.id) })),
-  labs: LAB_MISSIONS.map(({ steps, ...m }) => ({ ...m, done: u.labs_done.includes(m.id) })),
-});
 
 // GET -> "What Clawd remembers" + progress. `backend.offline` tells the prototype whether answers are canned.
 export async function GET(req: Request) {

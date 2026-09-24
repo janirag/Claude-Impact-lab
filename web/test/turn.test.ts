@@ -62,3 +62,18 @@ describe("turn flow (offline)", () => {
     expect(events[0]).toMatchObject({ action: "show_tip", deliver: "now" });
   });
 });
+
+describe("situations (home screen)", () => {
+  it("accepts a known situation and rejects an unknown one", () => {
+    expect(validateTurn({ message: "I got this letter", situation: "letter" })).toMatchObject({ situation: "letter" });
+    expect(validateTurn({ message: "hi", situation: "rocket" })).toBe("unknown situation");
+  });
+
+  it("asks for a photo when a photo situation has none, and records the situation", async () => {
+    const id = "turn-user-0101";
+    let text = "";
+    await withUser(id, (u) => handleTurn(u, { message: "I got this letter", situation: "letter" }, { token: (t) => { text += t; }, answerDone: () => {}, coach: () => {} }));
+    expect(text).toMatch(/photo/);
+    expect((await loadUser(id)).history[0].text).toBe("[picked: A letter I don't understand] I got this letter");
+  });
+});

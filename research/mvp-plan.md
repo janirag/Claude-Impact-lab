@@ -507,4 +507,5 @@ Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs)
 - [x] ~~Interactive prototype of the mascot~~: Clawd Guide v1 is done (chat, side panel, Lab, before/after).
 - [ ] Rename the animation clips by state, and add the missing states (watching, curious, talking, sleeping).
 - [x] ~~Prototype v2 poses~~: the clips are redrawn as pixel-art SVG poses in `prototype/index.html` (idle hop and blink, walk, busy, Lab training, celebrate with confetti, mission-complete flag). Clawd also roams to the coach's `point_at` anchors (upload button, composer, answer, card chip, Lab), stands beside them without covering content, points with its arm, and walks home when the bubble closes.
-- [ ] Build step 1: Next.js project with the task agent and an empty mascot slot, reusing the prototype's look.
+- [x] ~~Build steps 1–5~~: backend in `web/` (orchestrator, task and coach agents, Lab, memory, challenges) serving the prototype, live on the API.
+- [x] ~~Real-life challenges and the return visit~~: start a challenge in the panel, "One week later" in the banner, Clawd checks in and "I did it!" earns the challenge's card. The panel also shows cards and "What Clawd remembers" (forget items, copy the profile).

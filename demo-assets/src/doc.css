@@ -1,0 +1,29 @@
+/* Shared look for the demo documents: A4, printable, rendered by build.sh. */
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; }
+body {
+  width: 210mm; min-height: 296mm; padding: 18mm 20mm 22mm;
+  font: 10.5pt/1.45 "Helvetica Neue", Arial, sans-serif; color: #1d1d1b;
+  position: relative;
+}
+h1 { font-size: 15pt; margin: 0 0 4mm; }
+h2 { font-size: 11pt; margin: 6mm 0 2mm; text-transform: uppercase; letter-spacing: .03em; }
+p { margin: 0 0 3mm; }
+table { border-collapse: collapse; width: 100%; }
+td, th { padding: 1.6mm 2mm; text-align: left; vertical-align: top; }
+.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.muted { color: #666; }
+.small { font-size: 8.5pt; }
+.box { border: 1px solid #999; padding: 3mm 4mm; margin: 4mm 0; }
+.hl { background: #f2f2f2; }
+.head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; }
+.logo { display: flex; gap: 3mm; align-items: center; font-weight: 700; line-height: 1.15; }
+.logo .mark { width: 13mm; height: 13mm; border-radius: 2mm; display: grid; place-items: center; color: #fff; font-size: 14pt; }
+.addr { margin: 0 0 8mm 95mm; }
+.sign { margin-top: 10mm; }
+.demo {
+  position: absolute; left: 20mm; right: 20mm; bottom: 8mm;
+  border-top: 1px dashed #bbb; padding-top: 2mm;
+  font-size: 7.5pt; color: #888; text-align: center;
+}
