@@ -283,9 +283,6 @@
   .say .foot .skip { margin: 0 0 0 auto; }
   .say .ask { margin-top: 10px; font-weight: 500; }
   .say .fine { margin-top: 6px; font-size: 12px; color: var(--muted); }
-  .langs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .lang { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 13px; }
-  .lang[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 500; }
   .own { display: flex; gap: 6px; margin-top: 8px; }
   .say .own input[type="text"] { margin-top: 0; flex: 1; min-width: 0; }
   .choices { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
@@ -606,7 +603,6 @@ ${t("notesAfter")}`;
       notesAfter: '• "divendres" (Friday): Sr. Puig may not know which Friday. Consider "divendres 26 de setembre".\n• The invoice number, amounts and dates are unchanged.',
       ftueLead: "Hola! I'm Clawd, an AI helper.",
       ftueText: "I'll help you get good answers from Claude. It takes one minute, and no account is needed.",
-      whichLanguage: "Which language should I use?",
       privacyNote: "What you tell me stays in this browser. You can delete it any time.",
       skipForNow: "Skip for now",
       callYou: "What should I call you?",
@@ -781,7 +777,6 @@ ${t("notesAfter")}`;
       notesAfter: '• "divendres" (viernes): puede que el Sr. Puig no sepa qué viernes. Mejor "divendres 26 de setembre".\n• El número de factura, los importes y las fechas no han cambiado.',
       ftueLead: "¡Hola! Soy Clawd, un ayudante de IA.",
       ftueText: "Te ayudo a sacar buenas respuestas de Claude. Es solo un minuto y no necesitas cuenta.",
-      whichLanguage: "¿En qué idioma te hablo?",
       privacyNote: "Lo que me cuentes se queda en este navegador. Puedes borrarlo cuando quieras.",
       skipForNow: "Saltar por ahora",
       callYou: "¿Cómo te llamo?",
@@ -952,7 +947,6 @@ ${t("notesAfter")}`;
       notesAfter: '• "divendres": potser el Sr. Puig no sap quin divendres. Millor "divendres 26 de setembre".\n• El número de factura, els imports i les dates no han canviat.',
       ftueLead: "Hola! Sóc en Clawd, un ajudant d'IA.",
       ftueText: "T'ajudo a treure bones respostes de Claude. És només un minut i no cal cap compte.",
-      whichLanguage: "En quina llengua et parlo?",
       privacyNote: "El que m'expliquis es queda en aquest navegador. Ho pots esborrar quan vulguis.",
       skipForNow: "Salta-ho de moment",
       callYou: "Com et dic?",
@@ -1716,9 +1710,6 @@ ${t("notesAfter")}`;
     if (S.ftue === 0) {
       speak(`${ftueDots(0)}<p class="lead">${t("ftueLead")}</p>
         <p>${t("ftueText")}</p>
-        <p class="ask">${t("whichLanguage")}</p>
-        <div class="langs" role="group" aria-label="${esc(t("langGroup"))}">${Object.entries(LAB_LANG).map(([name, k]) =>
-          `<button class="lang" type="button" data-lang="${k}" aria-pressed="${S.language === k}">${name}</button>`).join("")}</div>
         <p class="fine">${t("privacyNote")}</p>
         <div class="foot"><button class="btn primary" type="button" data-ftue="next">${t("continue")}</button>${skip}</div>`);
     } else if (S.ftue === 1) {
@@ -2226,8 +2217,6 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   say.addEventListener("click", (e) => {
     const f = e.target.closest("[data-ftue]"); if (f) { ftueAct(f.dataset.ftue); return; }
     const fl = e.target.closest("[data-file]"); if (fl) { speak(""); openFile(fl.dataset.file); return; }
-    const g = e.target.closest("[data-lang]");
-    if (g) { setLang(g.dataset.lang); return; }
     const tp = e.target.closest("[data-topic]");
     if (tp) {
       const id = tp.dataset.topic;
