@@ -4,7 +4,8 @@ import type { CoachMode } from "../prompts";
 
 // Offline mode: canned answers and a rule-based coach so the demo works without network or key.
 
-const SENSITIVE = /\b(m[eè]dic|doctor|salud|salut|health|dolor|pain|hisenda|hacienda|tax|impost|lloguer|alquiler|rent|contrat|contract|banc|bank|multa|fine)\w*/i;
+// Whole words only: "Un saludo" must not read as "salud".
+const SENSITIVE = /\b(m[eéè]dic[oa]?s?|metges?|doctor(a|es|s)?|salud|salut|health|dolor|pain|pills?|pastillas?|hisenda|hacienda|tax(es)?|impost(os)?|impuestos?|lloguer|alquiler|rent|contract(e|es|s)?|contratos?|bancos?|banc|bank|multas?|fines?)\b/i;
 const PERSONAL_DATA = /\b(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|ES\d{2}[\s\d]{20,})\b/i;
 const TRANSLATE = /\b(tradu|translat)\w*/i;
 
@@ -40,6 +41,9 @@ export function offlineCoach(user: User, mode: CoachMode, latest?: { user: strin
   const translations = user.history.filter((h) => h.role === "user" && TRANSLATE.test(h.text)).length;
   if (translations >= 3 && !user.never.includes("suggest_lab:clients")) {
     return [{ action: "suggest_lab", ref: "clients", text: `You've translated ${translations} times. Teach me how you like them?`, mood: "curious", point_at: "lab_button" }];
+  }
+  if (msg.length > 700 && !has("show_a_photo")) {
+    return [{ action: "show_tip", text: "Long letter? Next time just send me a photo of it.", mood: "curious", point_at: "upload_button" }];
   }
   if (msg.trim().split(/\s+/).length <= 6) {
     return [{ action: "show_tip", text: "Tip: tell me who it's for and I'll get the tone right.", mood: "curious", point_at: "composer" }];

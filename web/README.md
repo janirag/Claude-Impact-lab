@@ -8,11 +8,18 @@ The agentic backend from [`research/mvp-plan.md`](../research/mvp-plan.md): an *
 cd web
 npm install
 cp .env.example .env.local   # add ANTHROPIC_API_KEY, or leave it empty for offline mode
-npm run dev                  # http://localhost:3000
+npm run dev                  # http://localhost:3000 serves the prototype, connected to the API
 npm test                     # 22 tests, run offline
 ```
 
 **Offline mode:** with no API key (or `CLAWD_OFFLINE=1`) the task agent returns canned answers and the coach follows simple rules. Use it for development, tests, and as a backup if the network fails during the demo.
+
+## The prototype is the frontend (for now)
+
+`npm run dev` and `npm run build` copy [`../prototype/index.html`](../prototype/index.html) to `public/prototype.html` and serve it at `/`. When the prototype is served from here it detects the API and uses it for everything: real answers, coach bubbles, the Lab and the profile. Opened as a file or as an artifact, it keeps working on its own with its built-in example answers.
+
+- If the backend has no API key (offline mode), the prototype keeps its own example answers. Add `?backend=1` to the URL to use the backend's offline coach anyway, for testing the connection.
+- After editing the prototype, restart `npm run dev` so the copy is refreshed.
 
 ## How a turn works
 
@@ -38,7 +45,7 @@ The coach only **proposes**. `src/lib/policy.ts` **decides** what reaches the sc
 | `GET /api/lab/:missionId` | | Mission and steps (same content as the prototype's Lab) |
 | `POST /api/lab/:missionId` | `{ answers: { [stepKey]: option \| option[] } }` | `{ saved: ["From now on, Claude will …"], events }` |
 | `GET /api/profile` | | Level, profile, skills, cards, challenges, Labs ("What Clawd remembers") |
-| `PATCH /api/profile` | `{ name?, language?, answer_style?, context?, level? }` (`null` clears a field) | Same as GET |
+| `PATCH /api/profile` | `{ name?, language?, answer_style?, context?, level?, mode? }` (`null` clears a field) | Same as GET |
 | `DELETE /api/profile` | `?fact=<id>` \| `?skill=<id>` \| `?all=1` | Same as GET |
 | `GET /api/profile/export` | | "My AI profile" as plain text for any assistant |
 | `POST /api/session/return` | | `{ events }`: greeting and challenge check-in (the demo's "one week later") |

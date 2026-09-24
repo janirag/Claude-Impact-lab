@@ -35,7 +35,7 @@ export function completeLab(user: User, missionId: string, answers: LabAnswers):
       `Tone for client emails: ${one("tone")}.`,
       ...rules.map((r) => `Rule: ${r}.`),
       rules.includes("Flag anything a client could misread")
-        ? `After the email, add a line with only "---" and a short "Notes for you" section (max 3 bullets) flagging anything a client could misread.`
+        ? `After the email, add a line with only "---" and a short "Notes for you" section (max 3 bullets) flagging anything a client could misread. Write the notes in the language of the user's own request, not the email's.`
         : "",
     ].filter(Boolean).join("\n");
     const skill = { id: "clients", title: "Client emails", instructions };

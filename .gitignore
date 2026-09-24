@@ -26,3 +26,6 @@ Temporary Items
 # Environment and secrets
 .env
 .env.*
+
+# Local browser-test logs
+.playwright-mcp/

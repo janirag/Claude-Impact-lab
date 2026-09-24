@@ -47,6 +47,16 @@ describe("turn flow (offline)", () => {
     expect(r.coach.find((e) => e.action === "award_card")).toMatchObject({ ref: "check_before_trusting", quiet: true });
   });
 
+  it("a sign-off like 'Un saludo' is not a health topic", async () => {
+    const r = await turn("turn-user-0005", "Translate this to Catalan: Gracias por avisarnos. Un saludo, Carmen");
+    expect(r.coach.some((e) => e.safety)).toBe(false);
+  });
+
+  it("a long pasted document gets the 'send a photo' tip pointing at the upload button", async () => {
+    const r = await turn("turn-user-0006", "Can you explain this letter? " + "We would like to inform you about the new opening hours of the office. ".repeat(12));
+    expect(r.coach[0]).toMatchObject({ action: "show_tip", point_at: "upload_button" });
+  });
+
   it("return visit greets the user", async () => {
     const events = await withUser("turn-user-0004", (u) => returnVisit(u));
     expect(events[0]).toMatchObject({ action: "show_tip", deliver: "now" });

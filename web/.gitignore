@@ -6,3 +6,4 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 .data-test/
+public/prototype.html

@@ -94,6 +94,7 @@
   .pill { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--muted); background: var(--surface); }
   .thread { overflow-y: auto; padding: 24px; }
   .thread-inner { width: 100%; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .main:not(.ftue-on) .thread-inner { padding-bottom: 56px; } /* room for Clawd sitting on the composer, so it never covers the last message */
   .hello { text-align: center; padding: 40px 0 8px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
   .hello h1 { font-family: var(--read); font-weight: 400; font-size: 32px; margin: 0; text-wrap: balance; }
   .suggest { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -146,12 +147,83 @@
   .clawd[hidden] { display: none !important; }
   .clawd.big { width: 104px; }
   .clawd-body { display: block; width: 100%; background: none; border: 0; padding: 0; }
-  .clawd-body svg { width: 100%; height: auto; display: block; }
-  .clawd .sprite { animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
-  .clawd.walking .sprite { animation: walk .28s steps(2) infinite; }
+  .clawd-body svg { width: 100%; height: auto; display: block; overflow: visible; }
   .clawd.facing-left .clawd-body svg { transform: scaleX(-1); }
-  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-  @keyframes walk { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-4px) rotate(3deg); } }
+
+  /* Clawd poses, redrawn from the clips in animations/ on the same 14x10 pixel grid.
+     1 CSS px inside the SVG = 1 Clawd pixel. Props (band, dumbbell, flag, confetti) are hidden until a state shows them. */
+  .cw-body, .cw-arm, .cw-arm-up, .cw-leg { fill: #d97757; }
+  .cw-eye, .cw-happy { fill: #141413; }
+  .cw-band { fill: #2f4a7a; }
+  .cw-iron { fill: var(--text); }
+  .cw-check-a { fill: var(--text); }
+  .cw-check-b { fill: var(--surface); }
+  .cw-arm-up, .cw-happy, .cw-band, .cw-bell, .cw-flag, .cw-confetti { display: none; }
+  .clawd .sprite, .clawd .cw-eyes, .clawd .cw-leg, .clawd .cw-bell, .clawd .cw-flag-cloth { transform-box: fill-box; }
+  .clawd .sprite { transform-origin: 50% 100%; }
+
+  /* Idle (clip 1C8B): rest, blink, crouch, hop, land. */
+  .clawd .sprite { animation: cw-idle 5.2s ease-in-out infinite; }
+  .clawd .cw-eyes { transform-origin: 50% 50%; animation: cw-blink 4.4s steps(1) infinite; }
+  @keyframes cw-idle {
+    0%, 76%, 100% { transform: none; }
+    80% { transform: scale(1.06, .86); }
+    86% { transform: translateY(-2.5px) scale(.97, 1.04); }
+    92% { transform: none; }
+    95% { transform: scale(1.04, .92); }
+  }
+  @keyframes cw-blink { 0%, 58%, 62%, 100% { transform: none; } 59% { transform: scaleY(.15); } }
+
+  /* Walking and roaming (clips 294D, BE89): lean, alternating legs, eyes lead. */
+  .clawd.walking .sprite { animation: cw-lean .56s ease-in-out infinite; }
+  .clawd.walking .cw-leg.a { animation: cw-step .28s steps(1) infinite; }
+  .clawd.walking .cw-leg.b { animation: cw-step .28s steps(1) infinite reverse; }
+  .clawd.walking .cw-eyes { animation: none; transform: translateX(1px); }
+  @keyframes cw-lean { 0%, 100% { transform: rotate(-3deg) translateY(-.5px); } 50% { transform: rotate(3deg); } }
+  @keyframes cw-step { 0% { transform: translateY(-1px); } 50% { transform: none; } }
+
+  /* Busy while Claude answers (clip 294D in place): gentle sway, eyes glance around. */
+  .clawd.state-busy .sprite { animation: cw-sway 1.6s ease-in-out infinite; }
+  .clawd.state-busy .cw-eyes { animation: cw-glance 2.4s steps(1) infinite; }
+  @keyframes cw-sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+  @keyframes cw-glance { 0%, 100% { transform: translateX(-1px); } 50% { transform: translateX(1px); } }
+
+  /* Lab training (clip 61C1): sweatband on, dumbbell curls overhead. */
+  .clawd.state-train .cw-band, .clawd.state-train .cw-bell { display: inline; }
+  .clawd.state-train .sprite { animation: cw-lift 1.4s steps(1) infinite; }
+  .clawd.state-train .cw-bell { animation: cw-bell 1.4s steps(1) infinite; }
+  .clawd.state-train .cw-arm-r { animation: cw-arm-down 1.4s steps(1) infinite; }
+  .clawd.state-train .cw-arm-up { display: inline; animation: cw-arm-up 1.4s steps(1) infinite; }
+  @keyframes cw-lift { 0% { transform: scale(1.04, .92); } 50% { transform: translateY(-.5px); } }
+  @keyframes cw-bell { 0% { transform: translateY(8px); } 50% { transform: none; } } /* down: hangs at the side, up: overhead */
+  @keyframes cw-arm-down { 0% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes cw-arm-up { 0% { opacity: 0; } 50% { opacity: 1; } }
+
+  /* Celebrate (clip 7FB0): jump with an arm up, confetti burst. */
+  .clawd.state-celebrate .cw-confetti, .clawd.state-celebrate .cw-arm-up { display: inline; }
+  .clawd.state-celebrate .cw-arm-r { display: none; }
+  .clawd.state-celebrate .sprite { animation: cw-jump .65s ease-out 4; }
+  .clawd.state-celebrate .cw-confetti rect { animation: cw-burst 1.3s ease-out 2 both; }
+  @keyframes cw-jump {
+    0%, 100% { transform: scale(1.06, .86); }
+    35% { transform: translateY(-3.5px) scale(.96, 1.05); }
+    70% { transform: none; }
+  }
+  @keyframes cw-burst {
+    0% { transform: translate(0, 0); opacity: 1; }
+    100% { transform: translate(calc(var(--dx) * 1px), calc(var(--dy) * 1px)); opacity: 0; }
+  }
+
+  /* Mission complete (clip 88A6): happy ^ ^ eyes, waving checkered flag. */
+  .clawd.state-flag .cw-flag, .clawd.state-flag .cw-arm-up, .clawd.state-flag .cw-happy { display: inline; }
+  .clawd.state-flag .cw-arm-r, .clawd.state-flag .cw-eyes { display: none; }
+  .clawd.state-flag .sprite { animation: cw-proud 1.2s ease-in-out infinite; }
+  .clawd.state-flag .cw-flag-cloth { transform-origin: 100% 50%; animation: cw-wave .5s ease-in-out infinite alternate; }
+  @keyframes cw-proud { 0%, 100% { transform: none; } 50% { transform: translateY(-.5px); } }
+  @keyframes cw-wave { from { transform: skewY(-10deg); } to { transform: skewY(8deg) scaleX(.9); } }
+
+  /* A single hop when Clawd has something to say (clip 1C8B, one beat). */
+  .clawd.state-hop .sprite { animation: cw-jump .6s ease-out 1; }
 
   .say {
     position: absolute; width: max-content; max-width: min(340px, calc(100vw - 48px));
@@ -161,6 +233,11 @@
   .say[hidden] { display: none !important; }
   .clawd.big .say { top: calc(100% + 14px); left: 50%; transform: translateX(-50%); max-width: min(400px, calc(100vw - 48px)); width: min(400px, calc(100vw - 48px)); }
   .clawd:not(.big) .say { bottom: calc(100% + 10px); right: 0; }
+  .clawd:not(.big).say-start .say { right: auto; left: 0; }
+  .clawd:not(.big).say-below .say { bottom: auto; top: calc(100% + 10px); }
+  /* Pointing at an anchor: the raised arm (flipped with Clawd when it faces left) points at it. */
+  .clawd.pointing:not(.walking) .cw-arm-up { display: inline; }
+  .clawd.pointing:not(.walking) .cw-arm-r { display: none; }
   .say .lead { font-size: 15px; font-weight: 500; margin: 0 0 4px; }
   .say p { margin: 0; }
   .say .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -268,7 +345,11 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .clawd { transition: none; }
-    .clawd .sprite, .clawd.walking .sprite { animation: none; }
+    /* No movement: each state keeps its pose (band and dumbbell up, flag, happy eyes), no confetti. */
+    .clawd .sprite, .clawd .cw-eyes, .clawd .cw-leg, .clawd .cw-bell, .clawd .cw-flag-cloth,
+    .clawd .cw-arm-r, .clawd .cw-arm-up { animation: none !important; }
+    .clawd.state-train .cw-arm-r { opacity: 0; }
+    .clawd .cw-confetti { display: none !important; }
     .panel, .sidebar { transition: none; }
   }
 </style>
@@ -450,23 +531,117 @@ Notes for you
   const mobile = () => matchMedia("(max-width: 760px)").matches;
   const who = () => S.name || "there";
 
-  // Placeholder pixel Clawd, to be replaced by the team's own artwork.
+  // Pixel Clawd in parts, so each pose from animations/ can move them (see the .cw-* styles).
+  const CONFETTI = [[-5, -6, "#d97757"], [-3, -8, "#6a9bcc"], [-1, -7, "#c46686"], [2, -8, "#d97757"], [4, -6, "#6a9bcc"],
+    [6, -7, "#c46686"], [-6, -3, "#6a9bcc"], [7, -4, "#d97757"], [0, -9, "#6a9bcc"], [5, -9, "#c46686"]]
+    .map(([dx, dy, c]) => `<rect x="6.7" y="1" width=".6" height=".6" fill="${c}" style="--dx:${dx};--dy:${dy}"/>`).join("");
+  const CHECKS = [0, 1, 2, 3].flatMap((x) => [0, 1, 2].map((y) =>
+    `<rect class="${(x + y) % 2 ? "cw-check-b" : "cw-check-a"}" x="${8 + x}" y="${-6 + y}" width="1" height="1"/>`)).join("");
   const CLAWD = `<svg viewBox="0 0 14 10" shape-rendering="crispEdges" aria-hidden="true"><g class="sprite">
-    <rect x="2" y="1" width="10" height="6" fill="#d97757"/>
-    <rect x="0" y="3" width="2" height="2" fill="#d97757"/>
-    <rect x="12" y="3" width="2" height="2" fill="#d97757"/>
-    <rect x="4" y="3" width="1" height="2" fill="#141413"/>
-    <rect x="9" y="3" width="1" height="2" fill="#141413"/>
-    <rect x="3" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="5" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="8" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="10" y="7" width="1" height="2" fill="#d97757"/>
+    <g class="cw-confetti">${CONFETTI}</g>
+    <g class="cw-flag"><rect class="cw-iron" x="12" y="-6" width=".6" height="6"/><g class="cw-flag-cloth">${CHECKS}</g></g>
+    <g class="cw-bell"><rect class="cw-iron" x="10" y="-3" width="1" height="2"/><rect class="cw-iron" x="11" y="-2.3" width="3" height=".6"/><rect class="cw-iron" x="14" y="-3" width="1" height="2"/></g>
+    <rect class="cw-body" x="2" y="1" width="10" height="6"/>
+    <rect class="cw-band" x="2" y="1.4" width="10" height=".7"/>
+    <rect class="cw-arm cw-arm-l" x="0" y="3" width="2" height="2"/>
+    <rect class="cw-arm cw-arm-r" x="12" y="3" width="2" height="2"/>
+    <rect class="cw-arm-up" x="12" y="-1" width="1" height="5"/>
+    <g class="cw-eyes"><rect class="cw-eye" x="4" y="3" width="1" height="2"/><rect class="cw-eye" x="9" y="3" width="1" height="2"/></g>
+    <g class="cw-happy"><rect x="3" y="4" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/>
+      <rect x="8" y="4" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/></g>
+    <rect class="cw-leg a" x="3" y="7" width="1" height="2"/>
+    <rect class="cw-leg b" x="5" y="7" width="1" height="2"/>
+    <rect class="cw-leg a" x="8" y="7" width="1" height="2"/>
+    <rect class="cw-leg b" x="10" y="7" width="1" height="2"/>
   </g></svg>`;
   $("clawdBody").innerHTML = CLAWD;
   $("navClawdIcon").innerHTML = CLAWD;
 
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("sample").then((s) => { sample = s; }).catch(() => {});
+  }
+
+  // ---------- Backend (web/) ----------
+  // Served by the backend: real answers, coach decisions, Lab and profile go through /api.
+  // Opened as a file or an artifact: everything below stays off and the prototype runs on its own.
+  const api = { on: false, pending: new Map(), labSave: null, coachSpoke: false };
+  const forceBackend = new URLSearchParams(location.search).has("backend");
+  let lastTyped = 0;
+  prompt.addEventListener("input", () => { lastTyped = Date.now(); });
+
+  const call = (url, body, method = "POST") =>
+    fetch(url, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined })
+      .then((r) => r.json());
+
+  // The first request also sets the anonymous user cookie, so it finishes before anything else is sent.
+  if (location.protocol.startsWith("http")) {
+    fetch("/api/profile", { headers: { accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { api.on = !!d && (!d.backend?.offline || forceBackend); })
+      .catch(() => {});
+  }
+
+  // POST /api/turn streams server-sent events: token*, answer_done, coach*, done | error.
+  async function askBackend(text, el, whoEl) {
+    el.innerHTML = `<span class="thinking">Thinking...</span>`;
+    const res = await fetch("/api/turn", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text }) });
+    if (!res.ok || !res.body) throw new Error("turn failed");
+    const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buf = "", out = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const chunk = buf.slice(0, i);
+        buf = buf.slice(i + 2);
+        const ev = /^event: (.*)$/m.exec(chunk)?.[1];
+        const data = JSON.parse(/^data: (.*)$/m.exec(chunk)?.[1] || "{}");
+        if (ev === "token") { out += data.text; renderAnswer(el, out); scrollDown(); }
+        else if (ev === "answer_done" && data.offline) whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">Offline backend</span>`);
+        else if (ev === "coach") showCoach(data);
+        else if (ev === "error") throw new Error(data.message);
+      }
+    }
+    return out;
+  }
+
+  // A coach event from the backend. The server already decided it should be shown; this only picks the moment.
+  function showCoach(e, deferred) {
+    if (level === "off") return;
+    if (e.action === "award_card" && !deferred) addChip(e.text || "New card");
+    if (e.quiet) return;
+    if (e.deliver === "at_pause" && Date.now() - lastTyped < 1500) { setTimeout(() => showCoach(e, true), 800); return; }
+    api.coachSpoke = true;
+    clawd.hidden = false;
+    roam(e.point_at);
+    if (e.action === "award_card" || e.mood === "celebrate") pose("celebrate", 2600);
+    else pose("hop", 700);
+    const btns = (e.buttons || []).map((b) =>
+      `<button class="btn ${b.id === "accept" ? "primary" : b.id === "never" ? "ghost" : ""}" data-coach="${esc(e.id)}" data-resp="${b.id}">${esc(b.label)}</button>`).join("");
+    if (btns) api.pending.set(e.id, e);
+    speakSmall(e.text || "", !btns, btns);
+  }
+
+  async function ackCoach(id, resp) {
+    api.pending.delete(id);
+    speak("");
+    if (level === "useful") clawd.hidden = true;
+    const r = await call("/api/coach/ack", { event_id: id, response: resp }).catch(() => null);
+    if (!r?.ok) return;
+    if (r.effect?.open_lab) openLab();
+    if (r.effect?.level) setLevel(r.effect.level, true);
+    if (r.effect?.saved_fact) addChip("Memory updated");
+    for (const ev of r.events || []) showCoach(ev);
+  }
+
+  function addChip(text) {
+    const d = document.createElement("div");
+    d.className = "sys";
+    d.innerHTML = `<span class="chip"><span class="dot"></span>${esc(text)}</span>`;
+    thread.append(d);
+    scrollDown();
   }
 
   // ---------- Clawd placement ----------
@@ -477,33 +652,116 @@ Notes for you
       requestAnimationFrame(() => requestAnimationFrame(() => { clawd.style.transition = ""; }));
     }
     const c = chat.getBoundingClientRect();
-    let left, top;
+    let left, top, face = 0; // face: -1 look left, 1 look right, 0 default
+    const w = S.ftue !== "done" ? 104 : mobile() ? 52 : 64;
+    const h = w * (10 / 14);
+    const spot = S.ftue === "done" && anchor ? anchorSpot(anchor, c, w, h) : null;
     if (S.ftue !== "done") {
-      const w = 104;
       left = (c.width - w) / 2;
       top = Math.max(76, c.height * 0.12);
+    } else if (spot) {
+      ({ left, top, face } = spot);
     } else {
       const comp = $("composer").getBoundingClientRect();
-      const w = mobile() ? 52 : 64;
-      clawd.style.width = w + "px";
       left = comp.right - c.left - w - 24;
-      top = comp.top - c.top - w * (10 / 14) + 4;
+      top = comp.top - c.top - h + 4;
     }
-    if (S.ftue !== "done") clawd.style.width = "";
+    clawd.style.width = S.ftue !== "done" ? "" : w + "px";
+    clawd.classList.toggle("pointing", !!spot);
+    // The bubble opens away from the nearest edges so it never leaves the screen.
+    clawd.classList.toggle("say-start", S.ftue === "done" && left < c.width / 2 - w / 2);
+    clawd.classList.toggle("say-below", S.ftue === "done" && top < 190);
+    const settle = () => clawd.classList.toggle("facing-left", face < 0);
     if (lastLeft !== null && Math.abs(left - lastLeft) > 4) {
       clawd.classList.toggle("facing-left", left < lastLeft);
       clawd.classList.add("walking");
       clearTimeout(placeClawd.t);
-      placeClawd.t = setTimeout(() => clawd.classList.remove("walking", "facing-left"), 1150);
-    }
+      placeClawd.t = setTimeout(() => { clawd.classList.remove("walking"); settle(); }, 1150);
+    } else if (!clawd.classList.contains("walking")) settle();
     lastLeft = left;
     clawd.style.left = left + "px";
     clawd.style.top = top + "px";
   }
   addEventListener("resize", () => placeClawd(true));
 
+  // ---------- Roaming to what Clawd is talking about ----------
+  // Anchors match the coach's point_at values (plus a few the prototype's own tips use).
+  let anchor = null;
+  const shown = (el) => { if (!el) return null; const r = el.getBoundingClientRect(); return r.width && r.height && r.right > 0 && r.left < innerWidth ? el : null; };
+  const last = (sel) => [...thread.querySelectorAll(sel)].pop() || null;
+  const ANCHORS = {
+    upload_button: () => shown($("composer").querySelector('[data-explain="attach"]')),
+    composer: () => null, // Clawd's home spot, next to the send button
+    answer_notes: () => shown(last(".notes")) || shown(last(".msg-claude")),
+    card_shelf: () => shown(last(".sys")),
+    lab_button: () => shown(body.querySelector("[data-mission]:not(:disabled)")) || shown($("navClawd")),
+    explain_dot: () => shown(document.querySelector(".chat-head [data-explain]")),
+  };
+
+  // Where to stand for an anchor: beside it, never on top of it, always inside the chat area.
+  function anchorSpot(name, c, w, h) {
+    const el = ANCHORS[name]?.();
+    if (!el) return null;
+    const t = el.getBoundingClientRect();
+    const clampX = (x) => Math.min(Math.max(8, x), c.width - w - 8);
+    const clampY = (y) => Math.min(Math.max(56, y), c.height - h - 8);
+    const mid = (t.left + t.right) / 2 - c.left;
+    if (t.right <= c.left + 4 || t.left >= c.right - 4) {
+      // Outside the chat (sidebar or panel): walk to that edge and point across.
+      const toLeft = t.right <= c.left + 4;
+      return { left: toLeft ? 12 : c.width - w - 12, top: clampY(t.top - c.top + t.height / 2 - h / 2), face: toLeft ? -1 : 1 };
+    }
+    if ($("composer").contains(el)) {
+      // In the composer: sit on its top edge, right above the button.
+      return { left: clampX(mid - w / 2), top: $("composer").getBoundingClientRect().top - c.top - h + 4, face: 0 };
+    }
+    if (c.right - t.right >= w + 24) {
+      // Room in the margin: stand next to it, looking at it.
+      return { left: clampX(t.right - c.left + 12), top: clampY(t.top - c.top + Math.min(t.height, 120) / 2 - h / 2), face: -1 };
+    }
+    // No margin: stand just under its bottom-right corner and point up (above it is usually the user's own
+    // message). If something is already there, stand on the composer edge below it instead.
+    const home = $("composer").getBoundingClientRect().top - c.top - h + 4;
+    const x = clampX(t.right - c.left - w - 8);
+    const y = clampY(Math.min(t.bottom - c.top + 4, home));
+    const box = { left: c.left + x, right: c.left + x + w, top: c.top + y, bottom: c.top + y + h };
+    const taken = [...thread.children].some((el) => {
+      const r = el.getBoundingClientRect();
+      return el !== el.parentNode.querySelector(":scope > .hello") && r.left < box.right && r.right > box.left && r.top < box.bottom && r.bottom > box.top;
+    });
+    return { left: x, top: taken ? home : y, face: 0 };
+  }
+
+  function roam(name) {
+    anchor = name && ANCHORS[name] ? name : null;
+    const el = anchor && ANCHORS[anchor]();
+    if (el && thread.contains(el)) el.scrollIntoView({ block: "nearest" });
+    placeClawd();
+  }
+  function goHome() { if (anchor) { anchor = null; placeClawd(); } }
+
+  // Only move at a pause: once scrolling stops, follow the anchor or go home if it scrolled away.
+  $("thread").addEventListener("scroll", () => {
+    if (!anchor) return;
+    clearTimeout(roam.t);
+    roam.t = setTimeout(() => { if (!ANCHORS[anchor]?.()) anchor = null; placeClawd(); }, 350);
+  });
+
+  // ---------- Clawd poses (from animations/) ----------
+  // A base pose lasts while its context does (training in the Lab); a timed pose plays once, then Clawd returns to base.
+  const POSES = ["busy", "train", "celebrate", "flag", "hop"];
+  let basePose = null, poseTimer = null;
+  function pose(name, ms) {
+    clearTimeout(poseTimer);
+    clawd.classList.remove(...POSES.map((p) => "state-" + p));
+    const p = name || basePose;
+    if (p) { void clawd.offsetWidth; clawd.classList.add("state-" + p); } // reflow restarts the animation
+    if (name && ms) poseTimer = setTimeout(() => pose(null), ms);
+  }
+  function setBasePose(name) { basePose = name; pose(null); }
+
   function speak(html) {
-    if (!html) { say.hidden = true; say.innerHTML = ""; return; }
+    if (!html) { say.hidden = true; say.innerHTML = ""; goHome(); return; }
     say.innerHTML = html;
     say.hidden = false;
   }
@@ -547,15 +805,18 @@ Notes for you
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
+    if (api.on) call("/api/profile", { name: S.name || null, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null }, "PATCH").catch(() => {});
     renderHello();
     setLevel(chosenLevel);
     setTimeout(() => {
       if (level === "off") return;
       if (S.intent === "learn") {
-        speakSmall(`Here's my Lab. Pick a mission when you have two minutes, or just start chatting.`);
         if (mobile()) panel.classList.add("open");
+        else roam("lab_button");
+        speakSmall(`Here's my Lab. Pick a mission when you have two minutes, or just start chatting.`);
       } else if (level === "guide") {
-        speakSmall(`I'll sit here. Tap anything with an orange dot and I'll explain it in one line.`, true);
+        roam("explain_dot");
+        speakSmall(`Tap anything with an orange dot, like this one, and I'll explain it in one line.`, true);
       }
     }, 1200);
   }
@@ -606,11 +867,18 @@ ${text}
 Reply with only the finished email in Catalan, ready to paste, with no preamble and no closing offer. Then a line containing only "---", then a short section starting with the line "Notes for you", written in English, with at most 3 bullets: anything in the original a client could misread, and a confirmation that numbers and dates are unchanged.`;
   }
 
+  // Light Markdown for real answers (bold, italics, headings, bullets). Escapes first, so it stays safe.
+  const md = (t) => esc(t)
+    .replace(/^#{1,4} +(.+)$/gm, "<strong>$1</strong>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g, "$1<em>$2</em>")
+    .replace(/^[-*] +/gm, "• ");
+
   function renderAnswer(el, text) {
     const i = text.indexOf("\n---");
     const m = i >= 0 ? text.slice(0, i).trim() : text;
-    const notes = i >= 0 ? text.slice(i + 4).trim().replace(/^Notes for you\s*/i, "") : "";
-    el.innerHTML = esc(m) + (notes ? `<div class="notes"><b>Notes for you</b>${esc(notes)}</div>` : "");
+    const notes = i >= 0 ? text.slice(i + 4).trim().replace(/^\**Notes for you\**:?\s*/i, "") : "";
+    el.innerHTML = md(m) + (notes ? `<div class="notes"><b>Notes for you</b>${md(notes)}</div>` : "");
   }
 
   function typeOut(el, text, done) {
@@ -662,6 +930,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (!text || busy || S.ftue !== "done") return;
     busy = true; $("send").disabled = true;
     speak("");
+    pose("busy");
     const isAfter = S.phase === "saved";
     if (S.phase === "start") {
       $("chatTitle").textContent = "Translate client email";
@@ -670,19 +939,31 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     addUser(text);
     prompt.value = "";
     const [el, whoEl] = addClaude(isAfter ? "after" : "before");
-    const out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl);
+    let out;
+    api.coachSpoke = false;
+    if (api.on) {
+      // The backend adds the saved Lab skill to Claude's instructions itself, so the plain request is enough.
+      if (api.labSave) await api.labSave.catch(() => {});
+      try { out = await askBackend(text, el, whoEl); }
+      catch (e) { out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl); }
+    } else {
+      out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl);
+    }
     busy = false; $("send").disabled = false;
+    pose(null);
     if (isAfter) {
       S.after = out; S.phase = "after";
+      if (level !== "off") pose("celebrate", 2600);
       const b = document.createElement("button");
       b.type = "button"; b.className = "compare-btn"; b.textContent = "Compare before and after";
       b.addEventListener("click", () => { b.remove(); showCompare(); });
       thread.append(b);
       S.view = "home"; renderPanel();
-      if (level !== "off") speakSmall(`Same email, same request. This time I knew how you write to clients.`, true);
+      if (level !== "off") { roam("answer_notes"); speakSmall(`Same email, same request. This time I knew how you write to clients.`, true); }
     } else {
       S.before = out; S.phase = "before";
-      setTimeout(nudge, 900);
+      // With the backend the coach decides; the scripted nudge is only the demo's safety net if it stayed silent.
+      if (!api.on || !api.coachSpoke) setTimeout(() => { if (!api.coachSpoke) nudge(); }, 900);
     }
     scrollDown();
   });
@@ -691,7 +972,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     const strip = (t) => { const i = t.indexOf("\n---"); return i >= 0 ? t.slice(0, i).trim() : t; };
     const d = document.createElement("div");
     d.className = "compare";
-    d.innerHTML = `<div class="b"><h3>Before</h3>${esc(S.before)}</div><div class="a"><h3>After the Lab</h3>${esc(strip(S.after))}</div>`;
+    d.innerHTML = `<div class="b"><h3>Before</h3>${md(S.before)}</div><div class="a"><h3>After the Lab</h3>${md(strip(S.after))}</div>`;
     thread.append(d);
     scrollDown();
   }
@@ -704,12 +985,14 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function nudge() {
     if (level === "off" || S.noSuggest || S.phase !== "before") return;
     clawd.hidden = false;
-    placeClawd();
+    roam("lab_button");
+    pose("hop", 700);
     speakSmall(`That's a word-for-word translation. Tell me how you write to clients and I'll get it right every time. Two minutes?`, false,
       `<button class="btn primary" data-act="lab">Teach me in the Lab</button><button class="btn" data-act="later">Not now</button><button class="btn ghost" data-act="never">Don't suggest this again</button>`);
   }
 
-  function setLevel(v) {
+  function setLevel(v, fromServer) {
+    if (api.on && !fromServer && v !== level) call("/api/profile", { level: v }, "PATCH").catch(() => {});
     level = v;
     $("lv-" + v).checked = true;
     main.classList.toggle("guide", v === "guide");
@@ -784,6 +1067,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   function openLab() {
     S.view = "lab"; S.step = 0;
+    setBasePose("train");
     clawd.hidden = false; placeClawd();
     speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
     renderPanel();
@@ -817,13 +1101,19 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     }
     if (a === "stepdown") { S.dismissals = 0; speak(""); setLevel("useful"); return; }
     if (a === "keep") { S.dismissals = 0; speak(""); return; }
-    if (a === "quit") { S.view = "home"; speak(""); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
+    if (a === "quit") { S.view = "home"; speak(""); setBasePose(null); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
     if (a === "back") { S.step--; renderLab(); return; }
     if (a === "next") {
       if (S.step < STEPS.length - 1) { S.step++; renderLab(); }
       else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
+        setBasePose(null); pose("flag", 3400);
         speakSmall(`Saved! I'll remember this every time you write to a client.`, true);
+        if (api.on) {
+          // Saves the skill on the server; the next turn waits for this before sending.
+          api.labSave = call("/api/lab/clients", { answers: S.answers })
+            .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); });
+        }
       }
       return;
     }
@@ -839,6 +1129,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     const f = e.target.closest("[data-ftue]"); if (f) { act(f.dataset.ftue); return; }
     const i = e.target.closest("[data-intent]"); if (i) { S.intent = i.dataset.intent; S.ftue = 2; renderFtue(); return; }
     const l = e.target.closest("[data-level]"); if (l) { finishFtue(l.dataset.level); return; }
+    const c = e.target.closest("[data-coach]"); if (c) { ackCoach(c.dataset.coach, c.dataset.resp); return; }
     const a = e.target.closest("[data-act]"); if (a) act(a.dataset.act);
   });
 
@@ -907,16 +1198,21 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (S.ftue !== "done") return;
     if (level === "off") setLevel("useful");
     if (S.view === "home" && S.phase !== "saved" && S.phase !== "after") openLab();
-    else { clawd.hidden = false; placeClawd(); speakSmall(`Here's my Lab and settings, in the panel on the right.`, true); }
+    else { clawd.hidden = false; roam("lab_button"); speakSmall(`Here's my Lab and settings, in the panel on the right.`, true); }
   });
   $("closeSheet").addEventListener("click", () => panel.classList.remove("open"));
   $("menuBtn").addEventListener("click", () => $("sidebar").classList.add("open"));
   $("closeNav").addEventListener("click", () => $("sidebar").classList.remove("open"));
   $("sidebar").addEventListener("click", (e) => { if (e.target.closest("#navClawd")) $("sidebar").classList.remove("open"); });
-  $("reset").addEventListener("click", start);
+  $("reset").addEventListener("click", () => {
+    if (api.on) call("/api/dev/reset").catch(() => {}).finally(start);
+    else start();
+  });
 
   function start() {
     S = fresh();
+    api.pending.clear(); api.labSave = null; api.coachSpoke = false;
+    setBasePose(null);
     level = "guide";
     $("lv-guide").checked = true;
     main.classList.add("guide");
@@ -928,7 +1224,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     $("chatTitle").textContent = "New chat";
     $("recents").innerHTML = `<p class="side-empty">Your chats will appear here.</p>`;
     $("avatar").textContent = "?"; $("meName").textContent = "Guest";
-    lastLeft = null;
+    lastLeft = null; anchor = null;
     renderPanel();
     renderFtue();
   }

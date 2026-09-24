@@ -1,4 +1,5 @@
 import { CARDS, CHALLENGES, LAB_MISSIONS } from "@/lib/catalog";
+import { config } from "@/lib/config";
 import { json, userIdFrom } from "@/lib/session";
 import { withUser } from "@/lib/store";
 import type { User } from "@/lib/types";
@@ -15,19 +16,19 @@ const view = (u: User) => ({
   labs: LAB_MISSIONS.map(({ steps, ...m }) => ({ ...m, done: u.labs_done.includes(m.id) })),
 });
 
-// GET -> "What Clawd remembers" + progress.
+// GET -> "What Clawd remembers" + progress. `backend.offline` tells the prototype whether answers are canned.
 export async function GET(req: Request) {
   const { id, setCookie } = userIdFrom(req);
-  return json(await withUser(id, async (u) => view(u)), { setCookie });
+  return json({ ...(await withUser(id, async (u) => view(u))), backend: { offline: config.offline } }, { setCookie });
 }
 
-// PATCH { name?, language?, answer_style?, context?, level? }
+// PATCH { name?, language?, answer_style?, context?, level?, mode? }
 export async function PATCH(req: Request) {
   const { id, setCookie } = userIdFrom(req);
   const b = (await req.json().catch(() => null)) ?? {};
   const bad = (k: string, ok: readonly unknown[]) => b[k] !== undefined && b[k] !== null && !ok.includes(b[k]);
   if (bad("language", ["ca", "es", "en"]) || bad("answer_style", ["short", "detailed", "visual"]) ||
-      bad("context", ["personal", "work", "study"]) || bad("level", ["guide", "useful", "off"]) ||
+      bad("context", ["personal", "work", "study"]) || bad("level", ["guide", "useful", "off"]) || bad("mode", ["learn", "do"]) ||
       (b.name !== undefined && b.name !== null && typeof b.name !== "string")) {
     return json({ error: "invalid field" }, { status: 400, setCookie });
   }
@@ -37,6 +38,8 @@ export async function PATCH(req: Request) {
       else if (b[k] !== undefined) (u.profile as Record<string, unknown>)[k] = k === "name" ? String(b[k]).slice(0, 60) : b[k];
     }
     if (b.level) { u.level = b.level; u.dismissals_in_a_row = 0; }
+    if (b.mode === null) delete u.mode;
+    else if (b.mode) u.mode = b.mode; // from onboarding: "I have something to get done" -> do
     return view(u);
   });
   return json(out, { setCookie });
