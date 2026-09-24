@@ -624,7 +624,8 @@ ${t("notesAfter")}`;
       guideAria: "Your guide for Claude",
       looksGood: "Looks good",
       edit: "Edit",
-      guideSaved: "Your guide is saved. ",
+      prefsSaved: "Done! I saved your preferences in your CLAUDE.md, the file Claude reads before every answer.",
+      seeClaudeMd: "See my CLAUDE.md",
       quietUseful: "I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.",
       guidePanelNote: "Claude reads this before every answer. In Claude Code it's your CLAUDE.md (or AGENTS.md).",
       changeIt: "Change it",
@@ -798,7 +799,8 @@ ${t("notesAfter")}`;
       guideAria: "Tu guía para Claude",
       looksGood: "Me parece bien",
       edit: "Editar",
-      guideSaved: "Tu guía está guardada. ",
+      prefsSaved: "¡Listo! He guardado tus preferencias en tu CLAUDE.md, el archivo que Claude lee antes de cada respuesta.",
+      seeClaudeMd: "Ver mi CLAUDE.md",
       quietUseful: "Me quedaré callado y solo apareceré cuando pueda ahorrarte tiempo. Toca Clawd en el menú lateral para cambiarlo.",
       guidePanelNote: "Claude la lee antes de cada respuesta. En Claude Code es tu CLAUDE.md (o AGENTS.md).",
       changeIt: "Cambiarla",
@@ -968,7 +970,8 @@ ${t("notesAfter")}`;
       guideAria: "La teva guia per a Claude",
       looksGood: "Em sembla bé",
       edit: "Edita",
-      guideSaved: "La teva guia està desada. ",
+      prefsSaved: "Fet! He desat les teves preferències al teu CLAUDE.md, el fitxer que Claude llegeix abans de cada resposta.",
+      seeClaudeMd: "Mostra el meu CLAUDE.md",
       quietUseful: "Em quedaré callat i només apareixeré quan et pugui estalviar temps. Toca en Clawd al menú lateral per canviar-ho.",
       guidePanelNote: "Claude la llegeix abans de cada resposta. A Claude Code és el teu CLAUDE.md (o AGENTS.md).",
       changeIt: "Canvia-la",
@@ -1788,20 +1791,24 @@ ${t("notesAfter")}`;
     setLevel(chosenLevel);
     if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
     if (S.firstTask?.typed) prompt.value = S.firstTask.typed;
+    // First thing Clawd says: where their preferences went (CLAUDE.md), then how he'll help from now on.
+    const hello = (text, closable) => speak((S.guide ? `<p>${esc(t("prefsSaved"))}</p>` : "") + `<p>${esc(text)}</p>` +
+      (S.guide ? `<div class="actions"><button class="btn" type="button" data-file="CLAUDE.md">${t("seeClaudeMd")}</button></div>` : "") +
+      (closable ? `<button class="skip" type="button" data-act="hush">${t("gotIt")}</button>` : ""));
     setTimeout(() => {
       if (level === "off") return;
       if (level === "useful") {
         clawd.hidden = false; placeClawd();
-        speakSmall((S.guide ? t("guideSaved") : "") + t("quietUseful"), true);
+        hello(t("quietUseful"), true);
         return;
       }
       if (S.intent === "learn") {
         showPanel(true);
         roam("lab_button");
-        speakSmall(t("labIntro"));
+        hello(t("labIntro"));
       } else if (level === "guide") {
         roam("explain_dot");
-        speakSmall(t("tapDots"), true);
+        hello(t("tapDots"), true);
       }
     }, 1200);
   }
@@ -2218,6 +2225,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   say.addEventListener("click", (e) => {
     const f = e.target.closest("[data-ftue]"); if (f) { ftueAct(f.dataset.ftue); return; }
+    const fl = e.target.closest("[data-file]"); if (fl) { speak(""); openFile(fl.dataset.file); return; }
     const g = e.target.closest("[data-lang]");
     if (g) { setLang(g.dataset.lang); return; }
     const tp = e.target.closest("[data-topic]");
