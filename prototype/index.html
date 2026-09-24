@@ -1,0 +1,703 @@
+<title>Clawd Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Poppins:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --sunk: #f0eee6;
+    --line: #e8e6dc;
+    --muted: #6b6a64;
+    --text: #141413;
+    --accent: #d97757;
+    --accent-ink: #b0502c;
+    --accent-soft: #f6e4dc;
+    --green: #788c5d;
+    --green-ink: #56683f;
+    --green-soft: #e7ecdf;
+    --blue: #6a9bcc;
+    --shadow: 0 1px 2px rgba(20, 20, 19, .06), 0 8px 24px rgba(20, 20, 19, .08);
+    --ui: "Poppins", "Helvetica Neue", Arial, sans-serif;
+    --read: "Lora", Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1c1b19; --surface: #262522; --sunk: #211f1d; --line: #3a3935;
+      --muted: #a3a19a; --text: #f0eee6; --accent-ink: #e8906f; --accent-soft: #3d2a22;
+      --green-ink: #a3b788; --green-soft: #2a3122;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1c1b19; --surface: #262522; --sunk: #211f1d; --line: #3a3935;
+    --muted: #a3a19a; --text: #f0eee6; --accent-ink: #e8906f; --accent-soft: #3d2a22;
+    --green-ink: #a3b788; --green-soft: #2a3122;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--ui); font-size: 14px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+
+  .banner {
+    display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between;
+    padding: 8px 16px; background: var(--text); color: var(--bg); font-size: 12px;
+  }
+  .banner strong { font-weight: 600; letter-spacing: .02em; }
+  .banner button { background: none; border: 1px solid currentColor; border-radius: 6px; padding: 3px 10px; font-size: 12px; color: var(--bg); }
+
+  .main { display: grid; grid-template-columns: 232px minmax(0, 1fr) 340px; min-height: 0; }
+  .main.clawd-off { grid-template-columns: 232px minmax(0, 1fr) 0; }
+
+  /* Sidebar */
+  .sidebar { border-right: 1px solid var(--line); background: var(--sunk); display: flex; flex-direction: column; gap: 4px; padding: 16px 12px; min-height: 0; overflow-y: auto; }
+  .brand { font-weight: 600; font-size: 16px; padding: 4px 8px 12px; }
+  .side-btn { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 8px; }
+  .side-btn:hover { background: var(--line); }
+  .side-btn.primary { color: var(--accent-ink); font-weight: 500; }
+  .side-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 16px 8px 4px; }
+  .recent { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent.active { background: var(--line); }
+  .me { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 12px 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+
+  /* Chat */
+  .chat { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
+  .chat-head { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+  .chat-title { font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--muted); background: var(--surface); }
+  .clawd-toggle { display: none; align-items: center; gap: 6px; }
+  .clawd-off .clawd-toggle { display: inline-flex; }
+  .thread { overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .thread-inner { width: 100%; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .hello { text-align: center; padding: 48px 0 8px; }
+  .hello h1 { font-family: var(--read); font-weight: 400; font-size: 32px; margin: 0 0 8px; text-wrap: balance; }
+  .hello p { color: var(--muted); margin: 0; }
+  .msg-user { align-self: flex-end; max-width: 85%; background: var(--sunk); border: 1px solid var(--line); border-radius: 16px 16px 4px 16px; padding: 12px 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.55; }
+  .msg-claude { font-family: var(--read); font-size: 16px; line-height: 1.65; white-space: pre-wrap; }
+  .msg-claude .who { font-family: var(--ui); font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .tag { font-family: var(--ui); font-size: 11px; font-weight: 500; border-radius: 999px; padding: 2px 8px; }
+  .tag.before { background: var(--sunk); color: var(--muted); border: 1px solid var(--line); }
+  .tag.after { background: var(--green-soft); color: var(--green-ink); }
+  .tag.offline { background: var(--accent-soft); color: var(--accent-ink); }
+  .notes { margin-top: 12px; font-family: var(--ui); font-size: 13px; line-height: 1.55; background: var(--green-soft); border-radius: 10px; padding: 10px 14px; color: var(--text); }
+  .notes b { color: var(--green-ink); font-weight: 600; display: block; margin-bottom: 2px; }
+  .thinking { color: var(--muted); font-style: italic; }
+  .sys { align-self: center; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .compare-btn { align-self: center; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--surface); border-radius: 999px; padding: 8px 16px; font-weight: 500; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .compare > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-family: var(--read); font-size: 14px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .compare h3 { font-family: var(--ui); font-size: 12px; margin: 0 0 8px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .compare .b h3 { color: var(--muted); }
+  .compare .a { border-color: var(--green); }
+  .compare .a h3 { color: var(--green-ink); }
+
+  .composer-wrap { padding: 12px 24px 20px; }
+  .composer { max-width: 720px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 12px 8px 16px; }
+  .composer textarea { width: 100%; border: 0; resize: none; background: none; color: var(--text); font: 14px/1.5 var(--ui); min-height: 64px; max-height: 180px; outline: none; }
+  .composer-row { display: flex; align-items: center; gap: 8px; }
+  .icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 16px; line-height: 1; }
+  .send { margin-left: auto; width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; font-size: 16px; }
+  .send:disabled { opacity: .5; cursor: default; }
+  .hint { max-width: 720px; margin: 8px auto 0; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* Guide-me explainables */
+  .guide [data-explain] { position: relative; }
+  .guide [data-explain]::after {
+    content: ""; position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 2px var(--bg); pointer-events: none;
+  }
+  .pop {
+    position: fixed; z-index: 50; max-width: 260px; background: var(--text); color: var(--bg);
+    border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.45; box-shadow: var(--shadow);
+  }
+  .pop b { display: block; font-weight: 600; margin-bottom: 2px; }
+  .pop button { margin-top: 8px; background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; }
+
+  /* Clawd panel */
+  .panel { border-left: 1px solid var(--line); background: var(--surface); display: grid; grid-template-rows: auto 1fr; min-height: 0; overflow: hidden; }
+  .clawd-off .panel { border-left: 0; }
+  .panel-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .panel-top { display: flex; align-items: center; gap: 8px; }
+  .panel-top h2 { font-size: 14px; font-weight: 600; margin: 0; flex: 1; }
+  .close-sheet { display: none; background: none; border: 0; font-size: 20px; line-height: 1; padding: 4px; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--sunk); border-radius: 10px; padding: 3px; gap: 2px; }
+  .levels input { position: absolute; opacity: 0; pointer-events: none; }
+  .levels label { text-align: center; font-size: 12px; padding: 6px 4px; border-radius: 8px; color: var(--muted); cursor: pointer; line-height: 1.25; }
+  .levels input:checked + label { background: var(--surface); color: var(--text); font-weight: 500; box-shadow: 0 1px 2px rgba(20,20,19,.12); }
+  .levels input:focus-visible + label { outline: 2px solid var(--accent); }
+  .level-note { font-size: 12px; color: var(--muted); margin: 0; }
+  .panel-body { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  .clawd-row { display: flex; gap: 12px; align-items: flex-start; }
+  .clawd { width: 56px; flex: none; }
+  .clawd svg { width: 100%; height: auto; display: block; }
+  .bob { animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .bubble { position: relative; background: var(--accent-soft); border-radius: 4px 14px 14px 14px; padding: 10px 12px; font-size: 13px; line-height: 1.5; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .btn { border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 500; border: 1px solid var(--line); background: var(--surface); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.ghost { border-color: transparent; background: none; color: var(--muted); }
+
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
+  .missions { display: flex; flex-direction: column; gap: 8px; }
+  .mission { text-align: left; width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }
+  .mission:hover:not(:disabled) { border-color: var(--accent); }
+  .mission:disabled { cursor: default; opacity: .6; }
+  .mission .t { font-weight: 500; font-size: 13px; }
+  .mission .d { grid-column: 1; font-size: 12px; color: var(--muted); }
+  .mission .m { grid-row: 1 / 3; grid-column: 2; align-self: center; font-size: 11px; color: var(--accent-ink); font-weight: 500; }
+  .mission.done .m { color: var(--green-ink); }
+
+  /* Lab */
+  .lab-head { display: flex; flex-direction: column; gap: 6px; background: var(--sunk); border-radius: 12px; padding: 12px; }
+  .lab-head .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-ink); font-weight: 600; }
+  .lab-head h3 { margin: 0; font-size: 15px; font-weight: 600; text-wrap: balance; }
+  .lab-head p { margin: 0; font-size: 12px; color: var(--muted); }
+  .progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .progress span { height: 5px; border-radius: 3px; background: var(--line); }
+  .progress span.on { background: var(--accent); }
+  .q { font-size: 14px; font-weight: 500; margin: 0 0 4px; }
+  .q-help { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .opt { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; }
+  .opt .box { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; }
+  .opt.multi .box { border-radius: 4px; }
+  .opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .opt[aria-pressed="true"] .box { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px var(--accent-soft); }
+  .lab-nav { display: flex; justify-content: space-between; gap: 8px; }
+  .win { text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .win .clawd { width: 72px; }
+  .win h3 { margin: 0; font-size: 16px; }
+  .saved { width: 100%; text-align: left; border: 1px solid var(--green); border-radius: 12px; padding: 12px; background: var(--green-soft); font-size: 13px; line-height: 1.5; }
+  .saved ul { margin: 6px 0 0; padding-left: 18px; }
+  .saved .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+  .fab { display: none; }
+
+  /* Tablet: drop the chat list */
+  @media (max-width: 1080px) {
+    .main { grid-template-columns: minmax(0, 1fr) 320px; }
+    .main.clawd-off { grid-template-columns: minmax(0, 1fr) 0; }
+    .sidebar { display: none; }
+  }
+  /* Phone: Clawd becomes a bottom sheet */
+  @media (max-width: 760px) {
+    .main, .main.clawd-off { grid-template-columns: minmax(0, 1fr); }
+    .thread, .chat-head { padding-inline: 16px; }
+    .composer-wrap { padding: 8px 16px 16px; }
+    .hello { padding-top: 24px; }
+    .hello h1 { font-size: 26px; }
+    .compare { grid-template-columns: 1fr; }
+    .panel {
+      position: fixed; left: 0; right: 0; bottom: 0; height: 72%; z-index: 40;
+      border: 1px solid var(--line); border-radius: 18px 18px 0 0; box-shadow: var(--shadow);
+      transform: translateY(105%); transition: transform .25s ease;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .panel.open { transform: translateY(0); }
+    .close-sheet { display: block; }
+    .fab {
+      display: flex; position: fixed; right: 16px; bottom: calc(176px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+      width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface);
+      box-shadow: var(--shadow); align-items: center; justify-content: center; padding: 8px;
+    }
+    .fab svg { width: 36px; }
+    .fab .badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+    .clawd-off .fab { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bob { animation: none; }
+    .panel { transition: none; }
+  }
+</style>
+
+<div class="app">
+  <div class="banner" role="note">
+    <span><strong>Concept prototype</strong> for the Claude Impact Lab hackathon, Barcelona 2026. Not an Anthropic product.</span>
+    <button type="button" id="reset">Reset demo</button>
+  </div>
+
+  <div class="main guide" id="main">
+    <nav class="sidebar" aria-label="Chats">
+      <div class="brand">Claude</div>
+      <button class="side-btn primary" type="button">+ New chat</button>
+      <button class="side-btn" type="button" data-explain="projects">Projects</button>
+      <div class="side-label">Recent</div>
+      <button class="side-btn recent active" type="button">Client email: Puig invoice</button>
+      <button class="side-btn recent" type="button">Translate: Ferrer order</button>
+      <button class="side-btn recent" type="button">Translate: Soler reminder</button>
+      <button class="side-btn recent" type="button">October rota</button>
+      <button class="side-btn recent" type="button">Translate: supplier reply</button>
+      <div class="me"><span class="avatar">CL</span> Carmen López</div>
+    </nav>
+
+    <section class="chat" aria-label="Conversation">
+      <header class="chat-head">
+        <span class="chat-title">Client email: Puig invoice</span>
+        <span class="pill" data-explain="model">Claude Sonnet</span>
+        <button class="pill clawd-toggle" type="button" id="clawdBack">Clawd is off</button>
+      </header>
+
+      <div class="thread" id="thread">
+        <div class="thread-inner" id="threadInner">
+          <div class="hello" id="hello">
+            <h1>Good afternoon, Carmen</h1>
+            <p>Your draft reply to Sr. Puig is ready to send below.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <form class="composer" id="composer">
+          <label for="prompt" class="visually-hidden" hidden>Message Claude</label>
+          <textarea id="prompt" rows="4"></textarea>
+          <div class="composer-row">
+            <button class="icon-btn" type="button" data-explain="attach" aria-label="Add a file">+</button>
+            <button class="icon-btn" type="button" data-explain="connectors" aria-label="Connectors">&#8651;</button>
+            <button class="send" id="send" type="submit" aria-label="Send">&#8593;</button>
+          </div>
+        </form>
+        <p class="hint" id="hint">Carmen's one-line request, exactly as she would type it.</p>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="Clawd">
+      <div class="panel-head">
+        <div class="panel-top">
+          <h2>Clawd</h2>
+          <button class="close-sheet" type="button" id="closeSheet" aria-label="Close">&times;</button>
+        </div>
+        <div class="levels" role="radiogroup" aria-label="How much help">
+          <input type="radio" name="level" id="lv-guide" value="guide" checked><label for="lv-guide">Guide me</label>
+          <input type="radio" name="level" id="lv-useful" value="useful"><label for="lv-useful">Only when useful</label>
+          <input type="radio" name="level" id="lv-off" value="off"><label for="lv-off">Off</label>
+        </div>
+        <p class="level-note" id="levelNote"></p>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </aside>
+  </div>
+
+  <button class="fab" type="button" id="fab" aria-label="Open Clawd"></button>
+</div>
+
+<div class="pop" id="pop" hidden role="tooltip"></div>
+
+<script>
+(() => {
+  // ---------- Content ----------
+  const DRAFT = `Estimado Sr. Puig:
+
+Gracias por avisarnos. Hemos revisado la factura n.º 2026-0418 del 12 de septiembre. El importe correcto es 1.180,00 €, como en el presupuesto aceptado; los 60,00 € de diferencia eran gastos de envío que no debimos incluir. Le enviaremos la factura corregida el viernes.
+
+Disculpe las molestias.
+
+Un saludo,
+Carmen López
+Administración`;
+  const REQUEST = "Translate this to Catalan:\n\n" + DRAFT;
+
+  const OFFLINE_BEFORE = `Aquí tens la traducció al català:
+
+Benvolgut Sr. Puig:
+
+Gràcies per avisar-nos. Hem revisat la factura núm. 2026-0418 del 12 de setembre. L'import correcte és 1.180,00 €, com en el pressupost acceptat; els 60,00 € de diferència eren despeses d'enviament que no havíem d'incloure. Li enviarem la factura corregida divendres.
+
+Disculpi les molèsties.
+
+Salutacions,
+Carmen López
+Administració
+
+Si vols, també puc fer-lo més formal o adaptar-lo a un altre to. Vols que hi afegeixi alguna cosa més?`;
+
+  const OFFLINE_AFTER = `Benvolgut Sr. Puig,
+
+Gràcies per fer-nos-ho saber. Hem revisat la factura núm. 2026-0418, del 12 de setembre. L'import correcte és d'1.180,00 €, tal com figura al pressupost acceptat. Els 60,00 € de diferència corresponien a despeses d'enviament que no s'havien d'incloure. Li enviarem la factura corregida divendres.
+
+Li demanem disculpes per les molèsties.
+
+Atentament,
+Carmen López
+Administració
+---
+Notes for you
+• "divendres" (Friday): Sr. Puig may not know which Friday. Consider "divendres 26 de setembre".
+• The invoice number, amounts and dates are unchanged.`;
+
+  const EXPLAIN = {
+    projects:   ["Projects", "A folder where Claude keeps the files and instructions for one piece of work.", null],
+    model:      ["Claude Sonnet", "Which version of Claude answers you. You don't need to change this.", null],
+    attach:     ["Add a file", "Add a photo or a PDF, like a letter or an invoice, for Claude to read.", null],
+    connectors: ["Connectors", "Let Claude look things up in apps you already use, like your email or calendar.", "connect"],
+    memory:     ["Memory updated", "Claude saved something about you, so you don't have to repeat it every time.", "clients"],
+    skill:      ["Skill saved", "A recipe Claude follows every time you ask for this task.", "clients"]
+  };
+
+  const MISSIONS = [
+    { id: "clients", t: "Teach Claude how you write to clients", d: "Saves your tone and rules. 2 min", ready: true },
+    { id: "you", t: "Tell Claude who you are", d: "Your role and languages. 1 min", ready: false },
+    { id: "connect", t: "Connect a tool you use", d: "Claude reads your calendar. 3 min", ready: false }
+  ];
+
+  const STEPS = [
+    { key: "role", q: "Who are you when you write to clients?", help: "Pick the closest one.", multi: false,
+      options: ["Office admin", "Accounts", "Sales", "Reception"] },
+    { key: "tone", q: "How should your emails sound?", help: "Claude will write every client email this way.", multi: false,
+      options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"] },
+    { key: "rules", q: "What must never go wrong?", help: "Pick as many as you like.", multi: true,
+      options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] }
+  ];
+
+  // ---------- State ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("clawd-" + k); return v == null ? d : v; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("clawd-" + k, v); } catch {} }
+  };
+  const fresh = () => ({ phase: "start", view: "home", step: 0, answers: { role: null, tone: null, rules: [] }, dismissals: 0, before: "", after: "", badge: false });
+  let S = fresh();
+  let level = store.get("level", "guide");
+  let sample = null;
+  let busy = false;
+
+  const $ = (id) => document.getElementById(id);
+  const main = $("main"), thread = $("threadInner"), prompt = $("prompt"), panel = $("panel"), body = $("panelBody"), pop = $("pop");
+
+  const CLAWD = `<svg viewBox="0 0 14 10" shape-rendering="crispEdges" aria-hidden="true">
+    <rect x="2" y="1" width="10" height="6" fill="#d97757"/>
+    <rect x="0" y="3" width="2" height="2" fill="#d97757"/>
+    <rect x="12" y="3" width="2" height="2" fill="#d97757"/>
+    <rect x="4" y="3" width="1" height="2" fill="#141413"/>
+    <rect x="9" y="3" width="1" height="2" fill="#141413"/>
+    <rect x="3" y="7" width="1" height="2" fill="#d97757"/>
+    <rect x="5" y="7" width="1" height="2" fill="#d97757"/>
+    <rect x="8" y="7" width="1" height="2" fill="#d97757"/>
+    <rect x="10" y="7" width="1" height="2" fill="#d97757"/>
+  </svg>`;
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---------- Claude calls ----------
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then((s) => { sample = s; }).catch(() => {});
+  }
+
+  function afterPrompt(text) {
+    const a = S.answers;
+    const rules = a.rules.length ? a.rules.map((r) => "- " + r).join("\n") : "- (none given)";
+    return `You are helping Carmen López, who works in an office and writes to clients. She saved these standing preferences:
+- Role: ${a.role || "Office admin"}
+- Tone for client emails: ${a.tone || "Warm and formal (vostè)"}
+Rules she set:
+${rules}
+
+Her request:
+${text}
+
+Reply with only the finished email in Catalan, ready to paste, with no preamble and no closing offer. Then a line containing only "---", then a short section starting with the line "Notes for you", written in English, with at most 3 bullets: anything in her original a client could misread, and a confirmation that numbers and dates are unchanged.`;
+  }
+
+  function renderAnswer(el, text) {
+    const i = text.indexOf("\n---");
+    const main = i >= 0 ? text.slice(0, i).trim() : text;
+    const notes = i >= 0 ? text.slice(i + 4).trim().replace(/^Notes for you\s*/i, "") : "";
+    el.innerHTML = esc(main) + (notes ? `<div class="notes"><b>Notes for you</b>${esc(notes)}</div>` : "");
+  }
+
+  function typeOut(el, text, done) {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { renderAnswer(el, text); done(); return; }
+    let n = 0;
+    const t = setInterval(() => {
+      n = Math.min(text.length, n + 18);
+      renderAnswer(el, text.slice(0, n));
+      scrollDown();
+      if (n >= text.length) { clearInterval(t); done(); }
+    }, 30);
+  }
+
+  async function ask(input, fallback, el, who) {
+    if (!sample) {
+      who.insertAdjacentHTML("beforeend", `<span class="tag offline">Example answer, offline</span>`);
+      return new Promise((res) => typeOut(el, fallback, () => res(fallback)));
+    }
+    el.innerHTML = `<span class="thinking">Thinking...</span>`;
+    try {
+      const { text } = await sample(input, { modelTier: "quick", onText: ({ text }) => { renderAnswer(el, text); scrollDown(); } });
+      return text;
+    } catch (e) {
+      who.insertAdjacentHTML("beforeend", `<span class="tag offline">Example answer, offline</span>`);
+      return new Promise((res) => typeOut(el, fallback, () => res(fallback)));
+    }
+  }
+
+  // ---------- Chat ----------
+  function scrollDown() { const t = $("thread"); t.scrollTop = t.scrollHeight; }
+
+  function addUser(text) {
+    $("hello")?.remove();
+    const d = document.createElement("div");
+    d.className = "msg-user";
+    d.textContent = text;
+    thread.append(d);
+  }
+
+  function addClaude(kind) {
+    const w = document.createElement("div");
+    w.className = "msg-claude";
+    w.innerHTML = `<div class="who">Claude <span class="tag ${kind}">${kind === "after" ? "After the Lab" : "Before"}</span></div><div class="ans"></div>`;
+    thread.append(w);
+    scrollDown();
+    return [w.querySelector(".ans"), w.querySelector(".who")];
+  }
+
+  $("composer").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const text = prompt.value.trim();
+    if (!text || busy) return;
+    busy = true; $("send").disabled = true;
+    const isAfter = S.phase === "saved";
+    addUser(text);
+    prompt.value = "";
+    const [el, who] = addClaude(isAfter ? "after" : "before");
+    const out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, who);
+    busy = false; $("send").disabled = false;
+    if (isAfter) {
+      S.after = out; S.phase = "after";
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "compare-btn"; b.textContent = "Compare before and after";
+      b.addEventListener("click", () => { b.remove(); showCompare(); });
+      thread.append(b);
+      $("hint").textContent = "Same request, same email. Only the context changed.";
+      S.view = "home"; renderPanel();
+    } else {
+      S.before = out; S.phase = "before";
+      $("hint").textContent = "";
+      setTimeout(nudge, 700);
+    }
+    scrollDown();
+  });
+
+  function showCompare() {
+    const strip = (t) => { const i = t.indexOf("\n---"); return i >= 0 ? t.slice(0, i).trim() : t; };
+    const d = document.createElement("div");
+    d.className = "compare";
+    d.innerHTML = `<div class="b"><h3>Before</h3>${esc(S.before)}</div><div class="a"><h3>After the Lab</h3>${esc(strip(S.after))}</div>`;
+    thread.append(d);
+    scrollDown();
+  }
+
+  // ---------- Clawd ----------
+  function nudge() {
+    if (level === "off" || S.phase !== "before") return;
+    S.view = "nudge";
+    S.badge = !panel.classList.contains("open");
+    renderPanel();
+  }
+
+  function setLevel(v) {
+    level = v; store.set("level", v);
+    document.querySelector(`#lv-${v}`).checked = true;
+    main.classList.toggle("guide", v === "guide");
+    main.classList.toggle("clawd-off", v === "off");
+    if (v === "off") { hidePop(); panel.classList.remove("open"); }
+    if (v !== "off" && S.phase === "before" && S.view === "home") S.view = "nudge";
+    renderPanel();
+  }
+
+  const NOTES = {
+    guide: "Tap anything with an orange dot for a one-line explanation.",
+    useful: "Clawd stays quiet and only shows up when it can save you time.",
+    off: "No tips, no suggestions. Turn Clawd back on here any time."
+  };
+
+  function renderPanel() {
+    $("levelNote").textContent = NOTES[level];
+    $("fab").innerHTML = CLAWD + (S.badge ? `<span class="badge"></span>` : "");
+    if (level === "off") { body.innerHTML = ""; return; }
+    const v = S.view;
+    if (v === "lab") return renderLab();
+    if (v === "done") return renderDone();
+    if (v === "nudge") {
+      body.innerHTML = clawdSays(`You've translated client emails four times this week. Want to teach me how you like them? It takes 2 minutes, and I'll remember next time.`,
+        `<button class="btn primary" data-act="lab">Open the Lab</button><button class="btn" data-act="later">Not now</button><button class="btn ghost" data-act="never">Don't suggest this again</button>`);
+      return;
+    }
+    // home
+    let html = "";
+    if (S.dismissals >= 2 && level === "guide") {
+      html += clawdSays(`Looks like you'd rather get on with your work. Want me to show up only when it's useful?`,
+        `<button class="btn primary" data-act="stepdown">Only when useful</button><button class="btn ghost" data-act="keep">Keep guiding me</button>`);
+    } else if (S.phase === "after") {
+      html += clawdSays(`Same email, same request. This time I knew how you write to clients. Tap "Compare before and after" to see the difference.`);
+    } else if (level === "guide") {
+      html += clawdSays(`Hi Carmen! I'm Clawd. Tap anything with an orange dot and I'll explain it in one line. When you have a few minutes, try a mission in the Lab.`);
+    } else {
+      html += clawdSays(`I'll stay quiet until I can save you time.`);
+    }
+    if (level === "guide" || S.phase === "saved" || S.phase === "after") {
+      html += `<div><p class="section-label">Lab missions</p><div class="missions">` + MISSIONS.map((m) => {
+        const done = m.id === "clients" && (S.phase === "saved" || S.phase === "after");
+        return `<button class="mission ${done ? "done" : ""}" data-mission="${m.id}" ${m.ready && !done ? "" : "disabled"}>
+          <span class="t">${m.t}</span><span class="d">${m.d}</span><span class="m">${done ? "Done" : m.ready ? "Start" : "Soon"}</span></button>`;
+      }).join("") + `</div></div>`;
+    }
+    body.innerHTML = html;
+  }
+
+  function clawdSays(text, actions = "") {
+    return `<div class="clawd-row"><div class="clawd bob">${CLAWD}</div><div class="bubble">${esc(text)}${actions ? `<div class="actions">${actions}</div>` : ""}</div></div>`;
+  }
+
+  function renderLab() {
+    const st = STEPS[S.step];
+    const val = S.answers[st.key];
+    const picked = (o) => st.multi ? val.includes(o) : val === o;
+    const canNext = st.multi ? val.length > 0 : !!val;
+    body.innerHTML = `
+      <div class="lab-head">
+        <span class="k">Lab · separate conversation</span>
+        <h3>Teach Claude how you write to clients</h3>
+        <p>Practice here never touches your real chat. You keep what you save.</p>
+        <div class="progress">${STEPS.map((_, i) => `<span class="${i <= S.step ? "on" : ""}"></span>`).join("")}</div>
+      </div>
+      <div>
+        <p class="q">${esc(st.q)}</p>
+        <p class="q-help">${esc(st.help)}</p>
+        <div class="options">${st.options.map((o) =>
+          `<button type="button" class="opt ${st.multi ? "multi" : ""}" data-opt="${esc(o)}" aria-pressed="${picked(o)}"><span class="box"></span>${esc(o)}</button>`).join("")}</div>
+      </div>
+      <div class="lab-nav">
+        <button class="btn ghost" data-act="${S.step === 0 ? "quit" : "back"}">${S.step === 0 ? "Leave the Lab" : "Back"}</button>
+        <button class="btn primary" data-act="next" ${canNext ? "" : "disabled"}>${S.step === STEPS.length - 1 ? "Save" : "Next"}</button>
+      </div>`;
+  }
+
+  function renderDone() {
+    const a = S.answers;
+    body.innerHTML = `
+      <div class="win">
+        <div class="clawd bob">${CLAWD}</div>
+        <h3>Mission complete</h3>
+        <div class="saved">
+          <strong>From now on, Claude will:</strong>
+          <ul>
+            <li>know you write to clients as ${esc(a.role.toLowerCase())}</li>
+            <li>use this tone: ${esc(a.tone.toLowerCase())}</li>
+            ${a.rules.map((r) => `<li>${esc(r.charAt(0).toLowerCase() + r.slice(1))}</li>`).join("")}
+          </ul>
+          <div class="row">
+            <span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span>
+            <span class="chip" data-explain="skill"><span class="dot"></span>Skill saved: client email to Catalan</span>
+          </div>
+        </div>
+        <button class="btn primary" data-act="try">Try it on your email</button>
+      </div>`;
+  }
+
+  body.addEventListener("click", (e) => {
+    const opt = e.target.closest("[data-opt]");
+    if (opt) {
+      const st = STEPS[S.step], o = opt.dataset.opt;
+      if (st.multi) {
+        const arr = S.answers[st.key];
+        S.answers[st.key] = arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o];
+      } else S.answers[st.key] = o;
+      renderLab();
+      return;
+    }
+    const m = e.target.closest("[data-mission]");
+    if (m && !m.disabled) { openLab(); return; }
+    const act = e.target.closest("[data-act]")?.dataset.act;
+    if (!act) return;
+    if (act === "lab") openLab();
+    if (act === "later") { S.dismissals++; S.view = "home"; renderPanel(); }
+    if (act === "never") { S.dismissals++; S.view = "home"; renderPanel(); }
+    if (act === "stepdown") { S.dismissals = 0; setLevel("useful"); }
+    if (act === "keep") { S.dismissals = 0; renderPanel(); }
+    if (act === "quit") { S.view = "home"; renderPanel(); }
+    if (act === "back") { S.step--; renderLab(); }
+    if (act === "next") {
+      if (S.step < STEPS.length - 1) { S.step++; renderLab(); }
+      else { S.phase = "saved"; S.view = "done"; renderPanel(); addSaved(); }
+    }
+    if (act === "try") {
+      panel.classList.remove("open");
+      S.view = "home"; renderPanel();
+      prompt.value = REQUEST;
+      $("composer").requestSubmit();
+    }
+  });
+
+  function openLab() {
+    S.view = "lab"; S.step = 0; S.badge = false;
+    renderPanel();
+  }
+
+  function addSaved() {
+    const d = document.createElement("div");
+    d.className = "sys";
+    d.innerHTML = `<span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span><span class="chip" data-explain="skill"><span class="dot"></span>Skill saved</span>`;
+    thread.append(d);
+    scrollDown();
+  }
+
+  // ---------- Explain popovers ----------
+  let popFor = null;
+  function showPop(el) {
+    const [title, text, mission] = EXPLAIN[el.dataset.explain] || [];
+    if (!title) return;
+    popFor = el;
+    const ready = mission && MISSIONS.find((m) => m.id === mission)?.ready;
+    pop.innerHTML = `<b>${esc(title)}</b>${esc(text)}${ready && S.phase !== "saved" && S.phase !== "after" ? `<br><button type="button" data-lab>Try it in the Lab</button>` : ""}`;
+    pop.hidden = false;
+    const r = el.getBoundingClientRect(), p = pop.getBoundingClientRect();
+    let left = Math.min(Math.max(8, r.left), innerWidth - p.width - 8);
+    let top = r.bottom + 8;
+    if (top + p.height > innerHeight - 8) top = r.top - p.height - 8;
+    pop.style.left = left + "px"; pop.style.top = top + "px";
+  }
+  function hidePop() { pop.hidden = true; popFor = null; }
+
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-lab]")) { hidePop(); openLab(); panel.classList.add("open"); return; }
+    if (e.target.closest("#pop")) return;
+    const el = e.target.closest("[data-explain]");
+    if (el && level === "guide") { e.preventDefault(); popFor === el ? hidePop() : showPop(el); return; }
+    hidePop();
+  });
+  document.addEventListener("mouseover", (e) => {
+    if (level !== "guide" || !matchMedia("(hover: hover)").matches) return;
+    const el = e.target.closest("[data-explain]");
+    if (el && el !== popFor) showPop(el);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") hidePop(); });
+  $("thread").addEventListener("scroll", hidePop);
+
+  // ---------- Wiring ----------
+  document.querySelectorAll('input[name="level"]').forEach((r) => r.addEventListener("change", () => setLevel(r.value)));
+  $("clawdBack").addEventListener("click", () => setLevel("useful"));
+  $("fab").addEventListener("click", () => { panel.classList.add("open"); S.badge = false; renderPanel(); });
+  $("closeSheet").addEventListener("click", () => panel.classList.remove("open"));
+  $("reset").addEventListener("click", () => {
+    S = fresh();
+    thread.innerHTML = `<div class="hello" id="hello"><h1>Good afternoon, Carmen</h1><p>Your draft reply to Sr. Puig is ready to send below.</p></div>`;
+    prompt.value = REQUEST;
+    $("hint").textContent = "Carmen's one-line request, exactly as she would type it.";
+    setLevel("guide");
+  });
+
+  prompt.value = REQUEST;
+  setLevel(["guide", "useful", "off"].includes(level) ? level : "guide");
+})();
+</script>
