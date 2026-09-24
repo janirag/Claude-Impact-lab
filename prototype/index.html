@@ -740,7 +740,7 @@ Notes for you
     if (api.on && (level !== "guide" || matchMedia("(hover: hover)").matches)) openPicker();
   });
 
-  // POST /api/turn streams server-sent events: token*, answer_done, coach*, done | error.
+  // POST /api/turn streams server-sent events: (token | searching)*, answer_done, coach*, done | error.
   async function askBackend(text, el, whoEl, file) {
     el.innerHTML = `<span class="thinking">${file ? "Reading your " + (file.media_type === "application/pdf" ? "PDF" : "photo") + "..." : "Thinking..."}</span>`;
     const attachment = file ? { media_type: file.media_type, data: file.data } : undefined;
@@ -749,7 +749,12 @@ Notes for you
     const res = await fetch("/api/turn", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text, attachment, situation }) });
     if (!res.ok || !res.body) throw new Error("turn failed");
     const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-    let buf = "", out = "";
+    let buf = "", out = "", searching = false;
+    // A web search can take a while, so say so below whatever is already written. The next token clears it.
+    const paint = () => {
+      if (out) renderAnswer(el, out); else el.innerHTML = "";
+      if (searching) el.insertAdjacentHTML("beforeend", `<p class="thinking">Checking the latest information online...</p>`);
+    };
     for (;;) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -760,7 +765,8 @@ Notes for you
         buf = buf.slice(i + 2);
         const ev = /^event: (.*)$/m.exec(chunk)?.[1];
         const data = JSON.parse(/^data: (.*)$/m.exec(chunk)?.[1] || "{}");
-        if (ev === "token") { out += data.text; renderAnswer(el, out); scrollDown(); }
+        if (ev === "token") { out += data.text; searching = false; paint(); scrollDown(); }
+        else if (ev === "searching") { searching = true; paint(); scrollDown(); }
         else if (ev === "answer_done" && data.offline) whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">Offline backend</span>`);
         else if (ev === "coach") showCoach(data);
         else if (ev === "error") throw new Error(data.message);

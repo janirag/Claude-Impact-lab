@@ -24,7 +24,7 @@ function userContent(text: string, attachment?: Attachment): Anthropic.Beta.Beta
 
 export type TaskResult = { text: string; refused: boolean };
 
-// Streams the answer to the user's real task. Calls onText with each delta.
+// Streams the answer to the user's real task. Calls onText with each delta, and onSearch when a web search starts.
 export async function runTask(
   user: User,
   text: string,
@@ -32,6 +32,7 @@ export async function runTask(
   onText: (delta: string) => void,
   signal?: AbortSignal,
   situation?: string,
+  onSearch?: () => void,
 ): Promise<TaskResult> {
   const [stable, ...rest] = taskSystem(user, situation);
   const system: Anthropic.Beta.BetaTextBlockParam[] = [{ type: "text", text: stable, cache_control: { type: "ephemeral" } }];
@@ -53,13 +54,18 @@ export async function runTask(
         output_config: { effort: "medium" },
         system,
         messages,
-        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
+        // The basic search tool: web_search_20260209 filters results in code execution, which took
+        // ~100 s before the first word on the rental contract flow (vs ~30 s with this one).
+        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 3 }],
       },
       { signal },
     );
     stream.on("text", (delta) => {
       out += delta;
       onText(delta);
+    });
+    stream.on("streamEvent", (e) => {
+      if (e.type === "content_block_start" && e.content_block.type === "server_tool_use" && e.content_block.name === "web_search") onSearch?.();
     });
     const message = await stream.finalMessage();
     if (message.stop_reason === "refusal") return { text: out, refused: true };

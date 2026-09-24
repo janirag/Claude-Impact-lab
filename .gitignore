@@ -30,3 +30,6 @@ Temporary Items
 # Local browser-test logs
 .playwright-mcp/
 deploy/.env
+
+# Claude Code local state (agent worktrees)
+.claude/
