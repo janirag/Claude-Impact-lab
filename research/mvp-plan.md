@@ -140,6 +140,56 @@ The coach **suggests** and the orchestrator **decides** what reaches the screen.
 - **Draft card set (8):** Give context · Show a photo · Ask for sources · Check before trusting · Remember me · Set my style · Translate with the right tone · Don't share secrets.
 - **Profile export:** a "my AI profile" text that works in any assistant, including ChatGPT and Gemini.
 
+### Memory: how it remembers preferences
+
+**1. Capturing: three ways, always with consent**
+
+| How | Example | What happens |
+|---|---|---|
+| **Asked at the start** (profile setup) | "Should I answer in Catalan or Spanish? Short or detailed?" | Saved right away, because the user chose it |
+| **Mentioned in chat** | "I'm vegetarian", "it's for my mother" | The coach calls `propose_memory` and the mascot asks "Should I remember that?" Saved only on **yes**. |
+| **Spotted from behaviour** | The user keeps asking for shorter answers | The coach proposes it: "You like it short, shall I always do that?" |
+
+It never saves anything silently. Each "should I remember?" moment is also the lesson that teaches the **Remember me** card.
+
+**2. Storage** (in the user record, keyed by the anonymous cookie ID; example values are made up)
+
+```
+profile: {
+  name: "Carmen",
+  language: "es",
+  answer_style: "short",            // short | detailed | visual
+  context: "personal",              // personal | work | study
+  facts: [
+    { text: "Vegetarian", category: "food", learned_from: "recipe chat", date: "2026-09-24" },
+    { text: "Helps her mother with paperwork", category: "family", ... }
+  ]
+}
+```
+
+- **Fixed fields** for what every answer depends on, and a **short list of facts** for the rest (around 20 at most; the coach proposes merging or replacing old ones).
+- **Sensitive details are stored only as general facts.** It can keep "manages her mother's paperwork", but never ID numbers, diagnoses or amounts, even if the user says yes.
+
+**3. Using it**
+
+1. On every turn, the orchestrator loads the profile.
+2. It adds a short **"About the user"** section to the task agent's instructions, for example: *Answer in Spanish, keep it short, she's vegetarian, often helps her mother with official letters.*
+3. The coach gets the profile too, so it doesn't repeat tips already learned and can use the user's name.
+
+The profile is small, so it's sent in full every time. No memory search is needed for the MVP.
+
+**4. Showing that it remembers**
+
+- **The mascot sometimes mentions it:** "I kept it short, the way you like it 👌" or "Here's a vegetarian version." Just often enough for the user to connect the profile with better answers.
+- **A "What Espurna remembers" screen:** every item can be seen, edited or deleted, with where it came from ("learned when we did the recipe").
+- **Return visits:** "Hi Carmen! How did checking that bill go?" This uses the profile together with the open mission.
+
+**Limitation:** with no account, the memory lives in one browser. Clearing it or switching phones loses the profile.
+
+- **MVP:** cookie plus **profile export**, the "my AI profile" text to paste into ChatGPT, Gemini or Claude. It also teaches the most transferable lesson: *any* assistant can remember you if you set it up.
+- **Later:** a code or email link to recover the profile, or connecting a real Claude account.
+- **Demo:** the "one week later" button reloads with the same profile.
+
 ### Proposed stack
 
 | Area | Proposal | Status |
