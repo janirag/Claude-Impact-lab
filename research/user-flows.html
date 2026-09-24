@@ -1,0 +1,333 @@
+<title>Clawd Flow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Poppins:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #faf9f5; --surface: #ffffff; --sunk: #f0eee6; --line: #e8e6dc;
+    --muted: #6b6a64; --text: #141413; --accent: #d97757; --accent-ink: #b0502c; --accent-soft: #f6e4dc;
+    --green-ink: #56683f; --green-soft: #e7ecdf; --blue-ink: #3f6a96; --blue-soft: #e2ecf6;
+    --ui: "Poppins", "Helvetica Neue", Arial, sans-serif; --read: "Lora", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1c1b19; --surface: #262522; --sunk: #211f1d; --line: #3a3935; --muted: #a3a19a; --text: #f0eee6;
+      --accent-ink: #e8906f; --accent-soft: #3d2a22; --green-ink: #a3b788; --green-soft: #2a3122; --blue-ink: #9cc0e6; --blue-soft: #1f2c3a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1c1b19; --surface: #262522; --sunk: #211f1d; --line: #3a3935; --muted: #a3a19a; --text: #f0eee6;
+    --accent-ink: #e8906f; --accent-soft: #3d2a22; --green-ink: #a3b788; --green-soft: #2a3122; --blue-ink: #9cc0e6; --blue-soft: #1f2c3a;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--ui); padding-inline: 16px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 80px; display: flex; flex-direction: column; gap: 48px; }
+  header { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; align-items: center; }
+  header img { width: 56px; image-rendering: pixelated; grid-row: span 2; }
+  h1 { font: 500 34px/1.15 var(--read); margin: 0; text-wrap: balance; }
+  .lead { margin: 0; color: var(--muted); max-width: 68ch; }
+  h2 { font: 600 20px/1.3 var(--ui); margin: 0 0 6px; text-wrap: balance; }
+  h3 { font: 600 16px/1.3 var(--ui); margin: 0; }
+  p { margin: 0; }
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .sub { color: var(--muted); font-size: 14px; max-width: 72ch; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+  .st { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+  .st.proto { background: var(--green-soft); color: var(--green-ink); }
+  .st.mvp { background: var(--blue-soft); color: var(--blue-ink); }
+  .st.later { background: var(--sunk); color: var(--muted); border: 1px solid var(--line); }
+  .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; overflow-x: auto; }
+  .diagram pre { margin: 0; }
+  .flows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 20px; }
+  .flow { display: flex; flex-direction: column; gap: 10px; }
+  .flow-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .flow-head .n { font: 500 13px var(--ui); color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+  .flow .trigger { font-size: 13px; color: var(--muted); }
+  .flow .trigger b { color: var(--text); font-weight: 500; }
+  details { border-top: 1px solid var(--line); padding-top: 8px; font-size: 14px; }
+  summary { cursor: pointer; color: var(--accent-ink); font-weight: 500; font-size: 13px; }
+  details ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 760px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--sunk); }
+  tr:last-child td { border-bottom: 0; }
+  td.stage { font-weight: 600; white-space: nowrap; }
+  td .anim { font-size: 12px; color: var(--accent-ink); display: block; }
+  .mood { font-family: var(--read); font-style: italic; }
+  .risk { color: var(--muted); font-size: 13px; }
+  .q { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .q li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .q b { font-weight: 600; }
+  footer { font-size: 12px; color: var(--muted); }
+  @media (max-width: 600px) { h1 { font-size: 27px; } .wrap { padding-block: 24px 56px; gap: 36px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAArCAYAAADYOsCbAAADFklEQVR4nO1YPWgUQRT+3pvZvZ/8IBgFIQqCFoogYiNoJ7b2dmol2kjQVkRRbENARIv0ghY21oKVhghiLCIIRglIEAvFJHe3+2Rm72f3krvbPTe38bLfwd0e++bNfN+beTNvgBw5cuTIMSSguIaLs9NSm38FgoAEA8foydOYvHQj1nh1XKcaBA8UqDBgViQJ1E9CKnAuNlKbUQp3KqH/Ddu4gwr7DrehrSIV7mHp1yrW/fpAiLCvrDGudF+DERH8qdWwvFpr2jsKmBwtQ0lAU7aalC+CqRevsfDzt/3PAkyfP4NzB/b04w5EhLml77j28i0CnQiHJ8bx9MJZqD786b5GUVeuLmLw3K8j21asA88IZkIl5jcaY0rgj7FN0D7ofxFJxzWsrny1+c/oYETcpTX2FnXQuQAF7l8fk1O1YkwUnCBq1j9HiFZXlhP464B3t66I8+ObNTFrxnTM3JrhFfHs2rJOhOEwg5PMkTZ4EFR8zwpk1pgRTrOCCoVMQs969wQO3XlCiSJlHCvWYKFNqbukkk30HlAglFh3nYMU6o+7KLht1lSa4E4vMjgJpQbGEIKx80gJhPwOp71sIV2G1Dn7QUHEsccWc4hlU3JkSM4nk/ZbWwp1iUfspPzp4V3xP84jCwiAwtHjOHj1NqW7popjNlZZwSmNxLblZJVavdYYMMh+xRd0J2a/oSclGDpStTVT5WaXKLaknuJKNRIrnxgVammixYM2OyIFMTW3DR4x1AbdGsLU4PitxGNsq7Zt8N6RwGdoBEidlLkcMZ/6JRmOzDyLhG3h/nXB8pdmaX9s5nnXsC4+eiDy4U29mCeMnTiF/ZdvNtt8fnxPqu/ngr4BTF6cij1NYtNvkOkM1bpGk96pX7nFUJYWsOtGDZxiM6qScNbHJ9XTc2hyxtpTetnQYLIfp5gA7XRunkopK1Jpo71WT++0wql5otZtrR/LbftFdRQeNQoeGdxl5gbYvtPbxwZy77dacIFC2T5vFoc1twx2Ri0vU3v1QtVxsO4GJ28jxQiXIu99VUKlMPKfnWVy5MBQ4i/zON51Du6RZwAAAABJRU5ErkJggg==" alt="">
+    <h1>Clawd Flow Map</h1>
+    <p class="lead">Every way a user can move through the Clawd coach, from first visit to coming back a week later. Built from the pitch doc, the prototype and Frank's MVP plan. Hero persona: Carmen, 52, whose office expects AI but gives no training.</p>
+  </header>
+
+  <div class="legend">
+    <span class="st proto">Prototype</span> built and clickable now
+    <span class="st mvp">MVP</span> in Frank's build plan
+    <span class="st later">Later</span> pitch only or after the hackathon
+  </div>
+
+  <section id="overview">
+    <h2>The whole map</h2>
+    <p class="sub">Three ways in, one core loop, and the orchestrator in the middle deciding whether Clawd speaks. Everything Clawd teaches ends up in the profile, which makes the next answer better. That return arrow is the product.</p>
+    <div class="diagram"><pre class="mermaid">
+flowchart LR
+  E1["First visit<br/>no account"] --> F1["Onboarding<br/>3 questions"]
+  E3["Picks a situation<br/>letter, email, trip"] --> L
+  F1 --> L
+  E2["Return visit"] --> R["Welcome back<br/>mission check-in"]
+  R --> L
+  L["Real task<br/>with Claude"] --> O{"Orchestrator<br/>pause? budget? level?"}
+  O -->|silent| L
+  O -->|tip| T["Clawd tip"]
+  O -->|fact spotted| M["Should I<br/>remember?"]
+  O -->|pattern| LAB["Lab mission"]
+  O -->|safety| S["Safety note"]
+  T --> L
+  M --> P[("Profile")]
+  LAB --> P
+  P -->|better answers| L
+  L --> FIN["End of session<br/>real-world mission"]
+  FIN -.-> E2
+    </pre></div>
+  </section>
+
+  <section id="flows">
+    <h2>The flows</h2>
+    <p class="sub">Each flow on its own, with what triggers it, what Clawd does and how far along it is. Open "Experience and edge cases" for the detail.</p>
+
+    <div class="flows">
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 1</span><h3>Onboarding</h3><span class="st proto">Prototype</span></div>
+        <p class="trigger"><b>Trigger:</b> first visit, no account, nothing known about the user.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Lands on the page"] --> B["Clawd, big and centred:<br/>what should I call you?"]
+  B -->|Skip the intro| Z["Chat on<br/>Only when useful"]
+  B --> C["What brings you here?"]
+  C --> D["How much help?<br/>level suggested from answer"]
+  D --> E["Flag wave, walks<br/>to the message box"]
+  E --> F["Greeting with name<br/>+ 3 suggestions"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>Three questions maximum. Role, tone and rules are asked later, when Clawd can show their effect.</li>
+          <li>"I have something to get done" suggests Only when useful. "I want to learn" suggests Guide me and opens the Lab list.</li>
+          <li>Open: Frank's plan also asks language here. Worth adding, since the first answer depends on it.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 2</span><h3>Real task with coaching</h3><span class="st proto">Prototype</span></div>
+        <p class="trigger"><b>Trigger:</b> Carmen types a one-line request. This is the hero demo.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["One-line request:<br/>translate to Catalan"] --> B["Claude answers<br/>with no context"]
+  B --> C{"Generic answer?<br/>budget left?"}
+  C -->|no| D["Clawd stays idle"]
+  C -->|yes| E["Clawd hops:<br/>teach me how you write?"]
+  E -->|Not now| F["Gap doubles"]
+  E -->|Never| G["Tip type blocked"]
+  E -->|Teach me| H["Lab mission<br/>Flow 3"]
+  H --> I["Same request again"]
+  I --> J["Better answer<br/>+ notes for you"]
+  J --> K["Compare before<br/>and after"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>The task always comes first. Clawd speaks only after the answer has finished and Carmen pauses.</li>
+          <li>If Claude is unavailable, the prototype shows labelled example answers so the demo still works.</li>
+          <li>Risk: Claude's "before" can already be decent. The visible gain is tone, ready-to-paste text and the flagged ambiguity.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 3</span><h3>Lab mission</h3><span class="st proto">Prototype</span></div>
+        <p class="trigger"><b>Trigger:</b> accepts a nudge, taps a mission, or taps "Try it in the Lab" on an explanation.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Opens the Lab<br/>separate conversation"] --> B["Who are you<br/>with clients?"]
+  A -->|Leave the Lab| X["Back to chat<br/>nothing saved"]
+  B --> C["How should<br/>emails sound?"]
+  C --> D["What must<br/>never go wrong?"]
+  D --> E["Save"]
+  E --> F["Memory + skill saved<br/>confetti"]
+  F --> G["Try it on<br/>the real task"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>Clawd lifts weights while Carmen is in the Lab, and throws confetti when she saves.</li>
+          <li>A separate conversation keeps practice out of her real chat, so Lab examples never leak into the client email.</li>
+          <li>Open: in Frank's plan this reward is a collectible card. The Lab mission can award the card, so both ideas fit.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 4</span><h3>Remembering with consent</h3><span class="st mvp">MVP</span></div>
+        <p class="trigger"><b>Trigger:</b> a personal detail comes up in chat, or Clawd spots a repeated preference.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Detail comes up:<br/>it's for my mother"] --> B{"Sensitive?<br/>ID, diagnosis, amount"}
+  B -->|yes| C["Keep a general version<br/>or nothing"]
+  B -->|no| D["Clawd: should<br/>I remember that?"]
+  D -->|Yes| E["Saved to profile"]
+  D -->|No| F["Discarded"]
+  E --> G["What Clawd remembers:<br/>see, edit, delete"]
+  G --> H["Export my AI profile<br/>for any assistant"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>Nothing is ever saved silently. Each "should I remember?" is itself the lesson for the Remember me card.</li>
+          <li>Without an account the profile lives in one browser. Export is the safety net.</li>
+          <li>Clawd occasionally says what he used ("kept it formal, like you asked") so Carmen links the profile to better answers.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 5</span><h3>Explain on demand</h3><span class="st proto">Prototype</span></div>
+        <p class="trigger"><b>Trigger:</b> Guide me level. Carmen hovers or taps anything she doesn't understand.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Guide me level"] --> B["Orange dots on<br/>confusing UI"]
+  B --> C["Hover or tap"]
+  C --> D["One-line explanation<br/>in plain words"]
+  D --> E{"Wants more?"}
+  E -->|yes| F["Try it in the Lab"]
+  E -->|no| G["Back to work"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>User-started, so it never counts against the interruption budget.</li>
+          <li>Covers the side nav (Projects, Artifacts, Scheduled, Design, Customize) and in-chat labels like "Memory updated".</li>
+          <li>Phones have no hover, so the dots are tap targets there.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 6</span><h3>Clawd learns to back off</h3><span class="st proto">Prototype</span></div>
+        <p class="trigger"><b>Trigger:</b> any suggestion Clawd starts, and any change of help level.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Clawd suggestion"] --> B{"Carmen's response"}
+  B -->|Accept| C["Next tip may<br/>come sooner"]
+  B -->|Not now| D["Gap for that tip<br/>type doubles"]
+  D --> E{"2 dismissals<br/>this session?"}
+  E -->|yes| F["Offer: Only<br/>when useful"]
+  B -->|Never| G["That tip type<br/>blocked for good"]
+  H["Level set to Off"] --> I["Clawd leaves<br/>the canvas"]
+  I --> J["Clawd in the side nav<br/>brings him back"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>The prototype has the step-down offer and Off. The doubling gap and per-type blocks are orchestrator rules for the MVP.</li>
+          <li>Budget per level, to test: Guide me 1 every 3 turns and 3 per session; Only when useful 1 per session; Off none.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 7</span><h3>Safety moments</h3><span class="st mvp">MVP</span></div>
+        <p class="trigger"><b>Trigger:</b> a health, legal or money topic, or personal data pasted into chat.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Health, legal, money<br/>or personal data"] --> B{"Help level"}
+  B -->|Guide me or<br/>Only when useful| C["Clawd bubble,<br/>skips the budget"]
+  B -->|Off| D["Claude adds the note<br/>inside its answer"]
+  C --> E["Card: Check<br/>before trusting"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>This is the main impact story in Frank's plan: 65% say they check answers, only 38% click through to sources.</li>
+          <li>Off stays truly quiet from Clawd, but the safety content still reaches the user through Claude.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 8</span><h3>Missions and coming back</h3><span class="st mvp">MVP</span></div>
+        <p class="trigger"><b>Trigger:</b> end of a session, then a return visit with the same browser.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["End of session"] --> B["Mission: try this on<br/>your next client email"]
+  B --> C["Days later:<br/>Carmen returns"]
+  C --> D["Clawd: hi Carmen,<br/>how did it go?"]
+  D --> E{"Did she try it?"}
+  E -->|yes| F["Card unlocked<br/>celebrate"]
+  E -->|not yet| G["No guilt,<br/>mission stays open"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>Anti-Duolingo rule: Clawd is happy when she comes back and never sad when she doesn't.</li>
+          <li>Demo shortcut: a "one week later" button reloads with the same profile.</li>
+        </ul></details>
+      </article>
+
+      <article class="flow">
+        <div class="flow-head"><span class="n">Flow 9</span><h3>Graduating to the full Claude app</h3><span class="st later">Later</span></div>
+        <p class="trigger"><b>Trigger:</b> several missions done, and a profile worth keeping.</p>
+        <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["Several missions done"] --> B["Clawd: take your profile<br/>to the Claude app?"]
+  B --> C["Connect an account<br/>or export the profile"]
+  C --> D["Clawd keeps coaching<br/>inside the full app"]
+  D --> E["Advanced Lab:<br/>connectors, documents"]
+        </pre></div>
+        <details><summary>Experience and edge cases</summary><ul>
+          <li>This is where RAG, CAG and LLM wikis come in, in plain words: "Claude learns from your work documents".</li>
+          <li>Pitch it as the scale story, not as part of the demo.</li>
+        </ul></details>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="journey">
+    <h2>Carmen's experience, stage by stage</h2>
+    <p class="sub">The hero demo as an experience map: what she does, what Clawd does, how she should feel, and the design risk at each stage.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Stage</th><th>Carmen does</th><th>Clawd does</th><th>She feels</th><th>Design risk</th></tr></thead>
+      <tbody>
+        <tr><td class="stage">Arrives</td><td>Opens the page on her phone, no account</td><td>Greets her, big and centred<span class="anim">idle</span></td><td class="mood">Wary, a bit behind</td><td class="risk">Feels like one more app to learn</td></tr>
+        <tr><td class="stage">Onboarding</td><td>Gives her name, picks "something to get done"</td><td>Suggests Only when useful, waves the flag<span class="anim">flag, then walk</span></td><td class="mood">Surprised it's this short</td><td class="risk">Any 4th question loses her</td></tr>
+        <tr><td class="stage">First answer</td><td>Types "translate this to Catalan"</td><td>Sits on the message box, quiet<span class="anim">idle</span></td><td class="mood">Unsure if it's right</td><td class="risk">"Before" may already look fine</td></tr>
+        <tr><td class="stage">The nudge</td><td>Reads the suggestion</td><td>"Tell me how you write to clients, 2 minutes?"<span class="anim">hop</span></td><td class="mood">Curious, not judged</td><td class="risk">Reads as an ad or an interruption</td></tr>
+        <tr><td class="stage">Lab</td><td>Taps three answers</td><td>Trains alongside her<span class="anim">workout</span></td><td class="mood">Playful, in control</td><td class="risk">Feels like homework</td></tr>
+        <tr><td class="stage">Saved</td><td>Sees what Claude will remember</td><td>Celebrates her, not himself<span class="anim">celebrate</span></td><td class="mood">Proud</td><td class="risk">Unclear what was saved, or where</td></tr>
+        <tr><td class="stage">After answer</td><td>Sends the same request again</td><td>"This time I knew how you write"<span class="anim">hop</span></td><td class="mood">Relieved, capable</td><td class="risk">Difference too subtle to notice</td></tr>
+        <tr><td class="stage">Leaves</td><td>Closes the page</td><td>Offers one small real-world mission</td><td class="mood">Has a next step</td><td class="risk">Mission feels like a chore</td></tr>
+        <tr><td class="stage">Returns</td><td>Opens it again days later</td><td>"Hi Carmen, how did it go?"</td><td class="mood">Remembered, not nagged</td><td class="risk">Profile lost if browser cleared</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="levels">
+    <h2>How each flow behaves per help level</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Flow</th><th>Guide me</th><th>Only when useful</th><th>Off</th></tr></thead>
+      <tbody>
+        <tr><td class="stage">Explain on demand</td><td>Dots on everything</td><td>No dots</td><td>No dots</td></tr>
+        <tr><td class="stage">Coaching nudges</td><td>1 every 3 turns, 3 per session</td><td>1 per session, high value only</td><td>None</td></tr>
+        <tr><td class="stage">Memory offers</td><td>Asked when a detail comes up</td><td>Only for repeated patterns</td><td>None</td></tr>
+        <tr><td class="stage">Lab</td><td>Listed and suggested</td><td>Listed, suggested only at a pattern</td><td>Reachable from the side nav</td></tr>
+        <tr><td class="stage">Safety</td><td>Clawd bubble, skips budget</td><td>Clawd bubble, skips budget</td><td>Inside Claude's answer</td></tr>
+        <tr><td class="stage">Return visit</td><td>Greeting and mission check-in</td><td>Mission check-in only</td><td>Nothing</td></tr>
+        <tr><td class="stage">Clawd on the canvas</td><td>Always, sitting on the message box</td><td>Only when he has something to say</td><td>Hidden</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="open">
+    <h2>Open questions for the team</h2>
+    <ul class="q">
+      <li><b>Language in onboarding?</b> Frank's plan asks it up front, the prototype doesn't. I'd add it as the only fourth question, since every answer depends on it.</li>
+      <li><b>Cards or Lab missions as the reward?</b> Both fit if a finished mission awards a card. Decide what the demo shows.</li>
+      <li><b>Should Clawd stay visible on Only when useful?</b> Today he disappears until he has a suggestion, so a new user may not know he exists.</li>
+      <li><b>Are the budget numbers right?</b> They are starting guesses. Test with 3 to 5 people over 45 before pitch day.</li>
+      <li><b>Where does the Lab live on phones?</b> The bottom sheet works, but a full-screen Lab may feel more like a game.</li>
+    </ul>
+  </section>
+
+  <footer>Sources: pitch doc, prototype v5, research/mvp-plan.md and research/barcelona-ai-users.md in the Claude Impact Lab repo. September 2026.</footer>
+</div>
