@@ -31,6 +31,7 @@ export type User = {
   level: Level;
   level_set_by_user?: boolean; // an explicit choice always beats the automatic learn/do guess
   mode?: "learn" | "do";
+  ui_language?: Language; // the app language picked from the browser's languages; a saved profile.language wins over it
   turn: number;
   profile: Profile;
   skills: Skill[];

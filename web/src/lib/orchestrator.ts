@@ -4,6 +4,7 @@ import { classifyIntent } from "./agents/intent";
 import { offlineAnswer, offlineCoach } from "./agents/offline";
 import { runTask, IMAGE_TYPES, type Attachment } from "./agents/task";
 import { situationById } from "./catalog";
+import { t, uiLanguage } from "./i18n";
 import { decide, touchSession } from "./policy";
 import type { CoachMode } from "./prompts";
 import type { CoachAction, CoachEvent, User } from "./types";
@@ -64,7 +65,7 @@ export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, s
   let answer: string;
   let refused = false;
   if (config.offline) {
-    answer = offlineAnswer(input.message, input.attachment, input.situation);
+    answer = offlineAnswer(input.message, input.attachment, input.situation, uiLanguage(user));
     for (const chunk of answer.match(/.{1,24}/gs) ?? []) emit.token(chunk);
   } else {
     const res = await runTask(user, input.message, input.attachment, emit.token, signal, input.situation);
@@ -85,7 +86,7 @@ export async function handleTurn(user: User, input: TurnInput, emit: TurnEmit, s
 // The user talks to Clawd directly (tap on the mascot).
 export async function mascotChat(user: User, message: string): Promise<CoachEvent[]> {
   const proposals = await coach(user, "chat", { user: message.slice(0, 2000) });
-  const reply = proposals.find((p) => p.action === "show_tip") ?? { action: "show_tip" as const, text: "Hmm, I'm not sure. Want to try it in the chat?", mood: "thoughtful" as const };
+  const reply = proposals.find((p) => p.action === "show_tip") ?? { action: "show_tip" as const, text: t(uiLanguage(user), "not_sure"), mood: "thoughtful" as const };
   return decide(user, [reply, ...proposals.filter((p) => p !== reply)], "chat");
 }
 

@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { cardById, challengeById, labById } from "./catalog";
+import { cardById, challengeById, inLanguage, labById } from "./catalog";
 import { policy } from "./config";
+import { t, uiLanguage, type TextKey } from "./i18n";
 import { addFact } from "./profile";
 import type { CoachMode } from "./prompts";
-import type { CoachAction, CoachActionName, CoachEvent, Level, User } from "./types";
+import type { CoachAction, CoachActionName, CoachEvent, Language, Level, User } from "./types";
 
 // The orchestrator's rules. Pure functions over the user record, so they are easy to test.
 
@@ -11,15 +12,21 @@ const PRIORITY: CoachActionName[] = [
   "suggest_step_down", "check_in_mission", "suggest_lab", "propose_memory", "award_card", "assign_mission", "show_tip",
 ];
 
-const BUTTONS: Partial<Record<CoachActionName, CoachEvent["buttons"]>> = {
-  show_tip: [{ id: "accept", label: "Got it" }, { id: "never", label: "Don't show tips like this" }],
-  award_card: [{ id: "accept", label: "Nice!" }],
-  propose_memory: [{ id: "accept", label: "Yes, remember" }, { id: "later", label: "Not now" }, { id: "never", label: "Don't ask" }],
-  suggest_lab: [{ id: "accept", label: "Open the Lab" }, { id: "later", label: "Not now" }, { id: "never", label: "Don't suggest this again" }],
-  assign_mission: [{ id: "accept", label: "I'll try it" }, { id: "later", label: "Not now" }],
-  check_in_mission: [{ id: "accept", label: "I did it!" }, { id: "later", label: "Not yet" }],
-  suggest_step_down: [{ id: "accept", label: "Only when useful" }, { id: "later", label: "Keep guiding me" }],
+type ButtonId = NonNullable<CoachEvent["buttons"]>[number]["id"];
+
+// Button labels are text keys (src/lib/i18n.ts), shown in the user's language.
+const BUTTONS: Partial<Record<CoachActionName, [ButtonId, TextKey][]>> = {
+  show_tip: [["accept", "got_it"], ["never", "no_tips_like_this"]],
+  award_card: [["accept", "nice"]],
+  propose_memory: [["accept", "yes_remember"], ["later", "not_now"], ["never", "dont_ask"]],
+  suggest_lab: [["accept", "open_lab"], ["later", "not_now"], ["never", "dont_suggest"]],
+  assign_mission: [["accept", "ill_try"], ["later", "not_now"]],
+  check_in_mission: [["accept", "i_did_it"], ["later", "not_yet"]],
+  suggest_step_down: [["accept", "only_useful"], ["later", "keep_guiding"]],
 };
+
+const buttons = (action: CoachActionName, lang: Language) => BUTTONS[action]?.map(([id, key]) => ({ id, label: t(lang, key) }));
+const cardTitle = (id: string, lang: Language) => inLanguage(cardById(id)!, lang).title;
 
 const neverKey = (a: CoachAction) => (a.ref ? `${a.action}:${a.ref}` : a.action);
 
@@ -78,14 +85,14 @@ function withinBudget(user: User, a: CoachAction, mode: CoachMode, level: Level)
 }
 
 // User-started exchanges (tap on Clawd, return visit) answer right away; unprompted tips wait for a pause.
-function toEvent(a: CoachAction, quiet = false, mode: CoachMode = "after_turn"): CoachEvent {
+function toEvent(a: CoachAction, lang: Language, quiet = false, mode: CoachMode = "after_turn"): CoachEvent {
   return {
     ...a,
     id: randomUUID().slice(0, 12),
     deliver: a.safety || a.action === "award_card" || mode !== "after_turn" ? "now" : "at_pause",
     quiet: quiet || undefined,
     // A reply to the user's own question needs no buttons.
-    buttons: quiet || (mode !== "after_turn" && a.action === "show_tip") ? undefined : BUTTONS[a.action],
+    buttons: quiet || (mode !== "after_turn" && a.action === "show_tip") ? undefined : buttons(a.action, lang),
   };
 }
 
@@ -105,13 +112,14 @@ function awardCard(user: User, cardId: string, evidence: string) {
 export function decide(user: User, proposals: CoachAction[], mode: CoachMode): CoachEvent[] {
   const level = effectiveLevel(user);
   if (level === "off") return [];
+  const lang = uiLanguage(user);
 
   let candidates = proposals.filter((a) => isValid(user, a) && !blockedByUser(user, a, mode) && allowedAtLevel(level, a, mode));
 
   // Two dismissals in a row while guiding: offer to step down (matches the prototype).
   if (mode === "after_turn" && user.level === "guide" && user.dismissals_in_a_row >= policy.dismissalsBeforeStepDown) {
     const safety = candidates.filter((a) => a.safety);
-    candidates = [...safety, { action: "suggest_step_down", mood: "thoughtful", text: "Looks like you'd rather get on with your work. Want me to show up only when it's useful?" }];
+    candidates = [...safety, { action: "suggest_step_down", mood: "thoughtful", text: t(lang, "step_down") }];
   }
 
   const events: CoachEvent[] = [];
@@ -122,12 +130,12 @@ export function decide(user: User, proposals: CoachAction[], mode: CoachMode): C
 
   if (card && awardCard(user, card.ref!, card.evidence ?? "")) {
     const quiet = !!visible || level === "useful";
-    const e = toEvent({ ...card, mood: "celebrate", text: card.text ?? `New card: ${cardById(card.ref!)!.title}!` }, quiet, mode);
+    const e = toEvent({ ...card, mood: "celebrate", text: card.text ?? t(lang, "new_card", { card: cardTitle(card.ref!, lang) }) }, lang, quiet, mode);
     record(user, e);
     events.push(e);
   }
   if (visible) {
-    const e = toEvent(visible, false, mode);
+    const e = toEvent(visible, lang, false, mode);
     record(user, e);
     if (mode === "after_turn" && !e.safety && e.action !== "suggest_step_down") user.session.tips++;
     events.push(e);
@@ -147,6 +155,7 @@ export function acknowledge(user: User, eventId: string, response: "accept" | "l
   if (rec) rec.outcome = response === "accept" ? "accepted" : response;
 
   const result: AckResult = { ok: true, events: [] };
+  const lang = uiLanguage(user);
   if (response !== "accept") {
     if (e.action === "suggest_step_down") { user.dismissals_in_a_row = 0; return result; } // "Keep guiding me"
     if (!e.safety) user.dismissals_in_a_row++;
@@ -167,7 +176,7 @@ export function acknowledge(user: User, eventId: string, response: "accept" | "l
       const f = addFact(user, e.fact ?? "", e.fact_category, "chat");
       if (f) result.effect = { saved_fact: f.text };
       if (awardCard(user, "remember_me", `Saved: ${e.fact}`)) {
-        result.events.push(toEvent({ action: "award_card", ref: "remember_me", mood: "celebrate", text: "New card: Remember me!" }, true));
+        result.events.push(toEvent({ action: "award_card", ref: "remember_me", mood: "celebrate", text: t(lang, "new_card", { card: cardTitle("remember_me", lang) }) }, lang, true));
       }
       break;
     }
@@ -181,7 +190,7 @@ export function acknowledge(user: User, eventId: string, response: "accept" | "l
       if (m) m.status = "done";
       const card = challengeById(e.ref!)?.card;
       if (card && awardCard(user, card, `Completed challenge: ${e.ref}`)) {
-        const ev = toEvent({ action: "award_card", ref: card, mood: "celebrate", text: `You did it! New card: ${cardById(card)!.title}` });
+        const ev = toEvent({ action: "award_card", ref: card, mood: "celebrate", text: t(lang, "challenge_card", { card: cardTitle(card, lang) }) }, lang);
         record(user, ev);
         result.events.push(ev);
       }

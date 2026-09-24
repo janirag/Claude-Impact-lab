@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { policy } from "./config";
-import type { Fact, Language, User } from "./types";
-
-const LANG_NAME: Record<Language, string> = { ca: "Catalan", es: "Spanish", en: "English" };
+import { LANG_NAME } from "./i18n";
+import type { Fact, User } from "./types";
 
 // Plain-text "About the user" block for the agents' system prompts. Empty profile -> empty string.
 export function aboutUser(user: User): string {
