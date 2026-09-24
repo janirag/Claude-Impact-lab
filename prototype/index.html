@@ -78,7 +78,7 @@
   .side-btn.new .ico { color: var(--text); }
   .side-btn.more, .side-btn.more .ico { color: var(--muted); }
   .mini-clawd { width: 20px; flex: none; display: grid; place-items: center; }
-  .mini-clawd svg { width: 20px; height: auto; display: block; }
+  .mini-clawd img { width: 22px; height: auto; display: block; image-rendering: pixelated; }
   .clawd-nav { color: var(--text); }
   .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; padding: 1px 7px; }
   .side-label { font-size: 12px; color: var(--muted); padding: 18px 10px 4px; }
@@ -140,18 +140,13 @@
 
   /* Clawd on the canvas */
   .clawd {
-    position: absolute; z-index: 30; left: 0; top: 0; width: 64px;
-    transition: left 1.1s ease-in-out, top 1.1s ease-in-out, width .8s ease-in-out;
+    position: absolute; z-index: 30; left: 0; top: 0; width: 66px; height: 54px;
+    transition: left 1.1s ease-in-out, top 1.1s ease-in-out, width .8s ease-in-out, height .8s ease-in-out;
   }
   .clawd[hidden] { display: none !important; }
-  .clawd.big { width: 104px; }
-  .clawd-body { display: block; width: 100%; background: none; border: 0; padding: 0; }
-  .clawd-body svg { width: 100%; height: auto; display: block; }
-  .clawd .sprite { animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
-  .clawd.walking .sprite { animation: walk .28s steps(2) infinite; }
-  .clawd.facing-left .clawd-body svg { transform: scaleX(-1); }
-  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-  @keyframes walk { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-4px) rotate(3deg); } }
+  .clawd-body { position: absolute; inset: 0; background: none; border: 0; padding: 0; }
+  .clawd-body img { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); image-rendering: pixelated; pointer-events: none; transition: width .8s ease-in-out; }
+  .clawd.facing-left .clawd-body img { transform: translateX(-50%) scaleX(-1); }
 
   .say {
     position: absolute; width: max-content; max-width: min(340px, calc(100vw - 48px));
@@ -268,7 +263,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .clawd { transition: none; }
-    .clawd .sprite, .clawd.walking .sprite { animation: none; }
+    .clawd-body img { transition: none; }
     .panel, .sidebar { transition: none; }
   }
 </style>
@@ -294,7 +289,7 @@
         <button class="close-nav" type="button" id="closeNav" aria-label="Close menu">&times;</button>
       </div>
       <button class="side-btn new" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New</span></button>
-      <button class="side-btn clawd-nav" type="button" id="navClawd"><span class="mini-clawd" id="navClawdIcon"></span><span class="lbl">Clawd</span><span class="nav-badge">Lab</span></button>
+      <button class="side-btn clawd-nav" type="button" id="navClawd"><span class="mini-clawd"><img src="clawd/icon.png" alt=""></span><span class="lbl">Clawd</span><span class="nav-badge">Lab</span></button>
       <button class="side-btn" type="button" data-explain="projects"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h16V17a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M5.5 5.5h13"/></svg><span class="lbl">Projects</span></button>
       <button class="side-btn" type="button" data-explain="artifacts"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 11.5 4 19.5h8z"/><rect x="13.5" y="10.5" width="6.5" height="9" rx="1.5"/></svg><span class="lbl">Artifacts</span></button>
       <button class="side-btn" type="button" data-explain="scheduled"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="lbl">Scheduled</span></button>
@@ -330,7 +325,7 @@
       </div>
 
       <div class="clawd big" id="clawd">
-        <button class="clawd-body" type="button" id="clawdBody" aria-label="Clawd"></button>
+        <button class="clawd-body" type="button" id="clawdBody" aria-label="Clawd"><img id="clawdImg" src="clawd/idle.webp" alt=""></button>
         <div class="say" id="say" role="status" hidden></div>
       </div>
     </section>
@@ -450,20 +445,26 @@ Notes for you
   const mobile = () => matchMedia("(max-width: 760px)").matches;
   const who = () => S.name || "there";
 
-  // Placeholder pixel Clawd, to be replaced by the team's own artwork.
-  const CLAWD = `<svg viewBox="0 0 14 10" shape-rendering="crispEdges" aria-hidden="true"><g class="sprite">
-    <rect x="2" y="1" width="10" height="6" fill="#d97757"/>
-    <rect x="0" y="3" width="2" height="2" fill="#d97757"/>
-    <rect x="12" y="3" width="2" height="2" fill="#d97757"/>
-    <rect x="4" y="3" width="1" height="2" fill="#141413"/>
-    <rect x="9" y="3" width="1" height="2" fill="#141413"/>
-    <rect x="3" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="5" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="8" y="7" width="1" height="2" fill="#d97757"/>
-    <rect x="10" y="7" width="1" height="2" fill="#d97757"/>
-  </g></svg>`;
-  $("clawdBody").innerHTML = CLAWD;
-  $("navClawdIcon").innerHTML = CLAWD;
+  // Clawd animations: transparent WebPs made from the team's clips in /animations.
+  // Every clip is drawn at 4 image pixels per art pixel, so one scale fits all.
+  const SIZES = { idle: 53, hop: 49, walk: 52, workout: 79, celebrate: 89, flag: 69 };
+  const ONCE = { hop: 2160, celebrate: 4230, flag: 4400 };
+  const IDLE_H = 43;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const img = $("clawdImg");
+  let base = "idle", cur = "idle", walking = false;
+  const scale = () => S.ftue !== "done" ? 2 : mobile() ? 1 : 1.25;
+  function show(name) {
+    cur = name;
+    img.src = reduceMotion.matches ? "clawd/icon.png" : "clawd/" + name + ".webp" + (ONCE[name] ? "?play=" + Date.now() : "");
+    img.style.width = (reduceMotion.matches ? SIZES.idle : SIZES[name]) * scale() + "px";
+  }
+  function setBase(name) { base = name; if (!walking && !ONCE[cur]) show(name); }
+  function play(name) {
+    clearTimeout(play.t);
+    show(name);
+    play.t = setTimeout(() => { if (!walking) show(base); }, ONCE[name]);
+  }
 
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("sample").then((s) => { sample = s; }).catch(() => {});
@@ -477,24 +478,24 @@ Notes for you
       requestAnimationFrame(() => requestAnimationFrame(() => { clawd.style.transition = ""; }));
     }
     const c = chat.getBoundingClientRect();
+    const w = SIZES.idle * scale(), h = IDLE_H * scale();
+    clawd.style.width = w + "px"; clawd.style.height = h + "px";
+    img.style.width = (reduceMotion.matches ? SIZES.idle : SIZES[cur]) * scale() + "px";
     let left, top;
     if (S.ftue !== "done") {
-      const w = 104;
       left = (c.width - w) / 2;
-      top = Math.max(76, c.height * 0.12);
+      top = Math.max(76, c.height * 0.1);
     } else {
       const comp = $("composer").getBoundingClientRect();
-      const w = mobile() ? 52 : 64;
-      clawd.style.width = w + "px";
       left = comp.right - c.left - w - 24;
-      top = comp.top - c.top - w * (10 / 14) + 4;
+      top = comp.top - c.top - h + 6;
     }
-    if (S.ftue !== "done") clawd.style.width = "";
-    if (lastLeft !== null && Math.abs(left - lastLeft) > 4) {
+    if (lastLeft !== null && Math.abs(left - lastLeft) > 4 && instant !== true) {
+      // The walk clip faces right; mirror it when Clawd heads left.
       clawd.classList.toggle("facing-left", left < lastLeft);
-      clawd.classList.add("walking");
+      walking = true; clearTimeout(play.t); show("walk");
       clearTimeout(placeClawd.t);
-      placeClawd.t = setTimeout(() => clawd.classList.remove("walking", "facing-left"), 1150);
+      placeClawd.t = setTimeout(() => { walking = false; clawd.classList.remove("facing-left"); show(base); }, 1150);
     }
     lastLeft = left;
     clawd.style.left = left + "px";
@@ -541,10 +542,15 @@ Notes for you
   }
 
   function finishFtue(chosenLevel) {
+    speak("");
+    play("flag");
+    setTimeout(() => settle(chosenLevel), 1800);
+  }
+
+  function settle(chosenLevel) {
     S.ftue = "done";
     main.classList.remove("ftue-on");
     clawd.classList.remove("big");
-    speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
     renderHello();
@@ -679,6 +685,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       b.addEventListener("click", () => { b.remove(); showCompare(); });
       thread.append(b);
       S.view = "home"; renderPanel();
+      if (level !== "off") { play("hop"); }
       if (level !== "off") speakSmall(`Same email, same request. This time I knew how you write to clients.`, true);
     } else {
       S.before = out; S.phase = "before";
@@ -705,6 +712,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (level === "off" || S.noSuggest || S.phase !== "before") return;
     clawd.hidden = false;
     placeClawd();
+    play("hop");
     speakSmall(`That's a word-for-word translation. Tell me how you write to clients and I'll get it right every time. Two minutes?`, false,
       `<button class="btn primary" data-act="lab">Teach me in the Lab</button><button class="btn" data-act="later">Not now</button><button class="btn ghost" data-act="never">Don't suggest this again</button>`);
   }
@@ -785,6 +793,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function openLab() {
     S.view = "lab"; S.step = 0;
     clawd.hidden = false; placeClawd();
+    setBase("workout");
     speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
     renderPanel();
     if (mobile()) panel.classList.add("open");
@@ -817,12 +826,13 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     }
     if (a === "stepdown") { S.dismissals = 0; speak(""); setLevel("useful"); return; }
     if (a === "keep") { S.dismissals = 0; speak(""); return; }
-    if (a === "quit") { S.view = "home"; speak(""); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
+    if (a === "quit") { S.view = "home"; speak(""); setBase("idle"); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
     if (a === "back") { S.step--; renderLab(); return; }
     if (a === "next") {
       if (S.step < STEPS.length - 1) { S.step++; renderLab(); }
       else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
+        base = "idle"; play("celebrate");
         speakSmall(`Saved! I'll remember this every time you write to a client.`, true);
       }
       return;
@@ -929,6 +939,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     $("recents").innerHTML = `<p class="side-empty">Your chats will appear here.</p>`;
     $("avatar").textContent = "?"; $("meName").textContent = "Guest";
     lastLeft = null;
+    base = "idle"; walking = false; clearTimeout(play.t); clearTimeout(placeClawd.t);
+    clawd.classList.remove("facing-left");
+    show("idle");
     renderPanel();
     renderFtue();
   }
