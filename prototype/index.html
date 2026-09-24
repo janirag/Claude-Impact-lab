@@ -78,8 +78,9 @@
   .side-btn { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 8px 10px; font-size: 15px; color: var(--side-ink); }
   .side-btn:hover { background: var(--line); }
   .side-btn .ico { color: var(--side-ink); }
-  .side-btn.new { background: var(--line); color: var(--text); font-weight: 500; margin-bottom: 2px; }
-  .side-btn.new .ico { color: var(--text); }
+  .side-btn.new { margin-bottom: 2px; }
+  .side-btn.active { background: var(--line); color: var(--text); font-weight: 500; }
+  .side-btn.active .ico { color: var(--text); }
   .side-btn.more, .side-btn.more .ico { color: var(--muted); }
   .mini-clawd { width: 20px; flex: none; display: grid; place-items: center; }
   .mini-clawd svg { width: 20px; height: auto; display: block; }
@@ -265,6 +266,15 @@
   .say .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .say input[type="text"] { width: 100%; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: 14px var(--ui); background: var(--bg); color: var(--text); }
   .say .skip { display: block; margin-top: 10px; background: none; border: 0; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; }
+  .say .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .say .foot .skip { margin: 0 0 0 auto; }
+  .say .ask { margin-top: 10px; font-weight: 500; }
+  .say .fine { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .langs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .lang { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 13px; }
+  .lang[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+  .own { display: flex; gap: 6px; margin-top: 8px; }
+  .say .own input[type="text"] { margin-top: 0; flex: 1; min-width: 0; }
   .choices { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
   .choice { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 12px; font-size: 13px; }
   .choice:hover { border-color: var(--accent); }
@@ -284,7 +294,7 @@
   .panel-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
   .panel-top { display: flex; align-items: center; gap: 8px; }
   .panel-top h2 { font-size: 14px; font-weight: 600; margin: 0; flex: 1; }
-  .close-sheet { display: none; background: none; border: 0; font-size: 20px; line-height: 1; padding: 4px; }
+  .close-sheet { display: block; background: none; border: 0; font-size: 20px; line-height: 1; padding: 4px; }
   .levels { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--sunk); border-radius: 10px; padding: 3px; gap: 2px; }
   .levels input { position: absolute; opacity: 0; pointer-events: none; }
   .levels label { text-align: center; font-size: 12px; padding: 6px 4px; border-radius: 8px; color: var(--muted); cursor: pointer; line-height: 1.25; }
@@ -410,7 +420,7 @@
         </span>
         <button class="close-nav" type="button" id="closeNav" aria-label="Close menu">&times;</button>
       </div>
-      <button class="side-btn new" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New</span></button>
+      <button class="side-btn new active" type="button" id="navNew"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New</span></button>
       <button class="side-btn clawd-nav" type="button" id="navClawd"><span class="mini-clawd" id="navClawdIcon"></span><span class="lbl">Clawd</span><span class="nav-badge">Lab</span></button>
       <button class="side-btn" type="button" data-explain="projects"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h16V17a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M5.5 5.5h13"/></svg><span class="lbl">Projects</span></button>
       <button class="side-btn" type="button" data-explain="artifacts"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 11.5 4 19.5h8z"/><rect x="13.5" y="10.5" width="6.5" height="9" rx="1.5"/></svg><span class="lbl">Artifacts</span></button>
@@ -458,7 +468,7 @@
       <div class="panel-head">
         <div class="panel-top">
           <h2>Clawd</h2>
-          <button class="close-sheet" type="button" id="closeSheet" aria-label="Close">&times;</button>
+          <button class="close-sheet" type="button" id="closeSheet" aria-label="Close Clawd's panel">&times;</button>
         </div>
         <div class="levels" role="radiogroup" aria-label="How much help">
           <input type="radio" name="level" id="lv-guide" value="guide" checked><label for="lv-guide">Guide me</label>
@@ -573,8 +583,23 @@ Notes for you
   };
 
   // ---------- State ----------
+  // Pre-select from the browser, but always ask: in Catalonia the device language
+  // is a weak signal for bilingual users (see the pitch doc's onboarding research).
+  function guessLanguage() {
+    const l = (navigator.language || "en").toLowerCase();
+    return l.startsWith("ca") ? "ca" : l.startsWith("es") ? "es" : "en";
+  }
+  const LANGS = { ca: "Català", es: "Español", en: "English" };
+  const TASKS = [
+    { id: "translate", label: "Translate an email", intent: "task" },
+    { id: "client", label: "Write or reply to a client", intent: "task" },
+    { id: "doc", label: "Understand a letter or document", intent: "task" },
+    { id: "learn", label: "Show me what AI can do", intent: "learn" },
+    { id: "look", label: "Just looking around", intent: "look" }
+  ];
+
   const fresh = () => ({
-    ftue: 0, name: "", intent: null,
+    ftue: 0, name: "", intent: null, language: guessLanguage(), firstTask: null,
     phase: "start", view: "home", step: 0, lab: "clients", labsDone: [], situation: null,
     answers: blankAnswers(), file: null,
     dismissals: 0, noSuggest: false, before: "", after: ""
@@ -995,28 +1020,38 @@ Notes for you
     clawd.classList.add("big");
     clawd.hidden = false;
     placeClawd();
+    const skip = `<button class="skip" type="button" data-ftue="skip">Skip for now</button>`;
     if (S.ftue === 0) {
-      speak(`${ftueDots(0)}<p class="lead">Hola! I'm Clawd.</p>
-        <p>I help you get good results from Claude, one small step at a time. No account needed. What should I call you?</p>
-        <form id="nameForm"><input type="text" id="nameInput" autocomplete="given-name" placeholder="Your first name" aria-label="Your first name">
-        <div class="actions"><button class="btn primary" type="submit">Continue</button></div></form>
-        <button class="skip" type="button" data-ftue="skip">Skip the intro</button>`);
-      setTimeout(() => $("nameInput")?.focus(), 50);
+      speak(`${ftueDots(0)}<p class="lead">Hola! I'm Clawd, an AI helper.</p>
+        <p>I help you get good results from Claude, one small step at a time. No account needed.</p>
+        <p class="ask">Which language should I use?</p>
+        <div class="langs" role="group" aria-label="Language">${Object.entries(LANGS).map(([k, v]) =>
+          `<button class="lang" type="button" data-lang="${k}" aria-pressed="${S.language === k}">${v}</button>`).join("")}</div>
+        <p class="fine">What you tell me stays in this browser. You can delete it any time.</p>
+        <div class="foot"><button class="btn primary" type="button" data-ftue="next">Continue</button>${skip}</div>`);
     } else if (S.ftue === 1) {
-      speak(`${ftueDots(1)}<p class="lead">Nice to meet you, ${esc(who())}.</p><p>What brings you here today?</p>
-        <div class="choices">
-          <button class="choice" data-intent="task">I have something to get done<small>I'll get out of your way</small></button>
-          <button class="choice" data-intent="learn">I want to learn how AI can help me<small>I'll show you around</small></button>
-          <button class="choice" data-intent="look">Just looking around</button>
-        </div>
-        <button class="skip" type="button" data-ftue="skip">Skip the intro</button>`);
+      speak(`${ftueDots(1)}<p class="lead">What should I call you?</p>
+        <p>So I can greet you when you come back. It's optional.</p>
+        <form id="nameForm"><input type="text" id="nameInput" autocomplete="given-name" placeholder="Your first name or a nickname" aria-label="Your first name or a nickname" value="${esc(S.name)}">
+        <div class="foot"><button class="btn primary" type="submit">Continue</button>${skip}</div></form>`);
+      setTimeout(() => $("nameInput")?.focus(), 50);
     } else if (S.ftue === 2) {
-      const rec = S.intent === "task" ? "useful" : "guide";
-      speak(`${ftueDots(2)}<p class="lead">How much should I help while you work?</p><p>You can change this any time in my panel.</p>
-        <div class="choices">${["guide", "useful", "off"].map((k) =>
-          `<button class="choice ${k === rec ? "rec" : ""}" data-level="${k}">${LEVELS[k][0]}${k === rec ? " (suggested)" : ""}<small>${LEVELS[k][1]}</small></button>`).join("")}
-        </div>`);
+      speak(`${ftueDots(2)}<p class="lead">${S.name ? "Nice to meet you, " + esc(S.name) + "." : "Nice to meet you."}</p>
+        <p>What do you need help with today?</p>
+        <div class="choices">${TASKS.map((t) => `<button class="choice" type="button" data-task="${t.id}">${t.label}</button>`).join("")}</div>
+        <form id="taskForm" class="own"><input type="text" id="taskInput" placeholder="Or type your own" aria-label="Or type what you need help with">
+        <button class="btn" type="submit">Go</button></form>
+        <div class="foot">${skip}</div>`);
     }
+  }
+
+  // The help level is not asked: people can't judge it before they've seen Clawd.
+  // A real task starts on "Only when useful"; exploring starts on "Guide me".
+  function pickTask(id, typed) {
+    const t = TASKS.find((x) => x.id === id);
+    S.intent = t ? t.intent : "task";
+    S.firstTask = typed ? { typed } : id;
+    finishFtue(S.intent === "task" ? "useful" : "guide");
   }
 
   function finishFtue(chosenLevel) {
@@ -1026,16 +1061,26 @@ Notes for you
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
     $("meName").textContent = S.name || "Guest";
-    if (api.on) call("/api/profile", { name: S.name || null, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel }, "PATCH").then(refreshProfile).catch(() => {});
+    if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel }, "PATCH").then(refreshProfile).catch(() => {});
     $("weekLater").hidden = !api.on;
     renderHello();
     setLevel(chosenLevel);
     if (chosenLevel !== "off") pose("flag", 2400); // flag wave, then the walk to the message box
+    const ft = S.firstTask;
+    if (ft === "translate") prompt.value = REQUEST;
+    else if (ft === "client") prompt.value = "Reply to a client: ";
+    else if (ft === "doc") prompt.value = "Explain this document in plain words: ";
+    else if (ft && ft.typed) prompt.value = ft.typed;
     setTimeout(() => {
       if (level === "off") return;
+      if (level === "useful") {
+        clawd.hidden = false; placeClawd();
+        speakSmall(`I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.`, true);
+        return;
+      }
       if (S.intent === "learn") {
-        if (mobile()) panel.classList.add("open");
-        else roam("lab_button");
+        showPanel(true);
+        roam("lab_button");
         speakSmall(`Here's my Lab. Pick a mission when you have two minutes, or just start chatting.`);
       } else if (level === "guide") {
         roam("explain_dot");
@@ -1045,11 +1090,17 @@ Notes for you
   }
 
   say.addEventListener("submit", (e) => {
+    if (e.target.id === "taskForm") {
+      e.preventDefault();
+      const typed = ($("taskInput").value || "").trim();
+      if (typed) pickTask(null, typed.slice(0, 500));
+      return;
+    }
     if (e.target.id === "askForm") { e.preventDefault(); sendToClawd($("askInput").value); return; }
     if (e.target.id !== "nameForm") return;
     e.preventDefault();
     S.name = ($("nameInput").value || "").trim().slice(0, 40);
-    S.ftue = 1; renderFtue();
+    S.ftue = 2; renderFtue();
   });
 
   // ---------- Hello and chat ----------
@@ -1247,9 +1298,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     level = v;
     $("lv-" + v).checked = true;
     main.classList.toggle("guide", v === "guide");
-    main.classList.toggle("no-panel", v === "off");
+    showPanel(panelOpen);
     $("clawdBack").hidden = v !== "off";
-    if (v === "off") { hidePop(); panel.classList.remove("open"); speak(""); }
+    if (v === "off") { hidePop(); speak(""); }
     // "Only when useful": Clawd is off-canvas until a moment worth interrupting for.
     clawd.hidden = v === "off" || (v === "useful" && S.phase !== "before" && S.view !== "lab" && S.view !== "done");
     placeClawd();
@@ -1335,13 +1386,25 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       <button class="btn primary" data-act="try">Try it on your email</button>`;
   }
 
+  // The Clawd panel is closed by default: a new user starts in a new chat, not in the Lab.
+  // It opens from Clawd in the side nav, from tapping Clawd, or when Clawd sends her to the Lab.
+  let panelOpen = false;
+  function showPanel(open) {
+    panelOpen = !!open && level !== "off" && S.ftue === "done";
+    main.classList.toggle("no-panel", !panelOpen);
+    panel.classList.toggle("open", panelOpen);
+    $("navClawd").classList.toggle("active", panelOpen);
+    $("navNew").classList.toggle("active", !panelOpen);
+    requestAnimationFrame(() => placeClawd(true));
+  }
+
   function openLab(id = "clients") {
     S.view = "lab"; S.step = 0; S.lab = LABS[id] ? id : "clients";
     setBasePose("train");
     clawd.hidden = false; placeClawd();
     speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
     renderPanel();
-    if (mobile()) panel.classList.add("open");
+    showPanel(true);
   }
 
   function addSaved() {
@@ -1355,12 +1418,17 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   // ---------- Actions (canvas bubble and panel share them) ----------
   function act(a) {
     if (a === "skip") { S.intent = "task"; finishFtue("useful"); return; }
-    if (a === "hush") { speak(""); return; }
+    if (a === "next") { S.ftue = 1; renderFtue(); return; }
+    if (a === "hush") {
+      speak("");
+      // "Only when useful": Clawd leaves again once his one line has been read.
+      if (level === "useful" && S.phase === "start" && S.view === "home") clawd.hidden = true;
+      return;
+    }
     if (a === "ask") { askClawd(); return; }
     if (a === "copyprofile") { copyProfile(); return; }
     if (a === "panel") {
-      if (mobile()) { speak(""); panel.classList.add("open"); }
-      else { roam("lab_button"); speakSmall(`My Lab and settings are in the panel on the right.`, true); }
+      speak(""); showPanel(true); roam("lab_button");
       return;
     }
     if (a === "lab") { openLab(); return; }
@@ -1380,7 +1448,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (a === "keep") { S.dismissals = 0; speak(""); return; }
     if (a === "quit") { S.view = "home"; speak(""); setBasePose(null); renderPanel(); if (level === "useful") clawd.hidden = true; return; }
     if (a === "back") { S.step--; renderLab(); return; }
-    if (a === "backtochat") { panel.classList.remove("open"); act("quit"); prompt.focus(); return; }
+    if (a === "backtochat") { showPanel(false); act("quit"); prompt.focus(); return; }
     if (a === "next") {
       if (S.step < LABS[S.lab].steps.length - 1) { S.step++; renderLab(); }
       else if (S.lab !== "clients") {
@@ -1406,7 +1474,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       return;
     }
     if (a === "try") {
-      panel.classList.remove("open");
+      showPanel(false);
       S.view = "home"; renderPanel();
       prompt.value = REQUEST;
       $("composer").requestSubmit();
@@ -1415,8 +1483,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   say.addEventListener("click", (e) => {
     const f = e.target.closest("[data-ftue]"); if (f) { act(f.dataset.ftue); return; }
-    const i = e.target.closest("[data-intent]"); if (i) { S.intent = i.dataset.intent; S.ftue = 2; renderFtue(); return; }
-    const l = e.target.closest("[data-level]"); if (l) { finishFtue(l.dataset.level); return; }
+    const g = e.target.closest("[data-lang]");
+    if (g) { S.language = g.dataset.lang; say.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b === g))); return; }
+    const t = e.target.closest("[data-task]"); if (t) { pickTask(t.dataset.task); return; }
     const c = e.target.closest("[data-coach]"); if (c) { ackCoach(c.dataset.coach, c.dataset.resp); return; }
     const a = e.target.closest("[data-act]"); if (a) act(a.dataset.act);
   });
@@ -1446,11 +1515,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (S.ftue !== "done") return;
     if (api.on && !say.hidden) { speak(""); return; }
     if (api.on) { askClawd(); return; }
-    if (mobile()) { panel.classList.toggle("open"); return; }
-    if (!say.hidden) { speak(""); return; }
-    speakSmall(level === "guide"
-      ? `Tap anything with an orange dot and I'll explain it. My Lab is in the panel on the right.`
-      : `I'm here if you need me. My Lab and settings are in the panel on the right.`, true);
+    if (!say.hidden && !mobile()) { speak(""); return; }
+    showPanel(!panelOpen);
   });
 
   // ---------- Explain popovers ----------
@@ -1493,11 +1559,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   // The nav entry is the always-there way back to Clawd, even when it is set to Off.
   $("navClawd").addEventListener("click", () => {
     if (S.ftue !== "done") return;
+    if (panelOpen) { showPanel(false); return; }
     if (level === "off") setLevel("useful");
-    if (S.view === "home" && S.phase !== "saved" && S.phase !== "after") openLab();
-    else { clawd.hidden = false; roam("lab_button"); speakSmall(`Here's my Lab and settings, in the panel on the right.`, true); }
+    showPanel(true);
   });
-  $("closeSheet").addEventListener("click", () => panel.classList.remove("open"));
+  $("navNew").addEventListener("click", () => showPanel(false));
+  $("closeSheet").addEventListener("click", () => showPanel(false));
   $("menuBtn").addEventListener("click", () => $("sidebar").classList.add("open"));
   $("closeNav").addEventListener("click", () => $("sidebar").classList.remove("open"));
   $("sidebar").addEventListener("click", (e) => { if (e.target.closest("#navClawd")) $("sidebar").classList.remove("open"); });
@@ -1515,7 +1582,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     $("lv-guide").checked = true;
     main.classList.add("guide");
     $("clawdBack").hidden = true;
-    panel.classList.remove("open");
+    showPanel(false);
     hidePop();
     thread.innerHTML = "";
     prompt.value = "";
