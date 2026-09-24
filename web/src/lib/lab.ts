@@ -1,4 +1,5 @@
-import { cardById, labById } from "./catalog";
+import { cardById, inLanguage, labById } from "./catalog";
+import { t, uiLanguage } from "./i18n";
 import { awardCard } from "./policy";
 import type { CoachEvent, Language, Topic, User } from "./types";
 import { randomUUID } from "node:crypto";
@@ -61,7 +62,9 @@ export function completeLab(user: User, missionId: string, answers: LabAnswers):
   const events: CoachEvent[] = [];
   const card = labById(missionId)?.card;
   if (card && awardCard(user, card, `Completed Lab: ${missionId}`)) {
-    events.push({ id: randomUUID().slice(0, 12), action: "award_card", ref: card, mood: "celebrate", deliver: "now", text: `Mission complete! New card: ${cardById(card)!.title}` });
+    // After the "you" mission this is already in the language the user just picked.
+    const lang = uiLanguage(user);
+    events.push({ id: randomUUID().slice(0, 12), action: "award_card", ref: card, mood: "celebrate", deliver: "now", text: t(lang, "mission_card", { card: inLanguage(cardById(card)!, lang).title }) });
   }
   return { saved, events };
 }

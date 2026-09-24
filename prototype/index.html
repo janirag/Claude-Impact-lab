@@ -58,6 +58,9 @@
   .banner strong { font-weight: 600; letter-spacing: .02em; }
   .banner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .banner button { background: none; border: 1px solid currentColor; border-radius: 6px; padding: 3px 10px; font-size: 12px; color: var(--bg); }
+  .lang-switch { display: inline-flex; border: 1px solid currentColor; border-radius: 6px; overflow: hidden; }
+  .banner .lang-switch button { border: 0; border-radius: 0; padding: 3px 8px; font-weight: 500; letter-spacing: .04em; }
+  .banner .lang-switch button[aria-pressed="true"] { background: var(--bg); color: var(--text); }
 
   .main { display: grid; grid-template-columns: 272px minmax(0, 1fr) 320px; min-height: 0; }
   .main.no-panel { grid-template-columns: 272px minmax(0, 1fr) 0; }
@@ -406,43 +409,46 @@
 
 <div class="app">
   <div class="banner" role="note">
-    <span><strong>Concept prototype</strong> for the Claude Impact Lab hackathon, Barcelona 2026. Not an Anthropic product.</span>
-    <span class="banner-actions"><button type="button" id="weekLater" hidden>One week later</button><button type="button" id="reset">Restart as a new user</button></span>
+    <span data-i18n-html="banner"><strong>Concept prototype</strong> for the Claude Impact Lab hackathon, Barcelona 2026. Not an Anthropic product.</span>
+    <span class="banner-actions">
+      <span class="lang-switch" id="langSwitch" role="group" aria-label="Language" data-i18n-aria="langGroup"><button type="button" data-lang="en" lang="en" title="English">EN</button><button type="button" data-lang="es" lang="es" title="Español">ES</button><button type="button" data-lang="ca" lang="ca" title="Català">CA</button></span>
+      <button type="button" id="weekLater" hidden data-i18n="weekLater">One week later</button><button type="button" id="reset" data-i18n="reset">Restart as a new user</button>
+    </span>
   </div>
 
   <div class="main ftue-on no-panel" id="main">
-    <nav class="sidebar" id="sidebar" aria-label="Main">
+    <nav class="sidebar" id="sidebar" aria-label="Main" data-i18n-aria="navMain">
       <div class="side-top">
-        <button class="top-btn" type="button" aria-label="Toggle sidebar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+        <button class="top-btn" type="button" aria-label="Toggle sidebar" data-i18n-aria="toggleSidebar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
         <span class="lbl hist">
-          <button class="top-btn" type="button" aria-label="Back"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
-          <button class="top-btn dim" type="button" aria-label="Forward"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <button class="top-btn" type="button" aria-label="Back" data-i18n-aria="back"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+          <button class="top-btn dim" type="button" aria-label="Forward" data-i18n-aria="forward"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </span>
-        <span class="lbl mode" role="group" aria-label="Mode">
-          <button class="mode-btn on" type="button" aria-label="Chat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h10a2 2 0 0 1 2 2V13a2 2 0 0 1-2 2H9l-3.5 3v-3H4a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2z"/><path d="M16 9h4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-.5v2.5L16.5 18H13a2 2 0 0 1-2-2"/></svg></button>
-          <button class="mode-btn" type="button" aria-label="Code"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.5 5l-3 14"/></svg></button>
+        <span class="lbl mode" role="group" aria-label="Mode" data-i18n-aria="mode">
+          <button class="mode-btn on" type="button" aria-label="Chat" data-i18n-aria="modeChat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h10a2 2 0 0 1 2 2V13a2 2 0 0 1-2 2H9l-3.5 3v-3H4a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2z"/><path d="M16 9h4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-.5v2.5L16.5 18H13a2 2 0 0 1-2-2"/></svg></button>
+          <button class="mode-btn" type="button" aria-label="Code" data-i18n-aria="modeCode"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.5 5l-3 14"/></svg></button>
         </span>
-        <button class="close-nav" type="button" id="closeNav" aria-label="Close menu">&times;</button>
+        <button class="close-nav" type="button" id="closeNav" aria-label="Close menu" data-i18n-aria="closeMenu">&times;</button>
       </div>
-      <button class="side-btn new active" type="button" id="navNew"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New</span></button>
-      <button class="side-btn clawd-nav" type="button" id="navClawd"><span class="mini-clawd" id="navClawdIcon"></span><span class="lbl">Clawd</span><span class="nav-badge">Lab</span></button>
-      <button class="side-btn" type="button" data-explain="projects"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h16V17a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M5.5 5.5h13"/></svg><span class="lbl">Projects</span></button>
-      <button class="side-btn" type="button" data-explain="artifacts"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 11.5 4 19.5h8z"/><rect x="13.5" y="10.5" width="6.5" height="9" rx="1.5"/></svg><span class="lbl">Artifacts</span></button>
-      <button class="side-btn" type="button" data-explain="scheduled"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="lbl">Scheduled</span></button>
-      <button class="side-btn" type="button" data-explain="design"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.7-1 1.2-1.9-.6-1.1 0-2.3 1.3-2.3h2A3.9 3.9 0 0 0 20.5 12c0-4.7-3.8-8.5-8.5-8.5z"/><circle cx="7.8" cy="11" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="8" r="1"/></svg><span class="lbl">Design</span></button>
-      <button class="side-btn" type="button" data-explain="customize"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17"/></svg><span class="lbl">Customize</span></button>
-      <button class="side-btn more" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span class="lbl">More</span></button>
-      <div class="side-label">Recents</div>
+      <button class="side-btn new active" type="button" id="navNew"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl" data-i18n="navNew">New</span></button>
+      <button class="side-btn clawd-nav" type="button" id="navClawd"><span class="mini-clawd" id="navClawdIcon"></span><span class="lbl">Clawd</span><span class="nav-badge" data-i18n="navLab">Lab</span></button>
+      <button class="side-btn" type="button" data-explain="projects"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h16V17a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M5.5 5.5h13"/></svg><span class="lbl" data-i18n="navProjects">Projects</span></button>
+      <button class="side-btn" type="button" data-explain="artifacts"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 11.5 4 19.5h8z"/><rect x="13.5" y="10.5" width="6.5" height="9" rx="1.5"/></svg><span class="lbl" data-i18n="navArtifacts">Artifacts</span></button>
+      <button class="side-btn" type="button" data-explain="scheduled"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="lbl" data-i18n="navScheduled">Scheduled</span></button>
+      <button class="side-btn" type="button" data-explain="design"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.7-1 1.2-1.9-.6-1.1 0-2.3 1.3-2.3h2A3.9 3.9 0 0 0 20.5 12c0-4.7-3.8-8.5-8.5-8.5z"/><circle cx="7.8" cy="11" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="8" r="1"/></svg><span class="lbl" data-i18n="navDesign">Design</span></button>
+      <button class="side-btn" type="button" data-explain="customize"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17"/></svg><span class="lbl" data-i18n="navCustomize">Customize</span></button>
+      <button class="side-btn more" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span class="lbl" data-i18n="navMore">More</span></button>
+      <div class="side-label" data-i18n="recents">Recents</div>
       <div id="recents"><p class="side-empty">Your chats will appear here.</p></div>
       <div class="me"><span class="avatar" id="avatar">?</span> <span id="meName">Guest</span></div>
     </nav>
 
-    <section class="chat" id="chat" aria-label="Conversation">
+    <section class="chat" id="chat" aria-label="Conversation" data-i18n-aria="conversation">
       <header class="chat-head">
-        <button class="icon-btn menu-btn" type="button" id="menuBtn" aria-label="Open menu">&#9776;</button>
+        <button class="icon-btn menu-btn" type="button" id="menuBtn" aria-label="Open menu" data-i18n-aria="openMenu">&#9776;</button>
         <span class="chat-title" id="chatTitle">New chat</span>
         <span class="pill" data-explain="model">Claude Sonnet</span>
-        <button class="pill" type="button" id="clawdBack" hidden>Clawd is off</button>
+        <button class="pill" type="button" id="clawdBack" hidden data-i18n="clawdOff">Clawd is off</button>
       </header>
 
       <div class="thread" id="thread">
@@ -453,28 +459,28 @@
         <form class="composer" id="composer">
           <div class="attach" id="attach" hidden></div>
           <input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
-          <textarea id="prompt" rows="4" aria-label="Message Claude" placeholder="How can I help you today?"></textarea>
+          <textarea id="prompt" rows="4" aria-label="Message Claude" placeholder="How can I help you today?" data-i18n-aria="messageClaude" data-i18n-ph="placeholder"></textarea>
           <div class="composer-row">
-            <button class="icon-btn" type="button" data-explain="attach" aria-label="Add a file">+</button>
-            <button class="icon-btn" type="button" data-explain="connectors" aria-label="Connectors">&#8651;</button>
-            <button class="send" id="send" type="submit" aria-label="Send">&#8593;</button>
+            <button class="icon-btn" type="button" data-explain="attach" aria-label="Add a file" data-i18n-aria="addFile">+</button>
+            <button class="icon-btn" type="button" data-explain="connectors" aria-label="Connectors" data-i18n-aria="connectors">&#8651;</button>
+            <button class="send" id="send" type="submit" aria-label="Send" data-i18n-aria="send">&#8593;</button>
           </div>
         </form>
       </div>
 
       <div class="clawd big" id="clawd">
-        <button class="clawd-body" type="button" id="clawdBody" aria-label="Clawd"></button>
+        <button class="clawd-body" type="button" id="clawdBody" aria-label="Clawd" data-i18n-aria="clawd"></button>
         <div class="say" id="say" role="status" hidden></div>
       </div>
     </section>
 
-    <aside class="panel" id="panel" aria-label="Clawd settings and Lab">
+    <aside class="panel" id="panel" aria-label="Clawd settings and Lab" data-i18n-aria="panelAria">
       <div class="panel-head">
         <div class="panel-top">
           <h2>Clawd</h2>
-          <button class="close-sheet" type="button" id="closeSheet" aria-label="Close Clawd's panel">&times;</button>
+          <button class="close-sheet" type="button" id="closeSheet" aria-label="Close" data-i18n-aria="close">&times;</button>
         </div>
-        <div class="levels" role="radiogroup" aria-label="How much help">
+        <div class="levels" role="radiogroup" aria-label="How much help" data-i18n-aria="howMuchHelp">
           <input type="radio" name="level" id="lv-guide" value="guide" checked><label for="lv-guide">Guide me</label>
           <input type="radio" name="level" id="lv-useful" value="useful"><label for="lv-useful">Only when useful</label>
           <input type="radio" name="level" id="lv-off" value="off"><label for="lv-off">Off</label>
@@ -500,7 +506,7 @@ Disculpe las molestias.
 Un saludo,
 Carmen López
 Administración`;
-  const REQUEST = "Translate this to Catalan:\n\n" + DRAFT;
+  const request = () => t("request") + "\n\n" + DRAFT;
 
   const OFFLINE_BEFORE = `Aquí tens la traducció al català:
 
@@ -516,7 +522,7 @@ Administració
 
 Si vols, també puc fer-lo més formal o adaptar-lo a un altre to. Vols que hi afegeixi alguna cosa més?`;
 
-  const OFFLINE_AFTER = `Benvolgut Sr. Puig,
+  const offlineAfter = () => `Benvolgut Sr. Puig,
 
 Gràcies per fer-nos-ho saber. Hem revisat la factura núm. 2026-0418, del 12 de setembre. L'import correcte és d'1.180,00 €, tal com figura al pressupost acceptat. Els 60,00 € de diferència corresponien a despeses d'enviament que no s'havien d'incloure. Li enviarem la factura corregida divendres.
 
@@ -526,102 +532,559 @@ Atentament,
 Carmen López
 Administració
 ---
-Notes for you
-• "divendres" (Friday): Sr. Puig may not know which Friday. Consider "divendres 26 de setembre".
-• The invoice number, amounts and dates are unchanged.`;
+${t("notes")}
+${t("notesAfter")}`;
 
-  const EXPLAIN = {
-    projects:   ["Projects", "A folder where Claude keeps the files and instructions for one piece of work.", null],
-    artifacts:  ["Artifacts", "Things Claude made for you that you can keep, like a document, a table or a small app.", null],
-    scheduled:  ["Scheduled", "Tasks Claude does for you at set times, like a Monday summary of your emails.", null],
-    design:     ["Design", "A canvas where Claude helps you make visuals, like a poster or a slide.", null],
-    customize:  ["Customize", "Tell Claude how to talk to you and what to remember about you. The Lab fills this in for you.", null],
-    model:      ["Claude Sonnet", "Which version of Claude answers you. You don't need to change this.", null],
-    attach:     ["Add a file", "Add a photo or a PDF, like a letter or an invoice, for Claude to read.", null],
-    connectors: ["Connectors", "Let Claude look things up in apps you already use, like your email or calendar.", null],
-    memory:     ["Memory updated", "Claude saved something about you, so you don't have to repeat it every time.", null],
-    skill:      ["Skill saved", "A recipe Claude follows every time you ask for this task.", null]
+  // ---------- Strings: English, Spanish, Catalan ----------
+  // Every word on screen comes from here through t(key) (plain strings) or tx(key) (lists and objects).
+  // Ids match web/src/lib/catalog.ts, which holds the same text for what the backend sends (cards, challenges).
+  // Spanish and Catalan use "tú"/"tu". Keep the three tables with the same keys (web/test/i18n.test.ts checks it).
+  const I18N = {
+    en: {
+      banner: "<strong>Concept prototype</strong> for the Claude Impact Lab hackathon, Barcelona 2026. Not an Anthropic product.",
+      weekLater: "One week later", reset: "Restart as a new user", langGroup: "Language",
+      navMain: "Main", toggleSidebar: "Toggle sidebar", back: "Back", forward: "Forward", mode: "Mode", modeChat: "Chat", modeCode: "Code",
+      closeMenu: "Close menu", navNew: "New", navLab: "Lab", navProjects: "Projects", navArtifacts: "Artifacts", navScheduled: "Scheduled",
+      navDesign: "Design", navCustomize: "Customize", navMore: "More", recents: "Recents", recentsEmpty: "Your chats will appear here.", guest: "Guest",
+      conversation: "Conversation", openMenu: "Open menu", newChat: "New chat", clawdOff: "Clawd is off",
+      messageClaude: "Message Claude", placeholder: "How can I help you today?", addFile: "Add a file", connectors: "Connectors", send: "Send",
+      clawd: "Clawd", askClawd: "Ask Clawd", panelAria: "Clawd settings and Lab", close: "Close", howMuchHelp: "How much help",
+      pdfTooBig: "That PDF is too big for me (5 MB max). Could you send just the pages that matter?",
+      badPhoto: "I couldn't read that picture. Could you try another one?",
+      removeFile: "Remove file", readingPdf: "Reading your PDF...", readingPhoto: "Reading your photo...", thinking: "Thinking...",
+      offlineBackend: "Offline backend", offlineExample: "Example answer, offline",
+      memoryUpdated: "Memory updated", challengeStarted: "Challenge started", challengeStartedNamed: "Challenge started: {title}", newCard: "New card",
+      challengeOpen: "I'll ask you how it went next time.", challengeDone: "Completed. You earned a card for it.",
+      statusDone: "Done", statusOpen: "Open", statusStart: "Start", statusSoon: "Soon",
+      noCards: "No cards yet. You earn them by doing things, not by studying.",
+      yourName: "Your name", language: "Language", answers: "Answers", learnedFrom: "Learned from {from}", fromChat: "chat", skill: "Skill",
+      forget: "Forget {what}", nothingYet: "Nothing yet. I only remember what you say yes to.",
+      challengesLabel: "Real-life challenges", cardsLabel: "Your cards · {n} of {total}", remembersLabel: "What Clawd remembers",
+      copyProfile: "Copy my AI profile", deal: "Deal! {prompt} I'll ask you how it went next time.",
+      copied: "Copied! Paste it into any assistant's custom instructions, even ChatGPT or Gemini.",
+      copyThis: "Copy this into any assistant's custom instructions:", done: "Done",
+      weekLaterChip: "One week later...", welcomeBack: "Welcome back, {name}! What do you need help with today?",
+      welcomeBackAnon: "Welcome back! What do you need help with today?",
+      askTitle: "Ask me anything", askHelp: "About Claude, the Lab, or something I said.", askPlaceholder: "e.g. What's a skill?",
+      ask: "Ask", labAndSettings: "Lab and settings", letMeThink: "Hmm, let me think...",
+      noAnswer: "I couldn't come up with an answer just now. Try again in a moment?", askMore: "Ask more", gotIt: "Got it",
+      continue: "Continue", 
+      niceToMeet: "Nice to meet you, {name}.", niceToMeetAnon: "Nice to meet you.", 
+      labIntro: "Here's my Lab. Pick a mission when you have two minutes, or just start chatting.",
+      tapDots: "Tap anything with an orange dot, like this one, and I'll explain it in one line.",
+      morning: "Good morning", afternoon: "Good afternoon", evening: "Good evening", greetName: "{part}, {name}",
+      helpToday: "What do you need help with today?", suggestTranslate: "Translate an email to Catalan",
+      request: "Translate this to Catalan:",
+      takePhoto: "Take a photo of it, or pick one from your phone. Then press send.",
+      addDetails: "Add a few details at the end, then press send.",
+      notes: "Notes for you", yourPhoto: "Your photo", before: "Before", afterLab: "After the Lab",
+      titleTranslate: "Translate client email", titlePdf: "Read a PDF", titlePhoto: "Read a photo",
+      compare: "Compare before and after", sameEmail: "Same email, same request. This time I knew how you write to clients.",
+      nudge: "That's a word-for-word translation. Tell me how you write to clients and I'll get it right every time. Two minutes?",
+      teachMe: "Teach me in the Lab", notNow: "Not now", dontSuggest: "Don't suggest this again",
+      stepDown: "Looks like you'd rather get on with your work. Want me to show up only when it's useful?", keepGuiding: "Keep guiding me",
+      panelTip: "Tap anything with an orange dot for a one-line explanation.", labMissions: "Lab missions",
+      labKicker: "Lab · separate conversation", labNote: "Practice here never touches your real chat. You keep what you save.",
+      leaveLab: "Leave the Lab", save: "Save", next: "Next",
+      missionComplete: "Mission complete", fromNowOn: "From now on, Claude will:", backToChat: "Back to my chat",
+      skillSaved: "Skill saved", skillSavedClients: "Skill saved: client email to Catalan", tryIt: "Try it on your email",
+      inLab: "We're in the Lab now. Nothing here touches your chat.", panelRight: "My Lab and settings are in the panel on the right.",
+      savedClients: "Saved! I'll remember this every time you write to a client.",
+      clawdGuide: "Tap anything with an orange dot and I'll explain it. My Lab is in the panel on the right.",
+      clawdUseful: "I'm here if you need me. My Lab and settings are in the panel on the right.",
+      navHere: "Here's my Lab and settings, in the panel on the right.",
+      pickFile: "Choose a photo or PDF", tryInLab: "Try it in the Lab",
+      notesAfter: '• "divendres" (Friday): Sr. Puig may not know which Friday. Consider "divendres 26 de setembre".\n• The invoice number, amounts and dates are unchanged.',
+      ftueLead: "Hola! I'm Clawd, an AI helper.",
+      ftueText: "I'll help you get good answers from Claude. It takes one minute, and no account is needed.",
+      whichLanguage: "Which language should I use?",
+      privacyNote: "What you tell me stays in this browser. You can delete it any time.",
+      skipForNow: "Skip for now",
+      callYou: "What should I call you?",
+      callYouNote: "So I can greet you when you come back. It's optional.",
+      nickname: "Your first name or a nickname",
+      helpWith: "What would you like Claude to help you with?",
+      pickMany: "Pick as many as you like.",
+      somethingElse: "Something else? Type it here",
+      somethingElseAria: "Something else Claude could help you with",
+      howAnswers: "How do you like answers?",
+      howAnswersNote: "Claude will explain things this way.",
+      guideLead: "Here's your guide for Claude",
+      guideText: "Claude reads this before every answer, so you don't have to repeat yourself. You can change it any time in my panel.",
+      guideDev: "In Claude Code this is called a CLAUDE.md (or AGENTS.md) file.",
+      guideAria: "Your guide for Claude",
+      looksGood: "Looks good",
+      edit: "Edit",
+      guideSaved: "Your guide is saved. ",
+      quietUseful: "I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.",
+      guidePanelNote: "Claude reads this before every answer. In Claude Code it's your CLAUDE.md (or AGENTS.md).",
+      changeIt: "Change it",
+      guideReady: "Your guide is ready",
+      guideReads: "Claude will read this before every answer:",
+      savedGuide: "Saved! Claude will follow your guide from now on.",
+      searchingOnline: "Checking the latest information online...",
+      guideIam: "I'm {name}.",
+      guideAlso: "Also: {text}.",
+      guideAnswerIn: "Answer in {lang}.",
+      guideLines: { helpWith: "Help me with:", discover: "Help me discover what you can do.", doubleCheck: "For anything important, tell me what to double-check and who to ask." },
+      // [button label, how the guide says it] ("explore" is not written into the guide)
+      topics: {
+        paperwork: ["Understand letters and paperwork", "letters and paperwork"], health: ["Health questions", "health questions"],
+        money: ["Money, bills and taxes", "money, bills and taxes"], home: ["Home and rent", "home and rent"],
+        writing: ["Write messages or emails", "writing messages and emails"], explore: ["Show me what it can do", ""]
+      },
+      // [label, hint, the line in their guide]
+      answerStyles: {
+        short: ["Short and simple", "Just the key points", "Keep answers short and simple."],
+        steps: ["Step by step", "One thing at a time, in order", "Explain things step by step."],
+        detailed: ["With all the details", "The full picture", "Give me all the details."]
+      },
+      langNames: { ca: "Catalan", es: "Spanish", en: "English" },
+      styles: { short: "Short", steps: "Step by step", detailed: "Detailed", visual: "Visual" },
+      levels: {
+        guide:  ["Guide me", "I explain things as you go and suggest short lessons."],
+        useful: ["Only when useful", "I stay quiet and only show up when I can save you time."],
+        off:    ["Off", "No tips, no suggestions. You can turn me back on any time."]
+      },
+      explain: {
+        projects:   ["Projects", "A folder where Claude keeps the files and instructions for one piece of work."],
+        artifacts:  ["Artifacts", "Things Claude made for you that you can keep, like a document, a table or a small app."],
+        scheduled:  ["Scheduled", "Tasks Claude does for you at set times, like a Monday summary of your emails."],
+        design:     ["Design", "A canvas where Claude helps you make visuals, like a poster or a slide."],
+        customize:  ["Customize", "Tell Claude how to talk to you and what to remember about you. The Lab fills this in for you."],
+        model:      ["Claude Sonnet", "Which version of Claude answers you. You don't need to change this."],
+        attach:     ["Add a file", "Add a photo or a PDF, like a letter or an invoice, for Claude to read."],
+        connectors: ["Connectors", "Let Claude look things up in apps you already use, like your email or calendar."],
+        memory:     ["Memory updated", "Claude saved something about you, so you don't have to repeat it every time."],
+        skill:      ["Skill saved", "A recipe Claude follows every time you ask for this task."]
+      },
+      missions: {
+        clients: ["Teach Claude how you write to clients", "Your tone and rules. 2 min"],
+        you:     ["Write your guide for Claude", "What you need help with and how you like answers. 1 min"],
+        connect: ["Connect a tool you use", "Claude reads your calendar. 3 min"]
+      },
+      // [title, hint, first message]
+      situations: {
+        letter:   ["A letter I don't understand", "Send a photo, I'll explain it", "I got this letter. What does it say and what do I need to do?"],
+        bill:     ["Check a bill", "Anything unusual?", "Can you check this bill? Is anything unusual?"],
+        rent:     ["A rental contract", "What to watch out for", "This is my rental contract. What should I watch out for?"],
+        doctor:   ["Prepare for the doctor", "What to say and ask", "I have a doctor's appointment. Help me prepare. It's about: "],
+        trip:     ["Plan a trip", "A simple plan with costs", "Help me plan a trip to "],
+        homework: ["Help with homework", "So you can help your child", "Help me understand this homework so I can explain it to my child."]
+      },
+      // Lab steps: labels for LABS' options (same order), and `said`: the "From now on, Claude will:" line for each.
+      labs: {
+        clients: { title: "Teach Claude how you write to clients", steps: {
+          role: { q: "Who are you when you write to clients?", help: "Pick the closest one.",
+            options: ["Office admin", "Accounts", "Sales", "Reception"],
+            said: ["know you write to clients as office admin", "know you write to clients as accounts", "know you write to clients as sales", "know you write to clients as reception"] },
+          tone: { q: "How should your emails sound?", help: "Claude will write every client email this way.",
+            options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"],
+            said: ["use this tone: warm and formal (vostè)", "use this tone: friendly (tu)", "use this tone: short and direct"] },
+          rules: { q: "What must never go wrong?", help: "Pick as many as you like.",
+            options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"],
+            said: ["keep prices and dates exactly as you wrote them", "flag anything a client could misread", "only give you the email, ready to paste", "keep your signature"] }
+        } },
+        you: { title: "Write your guide for Claude", steps: {
+          helps: { q: "What would you like Claude to help you with?", help: "Pick as many as you like.",
+            options: ["Letters and paperwork", "Health questions", "Money, bills and taxes", "Home and rent", "Writing messages and emails"] },
+          style: { q: "How do you like answers?", help: "Pick one.", options: ["Short and simple", "Step by step", "With all the details"] },
+          always: { q: "What should Claude always do for you?", help: "Pick as many as you like.",
+            options: ["Tell me what to double-check and who to ask", "Use plain words, no jargon", "Keep dates and amounts exactly as written", "Remind me not to share ID or bank numbers"] },
+          language: { q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", options: ["Català", "Español", "English"] }
+        } }
+      }
+    },
+
+    es: {
+      banner: "<strong>Prototipo conceptual</strong> para el hackathon Claude Impact Lab, Barcelona 2026. No es un producto de Anthropic.",
+      weekLater: "Una semana después", reset: "Empezar como usuario nuevo", langGroup: "Idioma",
+      navMain: "Principal", toggleSidebar: "Mostrar u ocultar la barra lateral", back: "Atrás", forward: "Adelante", mode: "Modo", modeChat: "Chat", modeCode: "Código",
+      closeMenu: "Cerrar menú", navNew: "Nuevo", navLab: "Lab", navProjects: "Proyectos", navArtifacts: "Artefactos", navScheduled: "Programadas",
+      navDesign: "Diseño", navCustomize: "Personalizar", navMore: "Más", recents: "Recientes", recentsEmpty: "Aquí aparecerán tus chats.", guest: "Visitante",
+      conversation: "Conversación", openMenu: "Abrir menú", newChat: "Nuevo chat", clawdOff: "Clawd está apagado",
+      messageClaude: "Escribe a Claude", placeholder: "¿En qué te puedo ayudar hoy?", addFile: "Añadir un archivo", connectors: "Conectores", send: "Enviar",
+      clawd: "Clawd", askClawd: "Pregunta a Clawd", panelAria: "Ajustes de Clawd y Lab", close: "Cerrar", howMuchHelp: "Cuánta ayuda",
+      pdfTooBig: "Este PDF es demasiado grande para mí (máx. 5 MB). ¿Puedes enviar solo las páginas importantes?",
+      badPhoto: "No he podido leer esa imagen. ¿Pruebas con otra?",
+      removeFile: "Quitar el archivo", readingPdf: "Leyendo tu PDF...", readingPhoto: "Leyendo tu foto...", thinking: "Pensando...",
+      offlineBackend: "Servidor sin conexión", offlineExample: "Respuesta de ejemplo, sin conexión",
+      memoryUpdated: "Memoria actualizada", challengeStarted: "Reto empezado", challengeStartedNamed: "Reto empezado: {title}", newCard: "Carta nueva",
+      challengeOpen: "La próxima vez te preguntaré qué tal te fue.", challengeDone: "Completado. Te has ganado una carta.",
+      statusDone: "Hecho", statusOpen: "En curso", statusStart: "Empezar", statusSoon: "Pronto",
+      noCards: "Aún no tienes cartas. Las ganas haciendo cosas, no estudiando.",
+      yourName: "Tu nombre", language: "Idioma", answers: "Respuestas", learnedFrom: "Aprendido en el {from}", fromChat: "chat", skill: "Habilidad",
+      forget: "Olvidar {what}", nothingYet: "Nada todavía. Solo recuerdo aquello a lo que dices que sí.",
+      challengesLabel: "Retos de la vida real", cardsLabel: "Tus cartas · {n} de {total}", remembersLabel: "Lo que Clawd recuerda",
+      copyProfile: "Copiar mi perfil de IA", deal: "¡Trato hecho! {prompt} La próxima vez te preguntaré qué tal te fue.",
+      copied: "¡Copiado! Pégalo en las instrucciones personalizadas de cualquier asistente, incluso ChatGPT o Gemini.",
+      copyThis: "Copia esto en las instrucciones personalizadas de cualquier asistente:", done: "Listo",
+      weekLaterChip: "Una semana después...", welcomeBack: "¡Hola de nuevo, {name}! ¿Con qué te ayudo hoy?",
+      welcomeBackAnon: "¡Hola de nuevo! ¿Con qué te ayudo hoy?",
+      askTitle: "Pregúntame lo que quieras", askHelp: "Sobre Claude, el Lab o algo que haya dicho.", askPlaceholder: "p. ej., ¿Qué es una habilidad?",
+      ask: "Preguntar", labAndSettings: "Lab y ajustes", letMeThink: "Mmm, déjame pensar...",
+      noAnswer: "Ahora mismo no se me ocurre nada. ¿Lo intentas otra vez en un momento?", askMore: "Preguntar más", gotIt: "Entendido",
+      continue: "Continuar", 
+      niceToMeet: "¡Un placer, {name}!", niceToMeetAnon: "¡Un placer!", 
+      labIntro: "Aquí tienes mi Lab. Elige una misión cuando tengas dos minutos, o ponte a chatear directamente.",
+      tapDots: "Toca cualquier cosa con un punto naranja, como este, y te la explico en una línea.",
+      morning: "Buenos días", afternoon: "Buenas tardes", evening: "Buenas noches", greetName: "{part}, {name}",
+      helpToday: "¿Con qué te ayudo hoy?", suggestTranslate: "Traducir un correo al catalán",
+      request: "Traduce esto al catalán:",
+      takePhoto: "Hazle una foto o elige una del móvil, y luego envíala.",
+      addDetails: "Añade algunos detalles al final y luego envíalo.",
+      notes: "Notas para ti", yourPhoto: "Tu foto", before: "Antes", afterLab: "Después del Lab",
+      titleTranslate: "Traducir correo de cliente", titlePdf: "Leer un PDF", titlePhoto: "Leer una foto",
+      compare: "Comparar antes y después", sameEmail: "Mismo correo, misma petición. Esta vez ya sabía cómo escribes a tus clientes.",
+      nudge: "Esta traducción es palabra por palabra. Cuéntame cómo escribes a tus clientes y la clavaré siempre. ¿Tienes dos minutos?",
+      teachMe: "Enséñame en el Lab", notNow: "Ahora no", dontSuggest: "No me lo vuelvas a sugerir",
+      stepDown: "Parece que prefieres seguir con lo tuyo. ¿Quieres que aparezca solo cuando sea útil?", keepGuiding: "Sigue guiándome",
+      panelTip: "Toca cualquier cosa con un punto naranja y te la explico en una línea.", labMissions: "Misiones del Lab",
+      labKicker: "Lab · conversación aparte", labNote: "Lo que practiques aquí no toca tu chat real. Te quedas con lo que guardes.",
+      leaveLab: "Salir del Lab", save: "Guardar", next: "Siguiente",
+      missionComplete: "¡Misión cumplida!", fromNowOn: "A partir de ahora, Claude:", backToChat: "Volver a mi chat",
+      skillSaved: "Habilidad guardada", skillSavedClients: "Habilidad guardada: correo de cliente al catalán", tryIt: "Pruébalo con tu correo",
+      inLab: "Ya estamos en el Lab. Nada de lo que hagas aquí toca tu chat.", panelRight: "Mi Lab y los ajustes están en el panel de la derecha.",
+      savedClients: "¡Guardado! Lo recordaré cada vez que escribas a un cliente.",
+      clawdGuide: "Toca cualquier cosa con un punto naranja y te la explico. Mi Lab está en el panel de la derecha.",
+      clawdUseful: "Aquí estoy si me necesitas. Mi Lab y los ajustes están en el panel de la derecha.",
+      navHere: "Aquí tienes mi Lab y los ajustes, en el panel de la derecha.",
+      pickFile: "Elegir una foto o un PDF", tryInLab: "Probarlo en el Lab",
+      notesAfter: '• "divendres" (viernes): puede que el Sr. Puig no sepa qué viernes. Mejor "divendres 26 de setembre".\n• El número de factura, los importes y las fechas no han cambiado.',
+      ftueLead: "¡Hola! Soy Clawd, un ayudante de IA.",
+      ftueText: "Te ayudo a sacar buenas respuestas de Claude. Es solo un minuto y no necesitas cuenta.",
+      whichLanguage: "¿En qué idioma te hablo?",
+      privacyNote: "Lo que me cuentes se queda en este navegador. Puedes borrarlo cuando quieras.",
+      skipForNow: "Saltar por ahora",
+      callYou: "¿Cómo te llamo?",
+      callYouNote: "Así te saludo cuando vuelvas. Es opcional.",
+      nickname: "Tu nombre o un apodo",
+      helpWith: "¿En qué te gustaría que Claude te ayudara?",
+      pickMany: "Elige todas las que quieras.",
+      somethingElse: "¿Otra cosa? Escríbela aquí",
+      somethingElseAria: "Otra cosa en la que Claude te pueda ayudar",
+      howAnswers: "¿Cómo te gustan las respuestas?",
+      howAnswersNote: "Claude te lo explicará así.",
+      guideLead: "Esta es tu guía para Claude",
+      guideText: "Claude la lee antes de cada respuesta, así no tienes que repetirte. Puedes cambiarla cuando quieras en mi panel.",
+      guideDev: "En Claude Code esto se llama un archivo CLAUDE.md (o AGENTS.md).",
+      guideAria: "Tu guía para Claude",
+      looksGood: "Me parece bien",
+      edit: "Editar",
+      guideSaved: "Tu guía está guardada. ",
+      quietUseful: "Me quedaré callado y solo apareceré cuando pueda ahorrarte tiempo. Toca Clawd en el menú lateral para cambiarlo.",
+      guidePanelNote: "Claude la lee antes de cada respuesta. En Claude Code es tu CLAUDE.md (o AGENTS.md).",
+      changeIt: "Cambiarla",
+      guideReady: "Tu guía está lista",
+      guideReads: "Claude leerá esto antes de cada respuesta:",
+      savedGuide: "¡Guardado! A partir de ahora Claude seguirá tu guía.",
+      searchingOnline: "Consultando la información más reciente en internet...",
+      guideIam: "Soy {name}.",
+      guideAlso: "También: {text}.",
+      guideAnswerIn: "Respóndeme en {lang}.",
+      guideLines: { helpWith: "Ayúdame con:", discover: "Ayúdame a descubrir lo que sabes hacer.", doubleCheck: "Para todo lo importante, dime qué debo comprobar y a quién preguntar." },
+      topics: {
+        paperwork: ["Entender cartas y papeleo", "cartas y papeleo"], health: ["Preguntas de salud", "preguntas de salud"],
+        money: ["Dinero, facturas e impuestos", "dinero, facturas e impuestos"], home: ["Casa y alquiler", "casa y alquiler"],
+        writing: ["Escribir mensajes o correos", "escribir mensajes y correos"], explore: ["Enséñame lo que sabe hacer", ""]
+      },
+      answerStyles: {
+        short: ["Cortas y sencillas", "Solo lo importante", "Dame respuestas cortas y sencillas."],
+        steps: ["Paso a paso", "Una cosa cada vez, en orden", "Explícamelo todo paso a paso."],
+        detailed: ["Con todos los detalles", "La imagen completa", "Dame todos los detalles."]
+      },
+      langNames: { ca: "catalán", es: "español", en: "inglés" },
+      styles: { short: "Cortas", steps: "Paso a paso", detailed: "Detalladas", visual: "Visuales" },
+      levels: {
+        guide:  ["Guíame", "Te explico las cosas sobre la marcha y te propongo lecciones cortas."],
+        useful: ["Solo si es útil", "Me quedo en silencio y solo aparezco cuando puedo ahorrarte tiempo."],
+        off:    ["Apagado", "Sin consejos ni sugerencias. Puedes volver a activarme cuando quieras."]
+      },
+      explain: {
+        projects:   ["Proyectos", "Una carpeta donde Claude guarda los archivos y las instrucciones de un trabajo concreto."],
+        artifacts:  ["Artefactos", "Cosas que Claude ha hecho para ti y que puedes guardar, como un documento, una tabla o una pequeña app."],
+        scheduled:  ["Programadas", "Tareas que Claude hace por ti a horas fijas, como un resumen de tus correos cada lunes."],
+        design:     ["Diseño", "Un lienzo donde Claude te ayuda a crear imágenes, como un cartel o una diapositiva."],
+        customize:  ["Personalizar", "Dile a Claude cómo hablarte y qué recordar de ti. El Lab lo rellena por ti."],
+        model:      ["Claude Sonnet", "Qué versión de Claude te responde. No hace falta que la cambies."],
+        attach:     ["Añadir un archivo", "Añade una foto o un PDF, como una carta o una factura, para que Claude lo lea."],
+        connectors: ["Conectores", "Deja que Claude consulte las apps que ya usas, como tu correo o tu calendario."],
+        memory:     ["Memoria actualizada", "Claude ha guardado algo sobre ti para que no tengas que repetirlo cada vez."],
+        skill:      ["Habilidad guardada", "Una receta que Claude sigue cada vez que le pides esta tarea."]
+      },
+      missions: {
+        clients: ["Enseña a Claude cómo escribes a tus clientes", "Tu tono y tus normas. 2 min"],
+        you:     ["Escribe tu guía para Claude", "En qué te puede ayudar y cómo te gustan las respuestas. 1 min"],
+        connect: ["Conecta una herramienta que uses", "Claude lee tu calendario. 3 min"]
+      },
+      situations: {
+        letter:   ["Una carta que no entiendo", "Envía una foto y te la explico", "Me ha llegado esta carta. ¿Qué dice y qué tengo que hacer?"],
+        bill:     ["Revisar una factura", "¿Hay algo raro?", "¿Puedes revisar esta factura? ¿Hay algo raro?"],
+        rent:     ["Un contrato de alquiler", "Qué debes vigilar", "Este es mi contrato de alquiler. ¿Qué debo vigilar?"],
+        doctor:   ["Preparar la visita al médico", "Qué contar y qué preguntar", "Tengo cita con el médico. Ayúdame a prepararla. Es por: "],
+        trip:     ["Planear un viaje", "Un plan sencillo con costes", "Ayúdame a planear un viaje a "],
+        homework: ["Ayuda con los deberes", "Para que puedas ayudar a tus hijos", "Ayúdame a entender estos deberes para poder explicárselos a mi hijo."]
+      },
+      labs: {
+        clients: { title: "Enseña a Claude cómo escribes a tus clientes", steps: {
+          role: { q: "¿Quién eres cuando escribes a clientes?", help: "Elige la opción más parecida.",
+            options: ["Administración", "Contabilidad", "Ventas", "Recepción"],
+            said: ["sabrá que escribes a clientes desde administración", "sabrá que escribes a clientes desde contabilidad", "sabrá que escribes a clientes desde ventas", "sabrá que escribes a clientes desde recepción"] },
+          tone: { q: "¿Cómo deben sonar tus correos?", help: "Claude escribirá así todos los correos a clientes.",
+            options: ["Cordial y formal (vostè)", "Cercano (tu)", "Breve y directo"],
+            said: ["usará este tono: cordial y formal (vostè)", "usará este tono: cercano (tu)", "usará este tono: breve y directo"] },
+          rules: { q: "¿Qué no puede fallar nunca?", help: "Elige todas las que quieras.",
+            options: ["Mantener precios y fechas tal como los escribí", "Avisar de todo lo que un cliente pueda malinterpretar", "Darme solo el correo, listo para pegar", "Mantener mi firma"],
+            said: ["mantendrá precios y fechas tal como los escribiste", "te avisará de todo lo que un cliente pueda malinterpretar", "te dará solo el correo, listo para pegar", "mantendrá tu firma"] }
+        } },
+        you: { title: "Escribe tu guía para Claude", steps: {
+          helps: { q: "¿En qué te gustaría que Claude te ayudara?", help: "Elige todas las que quieras.",
+            options: ["Cartas y papeleo", "Preguntas de salud", "Dinero, facturas e impuestos", "Casa y alquiler", "Escribir mensajes y correos"] },
+          style: { q: "¿Cómo te gustan las respuestas?", help: "Elige una.", options: ["Cortas y sencillas", "Paso a paso", "Con todos los detalles"] },
+          always: { q: "¿Qué debería hacer Claude siempre por ti?", help: "Elige todas las que quieras.",
+            options: ["Decirme qué comprobar y a quién preguntar", "Usar palabras sencillas, sin tecnicismos", "Mantener fechas e importes tal como están escritos", "Recordarme que no comparta el DNI ni datos del banco"] },
+          language: { q: "¿En qué idioma te respondo?", help: "Lo usaré salvo que escribas en otro.", options: ["Català", "Español", "English"] }
+        } }
+      }
+    },
+
+    ca: {
+      banner: "<strong>Prototip conceptual</strong> per al hackathon Claude Impact Lab, Barcelona 2026. No és un producte d'Anthropic.",
+      weekLater: "Una setmana després", reset: "Torna a començar com a usuari nou", langGroup: "Llengua",
+      navMain: "Principal", toggleSidebar: "Mostra o amaga la barra lateral", back: "Enrere", forward: "Endavant", mode: "Mode", modeChat: "Xat", modeCode: "Codi",
+      closeMenu: "Tanca el menú", navNew: "Nou", navLab: "Lab", navProjects: "Projectes", navArtifacts: "Artefactes", navScheduled: "Programades",
+      navDesign: "Disseny", navCustomize: "Personalitza", navMore: "Més", recents: "Recents", recentsEmpty: "Aquí apareixeran els teus xats.", guest: "Visitant",
+      conversation: "Conversa", openMenu: "Obre el menú", newChat: "Xat nou", clawdOff: "Clawd està apagat",
+      messageClaude: "Escriu a Claude", placeholder: "En què et puc ajudar avui?", addFile: "Afegeix un fitxer", connectors: "Connectors", send: "Envia",
+      clawd: "Clawd", askClawd: "Pregunta a Clawd", panelAria: "Configuració de Clawd i Lab", close: "Tanca", howMuchHelp: "Quanta ajuda",
+      pdfTooBig: "Aquest PDF és massa gran per a mi (màx. 5 MB). Pots enviar només les pàgines que importen?",
+      badPhoto: "No he pogut llegir aquesta imatge. En proves una altra?",
+      removeFile: "Treu el fitxer", readingPdf: "Llegint el teu PDF...", readingPhoto: "Llegint la teva foto...", thinking: "Pensant...",
+      offlineBackend: "Servidor sense connexió", offlineExample: "Resposta d'exemple, sense connexió",
+      memoryUpdated: "Memòria actualitzada", challengeStarted: "Repte començat", challengeStartedNamed: "Repte començat: {title}", newCard: "Carta nova",
+      challengeOpen: "La propera vegada et preguntaré com t'ha anat.", challengeDone: "Completat. T'has guanyat una carta.",
+      statusDone: "Fet", statusOpen: "En curs", statusStart: "Comença", statusSoon: "Aviat",
+      noCards: "Encara no tens cartes. Les guanyes fent coses, no estudiant.",
+      yourName: "El teu nom", language: "Llengua", answers: "Respostes", learnedFrom: "Après al {from}", fromChat: "xat", skill: "Habilitat",
+      forget: "Oblida {what}", nothingYet: "Res encara. Només recordo allò a què dius que sí.",
+      challengesLabel: "Reptes de la vida real", cardsLabel: "Les teves cartes · {n} de {total}", remembersLabel: "El que recorda Clawd",
+      copyProfile: "Copia el meu perfil d'IA", deal: "Som-hi! {prompt} La propera vegada et preguntaré com t'ha anat.",
+      copied: "Copiat! Enganxa'l a les instruccions personalitzades de qualsevol assistent, fins i tot ChatGPT o Gemini.",
+      copyThis: "Copia això a les instruccions personalitzades de qualsevol assistent:", done: "Fet",
+      weekLaterChip: "Una setmana després...", welcomeBack: "Hola de nou, {name}! Amb què t'ajudo avui?",
+      welcomeBackAnon: "Hola de nou! Amb què t'ajudo avui?",
+      askTitle: "Pregunta'm el que vulguis", askHelp: "Sobre Claude, el Lab o alguna cosa que hagi dit.", askPlaceholder: "p. ex., Què és una habilitat?",
+      ask: "Pregunta", labAndSettings: "Lab i configuració", letMeThink: "Mmm, deixa'm pensar...",
+      noAnswer: "Ara mateix no se m'acut res. Ho tornes a provar d'aquí a una estona?", askMore: "Pregunta més", gotIt: "Entesos",
+      continue: "Continua", 
+      niceToMeet: "Molt de gust, {name}!", niceToMeetAnon: "Molt de gust!", 
+      labIntro: "Aquí tens el meu Lab. Tria una missió quan tinguis dos minuts, o posa't a xatejar directament.",
+      tapDots: "Toca qualsevol cosa amb un punt taronja, com aquest, i te l'explico en una línia.",
+      morning: "Bon dia", afternoon: "Bona tarda", evening: "Bona nit", greetName: "{part}, {name}",
+      helpToday: "Amb què t'ajudo avui?", suggestTranslate: "Tradueix un correu al català",
+      request: "Tradueix això al català:",
+      takePhoto: "Fes-li una foto o tria'n una del mòbil, i després envia-la.",
+      addDetails: "Afegeix-hi uns quants detalls al final i després envia-ho.",
+      notes: "Notes per a tu", yourPhoto: "La teva foto", before: "Abans", afterLab: "Després del Lab",
+      titleTranslate: "Traduir un correu de client", titlePdf: "Llegir un PDF", titlePhoto: "Llegir una foto",
+      compare: "Compara l'abans i el després", sameEmail: "El mateix correu, la mateixa petició. Aquesta vegada ja sabia com escrius als clients.",
+      nudge: "Aquesta traducció és paraula per paraula. Explica'm com escrius als clients i l'encertaré cada vegada. Tens dos minuts?",
+      teachMe: "Ensenya-m'ho al Lab", notNow: "Ara no", dontSuggest: "No m'ho tornis a suggerir",
+      stepDown: "Sembla que prefereixes continuar amb la teva feina. Vols que només aparegui quan sigui útil?", keepGuiding: "Continua guiant-me",
+      panelTip: "Toca qualsevol cosa amb un punt taronja i te l'explico en una línia.", labMissions: "Missions del Lab",
+      labKicker: "Lab · conversa a part", labNote: "El que practiquis aquí no toca el teu xat real. Et quedes el que desis.",
+      leaveLab: "Surt del Lab", save: "Desa", next: "Següent",
+      missionComplete: "Missió acomplerta!", fromNowOn: "A partir d'ara, Claude:", backToChat: "Torna al meu xat",
+      skillSaved: "Habilitat desada", skillSavedClients: "Habilitat desada: correu de client al català", tryIt: "Prova-ho amb el teu correu",
+      inLab: "Ja som al Lab. Res del que facis aquí toca el teu xat.", panelRight: "El meu Lab i la configuració són al panell de la dreta.",
+      savedClients: "Desat! Ho recordaré cada vegada que escriguis a un client.",
+      clawdGuide: "Toca qualsevol cosa amb un punt taronja i te l'explico. El meu Lab és al panell de la dreta.",
+      clawdUseful: "Sóc aquí si em necessites. El meu Lab i la configuració són al panell de la dreta.",
+      navHere: "Aquí tens el meu Lab i la configuració, al panell de la dreta.",
+      pickFile: "Tria una foto o un PDF", tryInLab: "Prova-ho al Lab",
+      notesAfter: '• "divendres": potser el Sr. Puig no sap quin divendres. Millor "divendres 26 de setembre".\n• El número de factura, els imports i les dates no han canviat.',
+      ftueLead: "Hola! Sóc en Clawd, un ajudant d'IA.",
+      ftueText: "T'ajudo a treure bones respostes de Claude. És només un minut i no cal cap compte.",
+      whichLanguage: "En quina llengua et parlo?",
+      privacyNote: "El que m'expliquis es queda en aquest navegador. Ho pots esborrar quan vulguis.",
+      skipForNow: "Salta-ho de moment",
+      callYou: "Com et dic?",
+      callYouNote: "Així et saludo quan tornis. És opcional.",
+      nickname: "El teu nom o un sobrenom",
+      helpWith: "En què t'agradaria que Claude t'ajudés?",
+      pickMany: "Tria'n tantes com vulguis.",
+      somethingElse: "Alguna altra cosa? Escriu-la aquí",
+      somethingElseAria: "Una altra cosa en què Claude et pugui ajudar",
+      howAnswers: "Com t'agraden les respostes?",
+      howAnswersNote: "Claude t'ho explicarà així.",
+      guideLead: "Aquesta és la teva guia per a Claude",
+      guideText: "Claude la llegeix abans de cada resposta, així no t'has de repetir. La pots canviar quan vulguis al meu panell.",
+      guideDev: "A Claude Code això s'anomena un fitxer CLAUDE.md (o AGENTS.md).",
+      guideAria: "La teva guia per a Claude",
+      looksGood: "Em sembla bé",
+      edit: "Edita",
+      guideSaved: "La teva guia està desada. ",
+      quietUseful: "Em quedaré callat i només apareixeré quan et pugui estalviar temps. Toca en Clawd al menú lateral per canviar-ho.",
+      guidePanelNote: "Claude la llegeix abans de cada resposta. A Claude Code és el teu CLAUDE.md (o AGENTS.md).",
+      changeIt: "Canvia-la",
+      guideReady: "La teva guia està llesta",
+      guideReads: "Claude llegirà això abans de cada resposta:",
+      savedGuide: "Desat! A partir d'ara Claude seguirà la teva guia.",
+      searchingOnline: "Consultant la informació més recent a internet...",
+      guideIam: "Sóc {name}.",
+      guideAlso: "També: {text}.",
+      guideAnswerIn: "Respon-me en {lang}.",
+      guideLines: { helpWith: "Ajuda'm amb:", discover: "Ajuda'm a descobrir què saps fer.", doubleCheck: "Per a tot el que sigui important, digues-me què he de comprovar i a qui preguntar." },
+      topics: {
+        paperwork: ["Entendre cartes i paperassa", "cartes i paperassa"], health: ["Preguntes de salut", "preguntes de salut"],
+        money: ["Diners, factures i impostos", "diners, factures i impostos"], home: ["Casa i lloguer", "casa i lloguer"],
+        writing: ["Escriure missatges o correus", "escriure missatges i correus"], explore: ["Ensenya'm què sap fer", ""]
+      },
+      answerStyles: {
+        short: ["Curtes i senzilles", "Només el que importa", "Dona'm respostes curtes i senzilles."],
+        steps: ["Pas a pas", "Una cosa cada vegada, en ordre", "Explica-m'ho tot pas a pas."],
+        detailed: ["Amb tots els detalls", "La imatge completa", "Dona'm tots els detalls."]
+      },
+      langNames: { ca: "català", es: "castellà", en: "anglès" },
+      styles: { short: "Curtes", steps: "Pas a pas", detailed: "Detallades", visual: "Visuals" },
+      levels: {
+        guide:  ["Guia'm", "T'explico les coses mentre avances i et proposo lliçons curtes."],
+        useful: ["Només si és útil", "M'estic en silenci i només apareixo quan et puc estalviar temps."],
+        off:    ["Apagat", "Sense consells ni suggeriments. Em pots tornar a activar quan vulguis."]
+      },
+      explain: {
+        projects:   ["Projectes", "Una carpeta on Claude guarda els fitxers i les instruccions d'una feina concreta."],
+        artifacts:  ["Artefactes", "Coses que Claude ha fet per a tu i que pots guardar, com un document, una taula o una petita app."],
+        scheduled:  ["Programades", "Tasques que Claude fa per tu a hores fixes, com un resum dels teus correus cada dilluns."],
+        design:     ["Disseny", "Un llenç on Claude t'ajuda a crear imatges, com un cartell o una diapositiva."],
+        customize:  ["Personalitza", "Digues a Claude com t'ha de parlar i què ha de recordar de tu. El Lab ho omple per tu."],
+        model:      ["Claude Sonnet", "Quina versió de Claude et respon. No cal que la canviïs."],
+        attach:     ["Afegeix un fitxer", "Afegeix una foto o un PDF, com una carta o una factura, perquè Claude el llegeixi."],
+        connectors: ["Connectors", "Deixa que Claude consulti les apps que ja fas servir, com el correu o el calendari."],
+        memory:     ["Memòria actualitzada", "Claude ha desat alguna cosa sobre tu perquè no l'hagis de repetir cada vegada."],
+        skill:      ["Habilitat desada", "Una recepta que Claude segueix cada vegada que li demanes aquesta tasca."]
+      },
+      missions: {
+        clients: ["Ensenya a Claude com escrius als clients", "El teu to i les teves normes. 2 min"],
+        you:     ["Escriu la teva guia per a Claude", "En què et pot ajudar i com t'agraden les respostes. 1 min"],
+        connect: ["Connecta una eina que facis servir", "Claude llegeix el teu calendari. 3 min"]
+      },
+      situations: {
+        letter:   ["Una carta que no entenc", "Envia una foto i te l'explico", "M'ha arribat aquesta carta. Què diu i què he de fer?"],
+        bill:     ["Revisar una factura", "Hi ha res d'estrany?", "Pots revisar aquesta factura? Hi ha res d'estrany?"],
+        rent:     ["Un contracte de lloguer", "Què has de vigilar", "Aquest és el meu contracte de lloguer. Què he de vigilar?"],
+        doctor:   ["Preparar la visita al metge", "Què explicar i què preguntar", "Tinc hora amb el metge. Ajuda'm a preparar-la. És per: "],
+        trip:     ["Planificar un viatge", "Un pla senzill amb costos", "Ajuda'm a planificar un viatge a "],
+        homework: ["Ajuda amb els deures", "Perquè puguis ajudar els teus fills", "Ajuda'm a entendre aquests deures per poder-los explicar al meu fill."]
+      },
+      labs: {
+        clients: { title: "Ensenya a Claude com escrius als clients", steps: {
+          role: { q: "Qui ets quan escrius als clients?", help: "Tria l'opció més semblant.",
+            options: ["Administració", "Comptabilitat", "Vendes", "Recepció"],
+            said: ["sabrà que escrius als clients des d'administració", "sabrà que escrius als clients des de comptabilitat", "sabrà que escrius als clients des de vendes", "sabrà que escrius als clients des de recepció"] },
+          tone: { q: "Com han de sonar els teus correus?", help: "Claude escriurà així tots els correus als clients.",
+            options: ["Cordial i formal (vostè)", "Proper (tu)", "Breu i directe"],
+            said: ["farà servir aquest to: cordial i formal (vostè)", "farà servir aquest to: proper (tu)", "farà servir aquest to: breu i directe"] },
+          rules: { q: "Què no pot fallar mai?", help: "Tria'n tantes com vulguis.",
+            options: ["Mantenir preus i dates tal com els he escrit", "Avisar de tot el que un client pugui entendre malament", "Donar-me només el correu, a punt per enganxar", "Mantenir la meva signatura"],
+            said: ["mantindrà preus i dates tal com els has escrit", "t'avisarà de tot el que un client pugui entendre malament", "et donarà només el correu, a punt per enganxar", "mantindrà la teva signatura"] }
+        } },
+        you: { title: "Escriu la teva guia per a Claude", steps: {
+          helps: { q: "En què t'agradaria que Claude t'ajudés?", help: "Tria'n tantes com vulguis.",
+            options: ["Cartes i paperassa", "Preguntes de salut", "Diners, factures i impostos", "Casa i lloguer", "Escriure missatges i correus"] },
+          style: { q: "Com t'agraden les respostes?", help: "Tria'n una.", options: ["Curtes i senzilles", "Pas a pas", "Amb tots els detalls"] },
+          always: { q: "Què hauria de fer sempre Claude per tu?", help: "Tria'n tantes com vulguis.",
+            options: ["Dir-me què he de comprovar i a qui preguntar", "Fer servir paraules senzilles, sense tecnicismes", "Mantenir dates i imports tal com estan escrits", "Recordar-me que no comparteixi el DNI ni dades del banc"] },
+          language: { q: "En quina llengua et responc?", help: "La faré servir tret que escriguis en una altra.", options: ["Català", "Español", "English"] }
+        } }
+      }
+    }
   };
+  // ---------- end of strings ----------
 
   const DOUBLE_CHECK = "Tell me what to double-check and who to ask";
 
-  const MISSIONS = [
-    { id: "you", t: "Write your guide for Claude", d: "What you need help with and how you like answers. 1 min", ready: true },
-    { id: "clients", t: "Teach Claude how you write to clients", d: "Your tone and rules. 2 min", ready: true },
-    { id: "connect", t: "Connect a tool you use", d: "Claude reads your calendar. 3 min", ready: false }
-  ];
+  // Lab missions. The texts are in I18N (missions, labs); `options` here are the values the backend accepts.
+  // Their guide for Claude comes first: it's the plain-words CLAUDE.md that every answer reads.
+  const MISSIONS = [{ id: "you", ready: true }, { id: "clients", ready: true }, { id: "connect", ready: false }];
 
   const LABS = {
-    clients: { title: "Teach Claude how you write to clients", steps: [
-    { key: "role", q: "Who are you when you write to clients?", help: "Pick the closest one.", multi: false,
-      options: ["Office admin", "Accounts", "Sales", "Reception"] },
-    { key: "tone", q: "How should your emails sound?", help: "Claude will write every client email this way.", multi: false,
-      options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"] },
-    { key: "rules", q: "What must never go wrong?", help: "Pick as many as you like.", multi: true,
-      options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] }
+    clients: { steps: [
+      { key: "role", multi: false, options: ["Office admin", "Accounts", "Sales", "Reception"] },
+      { key: "tone", multi: false, options: ["Warm and formal (vostè)", "Friendly (tu)", "Short and direct"] },
+      { key: "rules", multi: true,
+        options: ["Keep prices and dates exactly as I wrote them", "Flag anything a client could misread", "Only give me the email, ready to paste", "Keep my signature"] }
     ] },
     // Same steps as LAB_MISSIONS "you" in web/src/lib/catalog.ts: the longer version of onboarding's guide.
-    you: { title: "Write your guide for Claude", steps: [
-      { key: "helps", q: "What would you like Claude to help you with?", help: "Pick as many as you like.", multi: true,
-        options: ["Letters and paperwork", "Health questions", "Money, bills and taxes", "Home and rent", "Writing messages and emails"] },
-      { key: "style", q: "How do you like answers?", help: "Pick one.", multi: false,
-        options: ["Short and simple", "Step by step", "With all the details"] },
-      { key: "always", q: "What should Claude always do for you?", help: "Pick as many as you like.", multi: true,
-        options: [DOUBLE_CHECK, "Use plain words, no jargon", "Keep dates and amounts exactly as written", "Remind me not to share ID or bank numbers"] },
-      { key: "language", q: "Which language should I answer in?", help: "I'll use it unless you write in another one.", multi: false,
-        options: ["Català", "Español", "English"] }
+    you: { steps: [
+      { key: "helps", multi: true, options: ["Letters and paperwork", "Health questions", "Money, bills and taxes", "Home and rent", "Writing messages and emails"] },
+      { key: "style", multi: false, options: ["Short and simple", "Step by step", "With all the details"] },
+      { key: "always", multi: true, options: [DOUBLE_CHECK, "Use plain words, no jargon", "Keep dates and amounts exactly as written", "Remind me not to share ID or bank numbers"] },
+      { key: "language", multi: false, options: ["Català", "Español", "English"] }
     ] }
   };
   const blankAnswers = () => Object.fromEntries(Object.entries(LABS).map(([id, l]) =>
     [id, Object.fromEntries(l.steps.map((st) => [st.key, st.multi ? [] : null]))]));
+  const LAB_LANG = { "Català": "ca", "Español": "es", "English": "en" };
 
   // Home screen: real-life starting points. Ids match SITUATIONS in web/src/lib/catalog.ts, which adds the guided first step.
   const SITUATIONS = [
-    { id: "letter",   ic: "✉️", t: "A letter I don't understand", d: "Send a photo, I'll explain it", file: true,  starter: "I got this letter. What does it say and what do I need to do?" },
-    { id: "bill",     ic: "🧾", t: "Check a bill",                d: "Anything unusual?",            file: true,  starter: "Can you check this bill? Is anything unusual?" },
-    { id: "rent",     ic: "🏠", t: "A rental contract",           d: "What to watch out for",        file: true,  starter: "This is my rental contract. What should I watch out for?" },
-    { id: "doctor",   ic: "🩺", t: "Prepare for the doctor",      d: "What to say and ask",          file: false, starter: "I have a doctor's appointment. Help me prepare. It's about: " },
-    { id: "trip",     ic: "🧳", t: "Plan a trip",                 d: "A simple plan with costs",     file: false, starter: "Help me plan a trip to " },
-    { id: "homework", ic: "📚", t: "Help with homework",          d: "So you can help your child",   file: true,  starter: "Help me understand this homework so I can explain it to my child." }
+    { id: "letter",   ic: "✉️", file: true },
+    { id: "bill",     ic: "🧾", file: true },
+    { id: "rent",     ic: "🏠", file: true },
+    { id: "doctor",   ic: "🩺", file: false },
+    { id: "trip",     ic: "🧳", file: false },
+    { id: "homework", ic: "📚", file: true }
   ];
 
-  const LEVELS = {
-    guide:  ["Guide me", "I explain things as you go and suggest short lessons."],
-    useful: ["Only when useful", "I stay quiet and only show up when I can save you time."],
-    off:    ["Off", "No tips, no suggestions. You can turn me back on any time."]
+  // ---------- Language ----------
+  // First visit: the system's languages (navigator.languages). Catalan wins if it appears anywhere before English,
+  // because many devices in Barcelona keep Spanish first and add Catalan below it. Otherwise the first of Spanish
+  // or English, and anything else falls back to English. Same rule as guessLanguage in web/src/lib/i18n.ts.
+  // After that the user's own choice wins: the EN / ES / CA switcher, or the language saved in their profile.
+  function guessLanguage(prefs = navigator.languages?.length ? [...navigator.languages] : [navigator.language]) {
+    const codes = prefs.map((p) => String(p || "").trim().toLowerCase().split(/[-_]/)[0]);
+    const ca = codes.indexOf("ca"), en = codes.indexOf("en");
+    if (ca >= 0 && (en < 0 || ca < en)) return "ca";
+    return codes.find((c) => c === "es" || c === "en") || "en";
+  }
+  const LANG_KEY = "clawd-lang"; // the switcher's choice in this browser; the app works the same without it
+  const chosenLanguage = () => { try { const v = localStorage.getItem(LANG_KEY); return I18N[v] ? v : null; } catch { return null; } };
+  const rememberLanguage = (v) => { try { if (v) localStorage.setItem(LANG_KEY, v); else localStorage.removeItem(LANG_KEY); } catch {} };
+  // ?lang=ca opens in that language without remembering it (handy for demos).
+  const firstLanguage = () => {
+    const q = new URLSearchParams(location.search).get("lang");
+    return I18N[q] ? q : chosenLanguage() || guessLanguage();
   };
 
+  // S.language (see fresh()) is the language on screen.
+  const t = (key, vars) => String(I18N[S.language][key] ?? I18N.en[key] ?? key).replace(/\{(\w+)\}/g, (_, k) => vars?.[k] ?? "");
+  const tx = (key) => I18N[S.language][key] ?? I18N.en[key];
+  // Lab answers keep the English option (what the backend accepts); these give its label and summary line.
+  const optIndex = (id, key, o) => LABS[id].steps.find((st) => st.key === key).options.indexOf(o);
+  const optLabel = (id, key, o) => tx("labs")[id].steps[key].options[optIndex(id, key, o)] ?? o;
+  const optSaid = (id, key, o) => tx("labs")[id].steps[key].said[optIndex(id, key, o)] ?? o;
+
   // ---------- State ----------
-  // Pre-select from the browser, but always ask: in Catalonia the device language
-  // is a weak signal for bilingual users (see the pitch doc's onboarding research).
-  function guessLanguage() {
-    const l = (navigator.language || "en").toLowerCase();
-    return l.startsWith("ca") ? "ca" : l.startsWith("es") ? "es" : "en";
-  }
-  const LANGS = { ca: "Català", es: "Español", en: "English" };
   // Onboarding's "What would you like Claude to help you with?". Ids match TOPICS in web/src/lib/types.ts;
-  // `lab` is the matching option of the "you" Lab mission; `situations` go first on the home screen.
+  // `lab` is the matching option of the "you" Lab mission; `situations` go first on the home screen. Texts: I18N topics.
   const TOPICS = [
-    { id: "paperwork", ic: "✉️", label: "Understand letters and paperwork", lab: "Letters and paperwork", phrase: "letters and paperwork", situations: ["letter", "bill"] },
-    { id: "health",    ic: "🩺", label: "Health questions",                 lab: "Health questions",       phrase: "health questions",                   situations: ["doctor"] },
-    { id: "money",     ic: "💶", label: "Money, bills and taxes",           lab: "Money, bills and taxes", phrase: "money, bills and taxes",             situations: ["bill", "letter"] },
-    { id: "home",      ic: "🏠", label: "Home and rent",                    lab: "Home and rent",          phrase: "home and rent",                      situations: ["rent"] },
-    { id: "writing",   ic: "✍️", label: "Write messages or emails",         lab: "Writing messages and emails", phrase: "writing messages and emails",  situations: [] },
-    { id: "explore",   ic: "✨", label: "Show me what it can do",           phrase: "", situations: [] }
+    { id: "paperwork", ic: "✉️", lab: "Letters and paperwork",       situations: ["letter", "bill"] },
+    { id: "health",    ic: "🩺", lab: "Health questions",            situations: ["doctor"] },
+    { id: "money",     ic: "💶", lab: "Money, bills and taxes",      situations: ["bill", "letter"] },
+    { id: "home",      ic: "🏠", lab: "Home and rent",               situations: ["rent"] },
+    { id: "writing",   ic: "✍️", lab: "Writing messages and emails", situations: [] },
+    { id: "explore",   ic: "✨", situations: [] }
   ];
   // Picking any of these adds the "double-check" rule by default: the research found this group trusts AI little but rarely checks.
   const CHECK_TOPICS = ["health", "money", "home"];
-  const STYLES = [
-    { id: "short",    label: "Short and simple",     lab: "Short and simple",     small: "Just the key points", rule: "Keep answers short and simple." },
-    { id: "steps",    label: "Step by step",         lab: "Step by step",         small: "One thing at a time, in order", rule: "Explain things step by step." },
-    { id: "detailed", label: "With all the details", lab: "With all the details", small: "The full picture", rule: "Give me all the details." }
-  ];
-  const LANG_EN = { ca: "Catalan", es: "Spanish", en: "English" };
+  const STYLES = [{ id: "short", lab: "Short and simple" }, { id: "steps", lab: "Step by step" }, { id: "detailed", lab: "With all the details" }];
 
   const fresh = () => ({
-    ftue: 0, name: "", intent: null, language: guessLanguage(), firstTask: null,
-    helps: [], other: "", style: null, always: [], guide: "", editingGuide: false,
+    ftue: 0, name: "", intent: null, language: firstLanguage(), firstTask: null,
+    helps: [], other: "", style: null, always: [], guide: "", editingGuide: false, guideEdited: false,
     phase: "start", view: "home", step: 0, lab: "clients", labsDone: [], situation: null,
+    title: null, inRecents: false, // title: a function, so the chat title follows the language
     answers: blankAnswers(), file: null,
     dismissals: 0, noSuggest: false, before: "", after: ""
   });
@@ -635,7 +1098,8 @@ Notes for you
   const panel = $("panel"), body = $("panelBody"), pop = $("pop"), clawd = $("clawd"), say = $("say");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const mobile = () => matchMedia("(max-width: 760px)").matches;
-  const who = () => S.name || "there";
+  // "Nice to meet you, Carmen." or, with no name, "Nice to meet you."
+  const named = (key, html) => S.name ? t(key, { name: html ? esc(S.name) : S.name }) : t(key + "Anon");
 
   // Pixel Clawd in parts, so each pose from animations/ can move them (see the .cw-* styles).
   const CONFETTI = [[-5, -6, "#d97757"], [-3, -8, "#6a9bcc"], [-1, -7, "#c46686"], [2, -8, "#d97757"], [4, -6, "#6a9bcc"],
@@ -670,7 +1134,7 @@ Notes for you
   // ---------- Backend (web/) ----------
   // Served by the backend: real answers, coach decisions, Lab and profile go through /api.
   // Opened as a file or an artifact: everything below stays off and the prototype runs on its own.
-  const api = { on: false, pending: new Map(), labSave: null, coachSpoke: false };
+  const api = { on: false, pending: new Map(), labSave: null, coachSpoke: false, langSaving: 0 };
   const forceBackend = new URLSearchParams(location.search).has("backend");
   let lastTyped = 0;
   prompt.addEventListener("input", () => { lastTyped = Date.now(); });
@@ -685,7 +1149,7 @@ Notes for you
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         api.on = !!d && (!d.backend?.offline || forceBackend);
-        if (api.on) { $("clawdBody").setAttribute("aria-label", "Ask Clawd"); refreshProfile(); }
+        if (api.on) { $("clawdBody").dataset.i18nAria = "askClawd"; applyStatic(); refreshProfile(); }
       })
       .catch(() => {});
   }
@@ -717,7 +1181,7 @@ Notes for you
     if (!isPdf) blob = await shrinkImage(file).catch(() => null);
     if (!blob || blob.size > MAX_BYTES) {
       clawd.hidden = false;
-      speakSmall(isPdf ? "That PDF is too big for me (5 MB max). Could you send just the pages that matter?" : "I couldn't read that picture. Could you try another one?", true);
+      speakSmall(t(isPdf ? "pdfTooBig" : "badPhoto"), true);
       return;
     }
     const data = await readB64(blob);
@@ -730,7 +1194,7 @@ Notes for you
     const box = $("attach"), f = S.file;
     box.hidden = !f;
     box.innerHTML = f ? `${f.preview ? `<img src="${f.preview}" alt="">` : `<span class="doc">PDF</span>`}
-      <span class="name">${esc(f.name)}</span><button type="button" id="dropFile" aria-label="Remove file">&times;</button>` : "";
+      <span class="name">${esc(f.name)}</span><button type="button" id="dropFile" aria-label="${esc(t("removeFile"))}">&times;</button>` : "";
   }
   function openPicker() { $("fileInput").value = ""; $("fileInput").click(); }
   $("fileInput").addEventListener("change", (e) => pickFile(e.target.files[0]));
@@ -742,7 +1206,7 @@ Notes for you
 
   // POST /api/turn streams server-sent events: (token | searching)*, answer_done, coach*, done | error.
   async function askBackend(text, el, whoEl, file) {
-    el.innerHTML = `<span class="thinking">${file ? "Reading your " + (file.media_type === "application/pdf" ? "PDF" : "photo") + "..." : "Thinking..."}</span>`;
+    el.innerHTML = `<span class="thinking">${t(file ? (file.media_type === "application/pdf" ? "readingPdf" : "readingPhoto") : "thinking")}</span>`;
     const attachment = file ? { media_type: file.media_type, data: file.data } : undefined;
     const situation = S.situation || undefined;
     S.situation = null;
@@ -753,7 +1217,7 @@ Notes for you
     // A web search can take a while, so say so below whatever is already written. The next token clears it.
     const paint = () => {
       if (out) renderAnswer(el, out); else el.innerHTML = "";
-      if (searching) el.insertAdjacentHTML("beforeend", `<p class="thinking">Checking the latest information online...</p>`);
+      if (searching) el.insertAdjacentHTML("beforeend", `<p class="thinking">${t("searchingOnline")}</p>`);
     };
     for (;;) {
       const { value, done } = await reader.read();
@@ -767,7 +1231,7 @@ Notes for you
         const data = JSON.parse(/^data: (.*)$/m.exec(chunk)?.[1] || "{}");
         if (ev === "token") { out += data.text; searching = false; paint(); scrollDown(); }
         else if (ev === "searching") { searching = true; paint(); scrollDown(); }
-        else if (ev === "answer_done" && data.offline) whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">Offline backend</span>`);
+        else if (ev === "answer_done" && data.offline) whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">${t("offlineBackend")}</span>`);
         else if (ev === "coach") showCoach(data);
         else if (ev === "error") throw new Error(data.message);
       }
@@ -778,7 +1242,7 @@ Notes for you
   // A coach event from the backend. The server already decided it should be shown; this only picks the moment.
   function showCoach(e, deferred) {
     if (level === "off") return;
-    if (e.action === "award_card" && !deferred) addChip(e.text || "New card");
+    if (e.action === "award_card" && !deferred) addChip(e.text || t("newCard"));
     if (e.quiet) return;
     if (e.deliver === "at_pause" && Date.now() - lastTyped < 1500) { setTimeout(() => showCoach(e, true), 800); return; }
     api.coachSpoke = true;
@@ -800,8 +1264,8 @@ Notes for you
     if (!r?.ok) return;
     if (r.effect?.open_lab) openLab(r.effect.open_lab);
     if (r.effect?.level) setLevel(r.effect.level, true);
-    if (r.effect?.saved_fact) addChip("Memory updated");
-    if (r.effect?.mission) addChip("Challenge started");
+    if (r.effect?.saved_fact) addChip(t("memoryUpdated"));
+    if (r.effect?.mission) addChip(t("challengeStarted"));
     for (const ev of r.events || []) showCoach(ev);
     refreshProfile();
   }
@@ -810,34 +1274,43 @@ Notes for you
   function refreshProfile() {
     if (!api.on) return Promise.resolve();
     return fetch("/api/profile").then((r) => r.json())
-      .then((d) => { api.profile = d; if (S.view === "home") renderPanel(); })
+      .then((d) => { api.profile = d; if (S.view === "home") renderPanel(); syncLang(d); })
       .catch(() => {});
   }
 
-  const LANG_NAMES = { ca: "Català", es: "Español", en: "English" };
+  // A language saved in the profile wins over this screen's. With none saved, the screen tells the server what it
+  // shows (a switcher pick as the user's choice, else the system default), so answers and cards follow it.
+  function syncLang(d) {
+    if (!d || api.langSaving) return;
+    const saved = d.profile?.language;
+    if (saved) { if (saved !== S.language) setLang(saved, { patch: false }); return; }
+    if (chosenLanguage()) setLang(chosenLanguage());
+    else if (d.ui_language !== S.language) call("/api/profile", { ui_language: S.language }, "PATCH").then(refreshProfile).catch(() => {});
+  }
+
   function progressHtml() {
     const p = api.on && api.profile;
     if (!p) return "";
     const challenges = p.challenges.map((c) => `<button class="mission ${c.status === "done" ? "done" : ""}" data-challenge="${esc(c.id)}" ${c.status ? "disabled" : ""}>
-        <span class="t">${esc(c.title)}</span><span class="d">${esc(c.status === "open" ? "I'll ask you how it went next time." : c.status === "done" ? "Completed. You earned a card for it." : c.prompt)}</span>
-        <span class="m">${c.status === "done" ? "Done" : c.status === "open" ? "Open" : "Start"}</span></button>`).join("");
+        <span class="t">${esc(c.title)}</span><span class="d">${esc(c.status === "open" ? t("challengeOpen") : c.status === "done" ? t("challengeDone") : c.prompt)}</span>
+        <span class="m">${t(c.status === "done" ? "statusDone" : c.status === "open" ? "statusOpen" : "statusStart")}</span></button>`).join("");
     const cards = p.cards.length
       ? `<div class="cards">${p.cards.map((c) => `<div class="card-chip"><b>${esc(c.title)}</b>${esc(c.lesson || "")}</div>`).join("")}</div>`
-      : `<p class="q-help">No cards yet. You earn them by doing things, not by studying.</p>`;
+      : `<p class="q-help">${t("noCards")}</p>`;
     const pr = p.profile || {};
     const items = [
-      pr.name && ["Your name", pr.name, null],
-      pr.language && ["Language", LANG_NAMES[pr.language] || pr.language, null],
-      pr.answer_style && ["Answers", pr.answer_style, null],
-      ...(pr.facts || []).map((f) => [`Learned from ${f.learned_from || "chat"}`, f.text, `fact=${f.id}`]),
-      ...(p.skills || []).map((sk) => ["Skill", sk.title, `skill=${sk.id}`]),
+      pr.name && [t("yourName"), pr.name, null],
+      pr.language && [t("language"), tx("langNames")[pr.language] || pr.language, null],
+      pr.answer_style && [t("answers"), tx("styles")[pr.answer_style] || pr.answer_style, null],
+      ...(pr.facts || []).map((f) => [t("learnedFrom", { from: !f.learned_from || f.learned_from === "chat" ? t("fromChat") : f.learned_from }), f.text, `fact=${f.id}`]),
+      ...(p.skills || []).map((sk) => [t("skill"), sk.title, `skill=${sk.id}`]),
     ].filter(Boolean);
     const memory = items.length
-      ? `<ul class="mem">${items.map(([k, v, del]) => `<li><span><small>${esc(k)}</small>${esc(v)}</span>${del ? `<button class="x" type="button" data-forget="${esc(del)}" aria-label="Forget ${esc(v)}">&times;</button>` : ""}</li>`).join("")}</ul>`
-      : `<p class="q-help">Nothing yet. I only remember what you say yes to.</p>`;
-    return `<div><p class="section-label">Real-life challenges</p><div class="missions">${challenges}</div></div>
-      <div class="cards-wrap"><p class="section-label">Your cards · ${p.cards.length} of ${p.cards_total}</p>${cards}</div>
-      <div><p class="section-label">What Clawd remembers</p>${memory}<button class="btn" type="button" data-act="copyprofile">Copy my AI profile</button></div>`;
+      ? `<ul class="mem">${items.map(([k, v, del]) => `<li><span><small>${esc(k)}</small>${esc(v)}</span>${del ? `<button class="x" type="button" data-forget="${esc(del)}" aria-label="${esc(t("forget", { what: v }))}">&times;</button>` : ""}</li>`).join("")}</ul>`
+      : `<p class="q-help">${t("nothingYet")}</p>`;
+    return `<div><p class="section-label">${t("challengesLabel")}</p><div class="missions">${challenges}</div></div>
+      <div class="cards-wrap"><p class="section-label">${t("cardsLabel", { n: p.cards.length, total: p.cards_total })}</p>${cards}</div>
+      <div><p class="section-label">${t("remembersLabel")}</p>${memory}<button class="btn" type="button" data-act="copyprofile">${t("copyProfile")}</button></div>`;
   }
 
   async function startChallenge(id) {
@@ -846,9 +1319,9 @@ Notes for you
     api.profile = { ...api.profile, ...r };
     renderPanel();
     const c = r.challenges.find((x) => x.id === id);
-    addChip(`Challenge started: ${c.title}`);
+    addChip(t("challengeStartedNamed", { title: c.title }));
     clawd.hidden = false; roam(null); pose("hop", 700);
-    speakSmall(`Deal! ${c.prompt} I'll ask you how it went next time.`, true);
+    speakSmall(t("deal", { prompt: c.prompt }), true);
   }
 
   async function forget(query) {
@@ -862,9 +1335,9 @@ Notes for you
     clawd.hidden = false; roam(null);
     try {
       await navigator.clipboard.writeText(text);
-      speakSmall(`Copied! Paste it into any assistant's custom instructions, even ChatGPT or Gemini.`, true);
+      speakSmall(t("copied"), true);
     } catch {
-      speak(`<p>Copy this into any assistant's custom instructions:</p><textarea class="copy-box" readonly>${esc(text)}</textarea><button class="skip" type="button" data-act="hush">Done</button>`);
+      speak(`<p>${t("copyThis")}</p><textarea class="copy-box" readonly>${esc(text)}</textarea><button class="skip" type="button" data-act="hush">${t("done")}</button>`);
     }
   }
 
@@ -872,11 +1345,11 @@ Notes for you
   async function weekLater() {
     if (!api.on || S.ftue !== "done") return;
     speak("");
-    addChip("One week later...");
+    addChip(t("weekLaterChip"));
     const r = await call("/api/session/return").catch(() => null);
     if (level === "off") setLevel("useful");
     for (const ev of r?.events || []) showCoach(ev);
-    if (!r?.events?.length) { clawd.hidden = false; roam(null); speakSmall(`Welcome back, ${who()}! What do you need help with today?`, true); }
+    if (!r?.events?.length) { clawd.hidden = false; roam(null); speakSmall(named("welcomeBack"), true); }
     refreshProfile();
   }
   $("weekLater").addEventListener("click", weekLater);
@@ -884,20 +1357,20 @@ Notes for you
   // Tapping Clawd: ask it anything. POST /api/mascot runs the coach in chat mode and returns its reply.
   function askClawd() {
     pose("hop", 700);
-    speak(`<p class="lead">Ask me anything</p><p>About Claude, the Lab, or something I said.</p>
-      <form id="askForm"><input type="text" id="askInput" maxlength="300" autocomplete="off" placeholder="e.g. What's a skill?" aria-label="Ask Clawd">
-      <div class="actions"><button class="btn primary" type="submit">Ask</button><button class="btn ghost" type="button" data-act="panel">Lab and settings</button></div></form>`);
+    speak(`<p class="lead">${t("askTitle")}</p><p>${t("askHelp")}</p>
+      <form id="askForm"><input type="text" id="askInput" maxlength="300" autocomplete="off" placeholder="${esc(t("askPlaceholder"))}" aria-label="${esc(t("askClawd"))}">
+      <div class="actions"><button class="btn primary" type="submit">${t("ask")}</button><button class="btn ghost" type="button" data-act="panel">${t("labAndSettings")}</button></div></form>`);
     setTimeout(() => $("askInput")?.focus(), 50);
   }
 
   async function sendToClawd(text) {
     text = (text || "").trim();
     if (!text) { $("askInput")?.focus(); return; }
-    speak(`<p class="thinking">Hmm, let me think...</p>`);
+    speak(`<p class="thinking">${t("letMeThink")}</p>`);
     pose("busy");
     const r = await call("/api/mascot", { message: text }).catch(() => null);
     pose(null);
-    if (!r?.events?.length) { speakSmall(`I couldn't come up with an answer just now. Try again in a moment?`, true); return; }
+    if (!r?.events?.length) { speakSmall(t("noAnswer"), true); return; }
     // Cards and other moves go through the usual path; the reply itself offers a follow-up question.
     const reply = r.events.find((ev) => ev.action === "show_tip" && !ev.buttons);
     for (const ev of r.events) if (ev !== reply) showCoach(ev);
@@ -905,7 +1378,7 @@ Notes for you
       clawd.hidden = false;
       roam(reply.point_at);
       pose(reply.mood === "celebrate" ? "celebrate" : "hop", reply.mood === "celebrate" ? 2600 : 700);
-      speakSmall(reply.text || "", false, `<button class="btn primary" data-act="ask">Ask more</button><button class="btn ghost" data-act="hush">Got it</button>`);
+      speakSmall(reply.text || "", false, `<button class="btn primary" data-act="ask">${t("askMore")}</button><button class="btn ghost" data-act="hush">${t("gotIt")}</button>`);
     }
   }
 
@@ -1042,16 +1515,17 @@ Notes for you
   // ---------- First-time experience ----------
   function ftueDots(i) { return `<div class="dots">${[0, 1, 2, 3, 4].map((n) => `<span class="${n <= i ? "on" : ""}"></span>`).join("")}</div>`; }
 
-  // "Your guide for Claude": the user's CLAUDE.md in plain words, built from their onboarding answers.
+  // "Your guide for Claude": the user's CLAUDE.md in plain words, built from their onboarding answers, in the app language.
   function writeGuide() {
-    const topics = TOPICS.filter((t) => S.helps.includes(t.id) && t.phrase).map((t) => t.phrase);
+    const g = tx("guideLines"), topics = tx("topics");
+    const mine = TOPICS.filter((x) => S.helps.includes(x.id) && topics[x.id][1]).map((x) => topics[x.id][1]);
     const lines = [
-      S.name && `I'm ${S.name}.`,
-      topics.length ? `Help me with:\n${topics.map((t) => "• " + t).join("\n")}` : S.helps.includes("explore") && "Help me discover what you can do.",
-      S.other && `Also: ${S.other}.`,
-      STYLES.find((s) => s.id === S.style)?.rule,
-      `Answer in ${LANG_EN[S.language]}.`,
-      ...S.always.map((r) => r === DOUBLE_CHECK ? "For anything important, tell me what to double-check and who to ask." : r + "."),
+      S.name && t("guideIam", { name: S.name }),
+      mine.length ? `${g.helpWith}\n${mine.map((x) => "• " + x).join("\n")}` : S.helps.includes("explore") && g.discover,
+      S.other && t("guideAlso", { text: S.other }),
+      S.style && tx("answerStyles")[S.style][2],
+      t("guideAnswerIn", { lang: tx("langNames")[S.language] }),
+      ...S.always.map((r) => r === DOUBLE_CHECK ? g.doubleCheck : optLabel("you", "always", r) + "."),
     ];
     return lines.filter(Boolean).join("\n");
   }
@@ -1061,42 +1535,45 @@ Notes for you
     clawd.classList.add("big");
     clawd.hidden = false;
     placeClawd();
-    const skip = `<button class="skip" type="button" data-ftue="skip">Skip for now</button>`;
+    const skip = `<button class="skip" type="button" data-ftue="skip">${t("skipForNow")}</button>`;
     if (S.ftue === 0) {
-      speak(`${ftueDots(0)}<p class="lead">Hola! I'm Clawd, an AI helper.</p>
-        <p>I'll help you get good answers from Claude. It takes one minute, and no account is needed.</p>
-        <p class="ask">Which language should I use?</p>
-        <div class="langs" role="group" aria-label="Language">${Object.entries(LANGS).map(([k, v]) =>
-          `<button class="lang" type="button" data-lang="${k}" aria-pressed="${S.language === k}">${v}</button>`).join("")}</div>
-        <p class="fine">What you tell me stays in this browser. You can delete it any time.</p>
-        <div class="foot"><button class="btn primary" type="button" data-ftue="next">Continue</button>${skip}</div>`);
+      speak(`${ftueDots(0)}<p class="lead">${t("ftueLead")}</p>
+        <p>${t("ftueText")}</p>
+        <p class="ask">${t("whichLanguage")}</p>
+        <div class="langs" role="group" aria-label="${esc(t("langGroup"))}">${Object.entries(LAB_LANG).map(([name, k]) =>
+          `<button class="lang" type="button" data-lang="${k}" aria-pressed="${S.language === k}">${name}</button>`).join("")}</div>
+        <p class="fine">${t("privacyNote")}</p>
+        <div class="foot"><button class="btn primary" type="button" data-ftue="next">${t("continue")}</button>${skip}</div>`);
     } else if (S.ftue === 1) {
-      speak(`${ftueDots(1)}<p class="lead">What should I call you?</p>
-        <p>So I can greet you when you come back. It's optional.</p>
-        <form id="nameForm"><input type="text" id="nameInput" autocomplete="given-name" placeholder="Your first name or a nickname" aria-label="Your first name or a nickname" value="${esc(S.name)}">
-        <div class="foot"><button class="btn primary" type="submit">Continue</button>${skip}</div></form>`);
+      const typed = $("nameInput")?.value ?? S.name; // kept when the language changes on this screen
+      speak(`${ftueDots(1)}<p class="lead">${t("callYou")}</p>
+        <p>${t("callYouNote")}</p>
+        <form id="nameForm"><input type="text" id="nameInput" autocomplete="given-name" placeholder="${esc(t("nickname"))}" aria-label="${esc(t("nickname"))}" value="${esc(typed)}">
+        <div class="foot"><button class="btn primary" type="submit">${t("continue")}</button>${skip}</div></form>`);
       setTimeout(() => $("nameInput")?.focus(), 50);
     } else if (S.ftue === 2) {
-      speak(`${ftueDots(2)}<p class="lead">${S.name ? "Nice to meet you, " + esc(S.name) + "." : "Nice to meet you."}</p>
-        <p class="ask">What would you like Claude to help you with?</p><p class="fine">Pick as many as you like.</p>
-        <div class="choices">${TOPICS.map((t) => `<button class="choice" type="button" data-topic="${t.id}" aria-pressed="${S.helps.includes(t.id)}"><span class="ic" aria-hidden="true">${t.ic}</span>${t.label}</button>`).join("")}</div>
-        <input type="text" id="otherInput" maxlength="200" placeholder="Something else? Type it here" aria-label="Something else Claude could help you with" value="${esc(S.other)}">
-        <div class="foot"><button class="btn primary" type="button" data-ftue="topics">Continue</button>${skip}</div>`);
+      const topics = tx("topics");
+      speak(`${ftueDots(2)}<p class="lead">${named("niceToMeet", true)}</p>
+        <p class="ask">${t("helpWith")}</p><p class="fine">${t("pickMany")}</p>
+        <div class="choices">${TOPICS.map((x) => `<button class="choice" type="button" data-topic="${x.id}" aria-pressed="${S.helps.includes(x.id)}"><span class="ic" aria-hidden="true">${x.ic}</span>${esc(topics[x.id][0])}</button>`).join("")}</div>
+        <input type="text" id="otherInput" maxlength="200" placeholder="${esc(t("somethingElse"))}" aria-label="${esc(t("somethingElseAria"))}" value="${esc(S.other)}">
+        <div class="foot"><button class="btn primary" type="button" data-ftue="topics">${t("continue")}</button>${skip}</div>`);
     } else if (S.ftue === 3) {
-      speak(`${ftueDots(3)}<p class="lead">How do you like answers?</p><p>Claude will explain things this way.</p>
-        <div class="choices">${STYLES.map((s) => `<button class="choice" type="button" data-style="${s.id}">${s.label}<small>${s.small}</small></button>`).join("")}</div>
+      const styles = tx("answerStyles");
+      speak(`${ftueDots(3)}<p class="lead">${t("howAnswers")}</p><p>${t("howAnswersNote")}</p>
+        <div class="choices">${STYLES.map((x) => `<button class="choice" type="button" data-style="${x.id}">${esc(styles[x.id][0])}<small>${esc(styles[x.id][1])}</small></button>`).join("")}</div>
         <div class="foot">${skip}</div>`);
     } else if (S.ftue === 4) {
       const card = S.editingGuide
-        ? `<textarea class="guide-card" id="guideInput" maxlength="1000" aria-label="Your guide for Claude">${esc(S.guide)}</textarea>`
+        ? `<textarea class="guide-card" id="guideInput" maxlength="1000" aria-label="${esc(t("guideAria"))}">${esc(S.guide)}</textarea>`
         : `<div class="guide-card">${esc(S.guide)}</div>`;
-      speak(`${ftueDots(4)}<p class="lead">Here's your guide for Claude</p>
-        <p>Claude reads this before every answer, so you don't have to repeat yourself. You can change it any time in my panel.</p>
+      speak(`${ftueDots(4)}<p class="lead">${t("guideLead")}</p>
+        <p>${t("guideText")}</p>
         ${card}
-        <p class="fine">In Claude Code this is called a CLAUDE.md (or AGENTS.md) file.</p>
+        <p class="fine">${t("guideDev")}</p>
         <div class="foot"><div class="actions" style="margin:0">${S.editingGuide
-          ? `<button class="btn primary" type="button" data-ftue="saveguide">Save</button>`
-          : `<button class="btn primary" type="button" data-ftue="done">Looks good</button><button class="btn" type="button" data-ftue="edit">Edit</button>`}</div>${skip}</div>`);
+          ? `<button class="btn primary" type="button" data-ftue="saveguide">${t("save")}</button>`
+          : `<button class="btn primary" type="button" data-ftue="done">${t("looksGood")}</button><button class="btn" type="button" data-ftue="edit">${t("edit")}</button>`}</div>${skip}</div>`);
       if (S.editingGuide) setTimeout(() => $("guideInput")?.focus(), 50);
     }
   }
@@ -1108,11 +1585,11 @@ Notes for you
     if (a === "topics") {
       S.other = ($("otherInput")?.value || "").trim().slice(0, 200);
       if (!S.helps.length && !S.other) { $("otherInput")?.focus(); return; }
-      if (S.helps.some((t) => CHECK_TOPICS.includes(t)) && !S.always.includes(DOUBLE_CHECK)) S.always.push(DOUBLE_CHECK);
+      if (S.helps.some((x) => CHECK_TOPICS.includes(x)) && !S.always.includes(DOUBLE_CHECK)) S.always.push(DOUBLE_CHECK);
       S.ftue = 3; renderFtue(); return;
     }
     if (a === "edit") { S.editingGuide = true; renderFtue(); return; }
-    if (a === "saveguide") { S.guide = ($("guideInput")?.value || "").trim().slice(0, 1000) || writeGuide(); S.editingGuide = false; renderFtue(); return; }
+    if (a === "saveguide") { S.guide = ($("guideInput")?.value || "").trim().slice(0, 1000) || writeGuide(); S.editingGuide = false; S.guideEdited = true; renderFtue(); return; }
     // The help level is not asked: people can't judge it before they've seen Clawd.
     // Exploring starts on "Guide me"; everyone else on "Only when useful".
     if (a === "done") {
@@ -1128,7 +1605,7 @@ Notes for you
     clawd.classList.remove("big");
     speak("");
     $("avatar").textContent = S.name ? S.name[0].toUpperCase() : "?";
-    $("meName").textContent = S.name || "Guest";
+    $("meName").textContent = S.name || t("guest");
     const guide = S.guide ? { helps_with: S.helps, answer_style: S.style, always: S.always, guide: S.guide } : {};
     if (api.on) call("/api/profile", { name: S.name || null, language: S.language, mode: S.intent === "task" ? "do" : S.intent === "learn" ? "learn" : null, level: chosenLevel, ...guide }, "PATCH").then(refreshProfile).catch(() => {});
     $("weekLater").hidden = !api.on;
@@ -1140,16 +1617,16 @@ Notes for you
       if (level === "off") return;
       if (level === "useful") {
         clawd.hidden = false; placeClawd();
-        speakSmall(`${S.guide ? "Your guide is saved. " : ""}I'll stay quiet and only pop up when I can save you time. Tap Clawd in the side menu to change that.`, true);
+        speakSmall((S.guide ? t("guideSaved") : "") + t("quietUseful"), true);
         return;
       }
       if (S.intent === "learn") {
         showPanel(true);
         roam("lab_button");
-        speakSmall(`Here's my Lab. Pick a mission when you have two minutes, or just start chatting.`);
+        speakSmall(t("labIntro"));
       } else if (level === "guide") {
         roam("explain_dot");
-        speakSmall(`Tap anything with an orange dot, like this one, and I'll explain it in one line.`, true);
+        speakSmall(t("tapDots"), true);
       }
     }, 1200);
   }
@@ -1171,13 +1648,14 @@ Notes for you
 
   function renderHello() {
     const h = new Date().getHours();
-    const part = h < 12 ? "Good morning" : h < 20 ? "Good afternoon" : "Good evening";
-    thread.innerHTML = `<div class="hello" id="hello"><h1>${part}${S.name ? ", " + esc(S.name) : ""}</h1>
-      <p class="ask">What do you need help with today?</p>
+    const part = t(h < 12 ? "morning" : h < 20 ? "afternoon" : "evening");
+    const sits = tx("situations");
+    thread.innerHTML = `<div class="hello" id="hello"><h1>${S.name ? t("greetName", { part, name: esc(S.name) }) : part}</h1>
+      <p class="ask">${t("helpToday")}</p>
       <div class="situations">${situationsFirst().map((x) =>
-        `<button type="button" class="situation" data-situation="${x.id}"><span class="ic" aria-hidden="true">${x.ic}</span><span class="t">${esc(x.t)}</span><span class="d">${esc(x.d)}</span></button>`).join("")}
+        `<button type="button" class="situation" data-situation="${x.id}"><span class="ic" aria-hidden="true">${x.ic}</span><span class="t">${esc(sits[x.id][0])}</span><span class="d">${esc(sits[x.id][1])}</span></button>`).join("")}
       </div>
-      <div class="suggest"><button type="button" data-suggest="translate">Translate an email to Catalan</button></div></div>`;
+      <div class="suggest"><button type="button" data-suggest="translate">${t("suggestTranslate")}</button></div></div>`;
   }
 
   // Picking a situation fills in a first message; the ones about a document open the camera / photo picker straight away.
@@ -1185,16 +1663,16 @@ Notes for you
     const x = SITUATIONS.find((s) => s.id === id);
     if (!x) return;
     S.situation = x.id;
-    $("chatTitle").textContent = x.t;
-    prompt.value = x.starter;
+    setTitle(() => tx("situations")[x.id][0], S.inRecents);
+    prompt.value = tx("situations")[x.id][2];
     lastTyped = Date.now();
     if (x.file && api.on) {
       openPicker();
-      if (level !== "off") { clawd.hidden = false; roam("upload_button"); speakSmall(`Take a photo of it, or pick one from your phone. Then press send.`, true); }
+      if (level !== "off") { clawd.hidden = false; roam("upload_button"); speakSmall(t("takePhoto"), true); }
     } else {
       prompt.focus();
       prompt.setSelectionRange(prompt.value.length, prompt.value.length);
-      if (level === "guide") { clawd.hidden = false; roam("composer"); speakSmall(`Add a few details at the end, then press send.`, true); }
+      if (level === "guide") { clawd.hidden = false; roam("composer"); speakSmall(t("addDetails"), true); }
     }
   }
 
@@ -1204,7 +1682,7 @@ Notes for you
     const s = e.target.closest("[data-suggest]");
     if (!s) return;
     S.situation = null;
-    prompt.value = REQUEST;
+    prompt.value = request();
     prompt.focus();
   });
 
@@ -1220,7 +1698,7 @@ ${rules}
 Their request:
 ${text}
 
-Reply with only the finished email in Catalan, ready to paste, with no preamble and no closing offer. Then a line containing only "---", then a short section starting with the line "Notes for you", written in English, with at most 3 bullets: anything in the original a client could misread, and a confirmation that numbers and dates are unchanged.`;
+Reply with only the finished email in Catalan, ready to paste, with no preamble and no closing offer. Then a line containing only "---", then a short section starting with the line "${t("notes")}", written in ${I18N.en.langNames[S.language]}, with at most 3 bullets: anything in the original a client could misread, and a confirmation that numbers and dates are unchanged.`;
   }
 
   // Light Markdown for real answers (bold, italics, headings, bullets). Escapes first, so it stays safe.
@@ -1233,8 +1711,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function renderAnswer(el, text) {
     const i = text.indexOf("\n---");
     const m = i >= 0 ? text.slice(0, i).trim() : text;
-    const notes = i >= 0 ? text.slice(i + 4).trim().replace(/^\**Notes for you\**:?\s*/i, "") : "";
-    el.innerHTML = md(m) + (notes ? `<div class="notes"><b>Notes for you</b>${md(notes)}</div>` : "");
+    const notes = i >= 0 ? text.slice(i + 4).trim().replace(/^\**(Notes for you|Notas para ti|Notes per a tu)\**:?\s*/i, "") : "";
+    el.innerHTML = md(m) + (notes ? `<div class="notes"><b>${t("notes")}</b>${md(notes)}</div>` : "");
   }
 
   function typeOut(el, text, done) {
@@ -1250,11 +1728,11 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   async function ask(input, fallback, el, whoEl) {
     const offline = () => {
-      whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">Example answer, offline</span>`);
+      whoEl.insertAdjacentHTML("beforeend", `<span class="tag offline">${t("offlineExample")}</span>`);
       return new Promise((res) => typeOut(el, fallback, () => res(fallback)));
     };
     if (!sample) return offline();
-    el.innerHTML = `<span class="thinking">Thinking...</span>`;
+    el.innerHTML = `<span class="thinking">${t("thinking")}</span>`;
     try {
       const { text } = await sample(input, { modelTier: "quick", onText: ({ text }) => { renderAnswer(el, text); scrollDown(); } });
       return text;
@@ -1267,7 +1745,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     $("hello")?.remove();
     const d = document.createElement("div");
     d.className = "msg-user";
-    if (file) d.innerHTML = file.preview ? `<img class="att" src="${file.preview}" alt="Your photo">` : `<span class="att-doc">📄 ${esc(file.name)}</span><br>`;
+    if (file) d.innerHTML = file.preview ? `<img class="att" src="${file.preview}" alt="${esc(t("yourPhoto"))}">` : `<span class="att-doc">📄 ${esc(file.name)}</span><br>`;
     d.append(text);
     thread.append(d);
   }
@@ -1275,7 +1753,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function addClaude(kind) {
     const w = document.createElement("div");
     w.className = "msg-claude";
-    w.innerHTML = `<div class="who">Claude <span class="tag ${kind}">${kind === "after" ? "After the Lab" : "Before"}</span></div><div class="ans"></div>`;
+    w.innerHTML = `<div class="who">Claude <span class="tag ${kind}">${t(kind === "after" ? "afterLab" : "before")}</span></div><div class="ans"></div>`;
     thread.append(w);
     scrollDown();
     return [w.querySelector(".ans"), w.querySelector(".who")];
@@ -1290,15 +1768,11 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     speak("");
     pose("busy");
     const isAfter = S.phase === "saved";
-    if (S.phase === "start") {
-      $("chatTitle").textContent = "Translate client email";
-      $("recents").innerHTML = `<button class="side-btn recent" type="button">Translate client email</button>`;
-    }
-    if (api.on && S.phase === "start" && !text.startsWith("Translate")) {
-      const pickedTitle = SITUATIONS.find((x) => x.id === S.situation)?.t;
-      const title = pickedTitle || (text ? text.split("\n")[0].slice(0, 40) : file.media_type === "application/pdf" ? "Read a PDF" : "Read a photo");
-      $("chatTitle").textContent = title;
-      $("recents").innerHTML = `<button class="side-btn recent" type="button">${esc(title)}</button>`;
+    if (S.phase === "start") setTitle(() => t("titleTranslate"), true);
+    if (api.on && S.phase === "start" && !/^(translate|tradu)/i.test(text)) {
+      const picked = S.situation;
+      const typed = text.split("\n")[0].slice(0, 40);
+      setTitle(picked ? () => tx("situations")[picked][0] : text ? () => typed : () => t(file.media_type === "application/pdf" ? "titlePdf" : "titlePhoto"), true);
     }
     addUser(text, file);
     prompt.value = "";
@@ -1310,9 +1784,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       // The backend adds the saved Lab skill to Claude's instructions itself, so the plain request is enough.
       if (api.labSave) await api.labSave.catch(() => {});
       try { out = await askBackend(text, el, whoEl, file); }
-      catch (e) { out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl); }
+      catch (e) { out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? offlineAfter() : OFFLINE_BEFORE, el, whoEl); }
     } else {
-      out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? OFFLINE_AFTER : OFFLINE_BEFORE, el, whoEl);
+      out = await ask(isAfter ? afterPrompt(text) : text, isAfter ? offlineAfter() : OFFLINE_BEFORE, el, whoEl);
     }
     busy = false; $("send").disabled = false;
     pose(null);
@@ -1321,16 +1795,16 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       S.after = out; S.phase = "after";
       if (level !== "off") pose("celebrate", 2600);
       const b = document.createElement("button");
-      b.type = "button"; b.className = "compare-btn"; b.textContent = "Compare before and after";
+      b.type = "button"; b.className = "compare-btn"; b.textContent = t("compare");
       b.addEventListener("click", () => { b.remove(); showCompare(); });
       thread.append(b);
       S.view = "home"; renderPanel();
-      if (level !== "off") { roam("answer_notes"); speakSmall(`Same email, same request. This time I knew how you write to clients.`, true); }
+      if (level !== "off") { roam("answer_notes"); speakSmall(t("sameEmail"), true); }
     } else {
       S.before = out; S.phase = "before";
       // With the backend the coach decides; the scripted nudge is only the demo's safety net if it stayed silent.
       // It is about translating client emails, so it only fires for a translation request.
-      if (!api.on || (!api.coachSpoke && !file && /translat/i.test(text))) setTimeout(() => { if (!api.coachSpoke) nudge(); }, 900);
+      if (!api.on || (!api.coachSpoke && !file && /translat|tradu/i.test(text))) setTimeout(() => { if (!api.coachSpoke) nudge(); }, 900);
     }
     scrollDown();
   });
@@ -1339,14 +1813,14 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     const strip = (t) => { const i = t.indexOf("\n---"); return i >= 0 ? t.slice(0, i).trim() : t; };
     const d = document.createElement("div");
     d.className = "compare";
-    d.innerHTML = `<div class="b"><h3>Before</h3>${md(S.before)}</div><div class="a"><h3>After the Lab</h3>${md(strip(S.after))}</div>`;
+    d.innerHTML = `<div class="b"><h3>${t("before")}</h3>${md(S.before)}</div><div class="a"><h3>${t("afterLab")}</h3>${md(strip(S.after))}</div>`;
     thread.append(d);
     scrollDown();
   }
 
   // ---------- Clawd speaking on the canvas ----------
   function speakSmall(text, closable, actions = "") {
-    speak(`<p>${esc(text)}</p>${actions ? `<div class="actions">${actions}</div>` : ""}${closable ? `<button class="skip" type="button" data-act="hush">Got it</button>` : ""}`);
+    speak(`<p>${esc(text)}</p>${actions ? `<div class="actions">${actions}</div>` : ""}${closable ? `<button class="skip" type="button" data-act="hush">${t("gotIt")}</button>` : ""}`);
   }
 
   function nudge() {
@@ -1354,8 +1828,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     clawd.hidden = false;
     roam("lab_button");
     pose("hop", 700);
-    speakSmall(`That's a word-for-word translation. Tell me how you write to clients and I'll get it right every time. Two minutes?`, false,
-      `<button class="btn primary" data-act="lab">Teach me in the Lab</button><button class="btn" data-act="later">Not now</button><button class="btn ghost" data-act="never">Don't suggest this again</button>`);
+    speakSmall(t("nudge"), false,
+      `<button class="btn primary" data-act="lab">${t("teachMe")}</button><button class="btn" data-act="later">${t("notNow")}</button><button class="btn ghost" data-act="never">${t("dontSuggest")}</button>`);
   }
 
   function setLevel(v, fromServer) {
@@ -1374,45 +1848,47 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
 
   // ---------- Side panel ----------
   function renderPanel() {
-    $("levelNote").textContent = LEVELS[level][1];
+    $("levelNote").textContent = tx("levels")[level][1];
     if (level === "off") { body.innerHTML = ""; return; }
     if (S.view === "lab") return renderLab();
     if (S.view === "done") return renderDone();
     const isDone = (id) => S.labsDone.includes(id) || (id === "clients" && (S.phase === "saved" || S.phase === "after")) ||
       !!api.profile?.labs?.find((l) => l.id === id)?.done;
+    const texts = tx("missions");
     const guide = api.profile?.profile?.guide || S.guide;
-    body.innerHTML = (level === "guide" ? `<p class="tip">Tap anything with an orange dot for a one-line explanation.</p>` : "") +
-      (guide ? `<div><p class="section-label">Your guide for Claude</p><div class="guide-card">${esc(guide)}</div>
-        <p class="q-help">Claude reads this before every answer. In Claude Code it's your CLAUDE.md (or AGENTS.md).</p>
-        <button class="btn" type="button" data-mission="you">Change it</button></div>` : "") +
-      `<div><p class="section-label">Lab missions</p><div class="missions">` + MISSIONS.map((m) => {
+    body.innerHTML = (level === "guide" ? `<p class="tip">${t("panelTip")}</p>` : "") +
+      (guide ? `<div><p class="section-label">${t("guideAria")}</p><div class="guide-card">${esc(guide)}</div>
+        <p class="q-help">${t("guidePanelNote")}</p>
+        <button class="btn" type="button" data-mission="you">${t("changeIt")}</button></div>` : "") +
+      `<div><p class="section-label">${t("labMissions")}</p><div class="missions">` + MISSIONS.map((m) => {
         const done = isDone(m.id);
         return `<button class="mission ${done ? "done" : ""}" data-mission="${m.id}" ${m.ready && !done ? "" : "disabled"}>
-          <span class="t">${m.t}</span><span class="d">${m.d}</span><span class="m">${done ? "Done" : m.ready ? "Start" : "Soon"}</span></button>`;
+          <span class="t">${texts[m.id][0]}</span><span class="d">${texts[m.id][1]}</span><span class="m">${t(done ? "statusDone" : m.ready ? "statusStart" : "statusSoon")}</span></button>`;
       }).join("") + `</div></div>` + progressHtml();
   }
 
   function renderLab() {
     const lab = LABS[S.lab], steps = lab.steps, st = steps[S.step];
+    const text = tx("labs")[S.lab], stText = text.steps[st.key];
     const val = S.answers[S.lab][st.key];
     const picked = (o) => st.multi ? val.includes(o) : val === o;
     const canNext = st.multi ? val.length > 0 : !!val;
     body.innerHTML = `
       <div class="lab-head">
-        <span class="k">Lab · separate conversation</span>
-        <h3>${esc(lab.title)}</h3>
-        <p>Practice here never touches your real chat. You keep what you save.</p>
+        <span class="k">${t("labKicker")}</span>
+        <h3>${esc(text.title)}</h3>
+        <p>${t("labNote")}</p>
         <div class="progress">${steps.map((_, i) => `<span class="${i <= S.step ? "on" : ""}"></span>`).join("")}</div>
       </div>
       <div>
-        <p class="q">${esc(st.q)}</p>
-        <p class="q-help">${esc(st.help)}</p>
+        <p class="q">${esc(stText.q)}</p>
+        <p class="q-help">${esc(stText.help)}</p>
         <div class="options">${st.options.map((o) =>
-          `<button type="button" class="opt ${st.multi ? "multi" : ""}" data-opt="${esc(o)}" aria-pressed="${picked(o)}"><span class="box"></span>${esc(o)}</button>`).join("")}</div>
+          `<button type="button" class="opt ${st.multi ? "multi" : ""}" data-opt="${esc(o)}" aria-pressed="${picked(o)}"><span class="box"></span>${esc(optLabel(S.lab, st.key, o))}</button>`).join("")}</div>
       </div>
       <div class="lab-nav">
-        <button class="btn ghost" data-act="${S.step === 0 ? "quit" : "back"}">${S.step === 0 ? "Leave the Lab" : "Back"}</button>
-        <button class="btn primary" data-act="next" ${canNext ? "" : "disabled"}>${S.step === steps.length - 1 ? "Save" : "Next"}</button>
+        <button class="btn ghost" data-act="${S.step === 0 ? "quit" : "back"}">${t(S.step === 0 ? "leaveLab" : "back")}</button>
+        <button class="btn primary" data-act="next" ${canNext ? "" : "disabled"}>${t(S.step === steps.length - 1 ? "save" : "next")}</button>
       </div>`;
   }
 
@@ -1420,34 +1896,34 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (S.lab === "you") {
       body.innerHTML = `
       <div class="win">
-        <h3>Your guide is ready</h3>
+        <h3>${t("guideReady")}</h3>
         <div class="saved">
-          <strong>Claude will read this before every answer:</strong>
+          <strong>${t("guideReads")}</strong>
           <div class="guide-card">${esc(S.guide)}</div>
-          <div class="row"><span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span></div>
+          <div class="row"><span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span></div>
         </div>
       </div>
-      <button class="btn primary" data-act="backtochat">Back to my chat</button>`;
+      <button class="btn primary" data-act="backtochat">${t("backToChat")}</button>`;
       return;
     }
     const a = S.answers.clients;
     body.innerHTML = `
       <div class="win">
-        <h3>Mission complete</h3>
+        <h3>${t("missionComplete")}</h3>
         <div class="saved">
-          <strong>From now on, Claude will:</strong>
+          <strong>${t("fromNowOn")}</strong>
           <ul>
-            <li>know you write to clients as ${esc(a.role.toLowerCase())}</li>
-            <li>use this tone: ${esc(a.tone.toLowerCase())}</li>
-            ${a.rules.map((r) => `<li>${esc(r.charAt(0).toLowerCase() + r.slice(1))}</li>`).join("")}
+            <li>${esc(optSaid("clients", "role", a.role))}</li>
+            <li>${esc(optSaid("clients", "tone", a.tone))}</li>
+            ${a.rules.map((r) => `<li>${esc(optSaid("clients", "rules", r))}</li>`).join("")}
           </ul>
           <div class="row">
-            <span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span>
-            <span class="chip" data-explain="skill"><span class="dot"></span>Skill saved: client email to Catalan</span>
+            <span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span>
+            <span class="chip" data-explain="skill"><span class="dot"></span>${t("skillSavedClients")}</span>
           </div>
         </div>
       </div>
-      <button class="btn primary" data-act="try">Try it on your email</button>`;
+      <button class="btn primary" data-act="try">${t("tryIt")}</button>`;
   }
 
   // The Clawd panel is closed by default: a new user starts in a new chat, not in the Lab.
@@ -1467,14 +1943,14 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     // The guide mission starts from what they already told me in onboarding.
     if (S.lab === "you") {
       const a = S.answers.you;
-      if (!a.helps.length) a.helps = TOPICS.filter((t) => S.helps.includes(t.id) && t.lab).map((t) => t.lab);
-      if (!a.style) a.style = STYLES.find((s) => s.id === S.style)?.lab ?? null;
+      if (!a.helps.length) a.helps = TOPICS.filter((x) => S.helps.includes(x.id) && x.lab).map((x) => x.lab);
+      if (!a.style) a.style = STYLES.find((x) => x.id === S.style)?.lab ?? null;
       if (!a.always.length) a.always = [...S.always];
-      if (!a.language) a.language = LANGS[S.language];
+      if (!a.language) a.language = Object.keys(LAB_LANG).find((name) => LAB_LANG[name] === S.language);
     }
     setBasePose("train");
     clawd.hidden = false; placeClawd();
-    speakSmall(`We're in the Lab now. Nothing here touches your chat.`, true);
+    speakSmall(t("inLab"), true);
     renderPanel();
     showPanel(true);
   }
@@ -1482,7 +1958,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   function addSaved() {
     const d = document.createElement("div");
     d.className = "sys";
-    d.innerHTML = `<span class="chip" data-explain="memory"><span class="dot"></span>Memory updated</span><span class="chip" data-explain="skill"><span class="dot"></span>Skill saved</span>`;
+    d.innerHTML = `<span class="chip" data-explain="memory"><span class="dot"></span>${t("memoryUpdated")}</span><span class="chip" data-explain="skill"><span class="dot"></span>${t("skillSaved")}</span>`;
     thread.append(d);
     scrollDown();
   }
@@ -1506,8 +1982,8 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       S.dismissals++;
       if (a === "never") S.noSuggest = true;
       if (S.dismissals >= 2 && level === "guide") {
-        speakSmall(`Looks like you'd rather get on with your work. Want me to show up only when it's useful?`, false,
-          `<button class="btn primary" data-act="stepdown">Only when useful</button><button class="btn ghost" data-act="keep">Keep guiding me</button>`);
+        speakSmall(t("stepDown"), false,
+          `<button class="btn primary" data-act="stepdown">${tx("levels").useful[0]}</button><button class="btn ghost" data-act="keep">${t("keepGuiding")}</button>`);
       } else {
         speak("");
         if (level === "useful") { clawd.hidden = true; }
@@ -1525,14 +2001,17 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
         const id = S.lab, a = S.answers.you;
         if (!S.labsDone.includes(id)) S.labsDone.push(id);
         // Rewrite their guide from the mission's answers, the same way onboarding did.
-        S.helps = TOPICS.filter((t) => a.helps.includes(t.lab)).map((t) => t.id);
-        S.style = STYLES.find((s) => s.lab === a.style)?.id ?? S.style;
+        // The language they picked becomes the app's too. The Lab save below stores it in the profile.
+        S.helps = TOPICS.filter((x) => a.helps.includes(x.lab)).map((x) => x.id);
+        S.style = STYLES.find((x) => x.lab === a.style)?.id ?? S.style;
         S.always = [...a.always];
-        S.language = Object.keys(LANGS).find((k) => LANGS[k] === a.language) ?? S.language;
+        const picked = LAB_LANG[a.language];
+        S.view = "done";
+        if (picked !== S.language) setLang(picked, { patch: false });
         S.guide = writeGuide();
-        S.view = "done"; renderPanel();
+        renderPanel();
         setBasePose(null); pose("celebrate", 2600);
-        speakSmall(`Saved! Claude will follow your guide from now on.`, true);
+        speakSmall(t("savedGuide"), true);
         if (api.on) {
           api.labSave = call(`/api/lab/${id}`, { answers: a })
             .then((r) => { for (const ev of r.events || []) if (ev.action === "award_card") addChip(ev.text); })
@@ -1542,7 +2021,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
       } else {
         S.phase = "saved"; S.view = "done"; renderPanel(); addSaved();
         setBasePose(null); pose("celebrate", 2600);
-        speakSmall(`Saved! I'll remember this every time you write to a client.`, true);
+        speakSmall(t("savedClients"), true);
         if (api.on) {
           // Saves the skill on the server; the next turn waits for this before sending.
           api.labSave = call("/api/lab/clients", { answers: S.answers.clients })
@@ -1554,7 +2033,7 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     if (a === "try") {
       showPanel(false);
       S.view = "home"; renderPanel();
-      prompt.value = REQUEST;
+      prompt.value = request();
       $("composer").requestSubmit();
     }
   }
@@ -1562,12 +2041,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   say.addEventListener("click", (e) => {
     const f = e.target.closest("[data-ftue]"); if (f) { ftueAct(f.dataset.ftue); return; }
     const g = e.target.closest("[data-lang]");
-    if (g) { S.language = g.dataset.lang; say.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b === g))); return; }
-    const t = e.target.closest("[data-topic]");
-    if (t) {
-      const id = t.dataset.topic;
+    if (g) { setLang(g.dataset.lang); return; }
+    const tp = e.target.closest("[data-topic]");
+    if (tp) {
+      const id = tp.dataset.topic;
       S.helps = S.helps.includes(id) ? S.helps.filter((x) => x !== id) : [...S.helps, id];
-      t.setAttribute("aria-pressed", String(S.helps.includes(id)));
+      tp.setAttribute("aria-pressed", String(S.helps.includes(id)));
       return;
     }
     const st = e.target.closest("[data-style]");
@@ -1608,12 +2087,12 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   // ---------- Explain popovers ----------
   let popFor = null;
   function showPop(el) {
-    const [title, text] = EXPLAIN[el.dataset.explain] || [];
+    const [title, text] = tx("explain")[el.dataset.explain] || [];
     if (!title) return;
     popFor = el;
     const pick = el.dataset.explain === "attach" && api.on;
-    pop.innerHTML = `<b>${esc(title)}</b>${esc(text)}${pick ? `<br><button type="button" data-pick>Choose a photo or PDF</button>`
-      : S.phase === "start" || S.phase === "before" ? `<br><button type="button" data-lab>Try it in the Lab</button>` : ""}`;
+    pop.innerHTML = `<b>${esc(title)}</b>${esc(text)}${pick ? `<br><button type="button" data-pick>${t("pickFile")}</button>`
+      : S.phase === "start" || S.phase === "before" ? `<br><button type="button" data-lab>${t("tryInLab")}</button>` : ""}`;
     pop.hidden = false;
     const r = el.getBoundingClientRect(), p = pop.getBoundingClientRect();
     const left = Math.min(Math.max(8, r.left), innerWidth - p.width - 8);
@@ -1655,12 +2134,57 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
   $("closeNav").addEventListener("click", () => $("sidebar").classList.remove("open"));
   $("sidebar").addEventListener("click", (e) => { if (e.target.closest("#navClawd")) $("sidebar").classList.remove("open"); });
   $("reset").addEventListener("click", () => {
+    rememberLanguage(null); // a new user starts from the system language again
     if (api.on) call("/api/dev/reset").catch(() => {}).finally(start);
     else start();
   });
+  $("langSwitch").addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (b) setLang(b.dataset.lang); });
+
+  // ---------- Switching language ----------
+  // Fixed words in the page: data-i18n (text), data-i18n-html (our own markup), data-i18n-aria, data-i18n-ph.
+  function applyStatic() {
+    document.documentElement.lang = S.language;
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
+    document.querySelectorAll("[data-i18n-ph]").forEach((el) => el.setAttribute("placeholder", t(el.dataset.i18nPh)));
+    $("langSwitch").querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === S.language)));
+    ["guide", "useful", "off"].forEach((k) => { document.querySelector(`label[for="lv-${k}"]`).textContent = tx("levels")[k][0]; });
+    $("meName").textContent = S.ftue === "done" && S.name ? S.name : t("guest");
+    renderTitle();
+  }
+
+  // The chat title (and its Recents entry) is kept as a function, so it can be redrawn in another language.
+  function setTitle(fn, inRecents) { S.title = fn; S.inRecents = inRecents; renderTitle(); }
+  function renderTitle() {
+    const title = S.title ? S.title() : t("newChat");
+    $("chatTitle").textContent = title;
+    $("recents").innerHTML = S.inRecents ? `<button class="side-btn recent" type="button">${esc(title)}</button>`
+      : `<p class="side-empty">${t("recentsEmpty")}</p>`;
+  }
+
+  // The user's own pick (switcher or Lab): remembered in this browser and, with the backend, saved in their profile,
+  // so Claude and Clawd use it too. Messages already in the chat stay as they are.
+  function setLang(v, { patch = true } = {}) {
+    if (!I18N[v]) return;
+    rememberLanguage(v);
+    if (api.on && patch) {
+      api.langSaving++;
+      call("/api/profile", { language: v }, "PATCH").catch(() => {}).finally(() => { api.langSaving--; refreshProfile(); });
+    }
+    if (v === S.language) return;
+    S.language = v;
+    hidePop();
+    applyStatic();
+    if (S.ftue === 4 && !S.guideEdited) S.guide = writeGuide(); // their guide follows the language until they edit it
+    if (S.ftue !== "done") renderFtue();
+    else if ($("hello")) renderHello();
+    renderPanel();
+  }
 
   function start() {
     S = fresh();
+    applyStatic();
     api.pending.clear(); api.labSave = null; api.coachSpoke = false; api.profile = null;
     $("weekLater").hidden = true;
     setBasePose(null);
@@ -1673,10 +2197,9 @@ Reply with only the finished email in Catalan, ready to paste, with no preamble 
     thread.innerHTML = "";
     prompt.value = "";
     renderAttach();
-    $("chatTitle").textContent = "New chat";
-    $("recents").innerHTML = `<p class="side-empty">Your chats will appear here.</p>`;
-    $("avatar").textContent = "?"; $("meName").textContent = "Guest";
+    $("avatar").textContent = "?";
     lastLeft = null; anchor = null;
+    speak(""); // no half-typed name left over from the last intro
     renderPanel();
     renderFtue();
   }

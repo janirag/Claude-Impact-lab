@@ -9,7 +9,7 @@ cd web
 npm install
 cp .env.example .env.local   # add ANTHROPIC_API_KEY, or leave it empty for offline mode
 npm run dev                  # http://localhost:3000 serves the prototype, connected to the API
-npm test                     # 22 tests, run offline
+npm test                     # run offline
 ```
 
 **Offline mode:** with no API key (or `CLAWD_OFFLINE=1`) the task agent returns canned answers and the coach follows simple rules. Use it for development, tests, and as a backup if the network fails during the demo.
@@ -42,10 +42,10 @@ The coach only **proposes**. `src/lib/policy.ts` **decides** what reaches the sc
 | `POST /api/turn` | `{ message, attachment?: { media_type, data (base64) } }` (images or PDF, up to 5 MB) | SSE: `token` `{text}` and `searching` `{}` (a web search started) … `answer_done` `{refused, offline}` → `coach` (CoachEvent) … → `done` (or `error`) |
 | `POST /api/coach/ack` | `{ event_id, response: "accept" \| "later" \| "never" }` | `{ ok, effect?: { open_lab, level, saved_fact, mission }, events }` |
 | `POST /api/mascot` | `{ message }` | `{ events }`: Clawd's reply when the user taps it and asks something |
-| `GET /api/lab/:missionId` | | Mission and steps (same content as the prototype's Lab) |
+| `GET /api/lab/:missionId` | `?lang=ca\|es\|en` (else Accept-Language) | Mission and steps (same content as the prototype's Lab). Each step's `labels` are shown; its `options` are what POST accepts |
 | `POST /api/lab/:missionId` | `{ answers: { [stepKey]: option \| option[] } }` | `{ saved: ["From now on, Claude will …"], events }` |
 | `GET /api/profile` | | Level, profile, skills, cards (`cards_total`), every challenge with its status, Labs ("What Clawd remembers") |
-| `PATCH /api/profile` | `{ name?, language?, answer_style?, context?, level?, mode? }` (`null` clears a field) | Same as GET |
+| `PATCH /api/profile` | `{ name?, language?, ui_language?, answer_style?, context?, level?, mode? }` (`null` clears a field) | Same as GET |
 | `DELETE /api/profile` | `?fact=<id>` \| `?skill=<id>` \| `?all=1` | Same as GET |
 | `GET /api/profile/export` | | "My AI profile" as plain text for any assistant |
 | `POST /api/session/return` | | `{ events }`: greeting and challenge check-in (the demo's "One week later" button) |
@@ -69,6 +69,13 @@ The user is identified by an anonymous `clawd_uid` cookie. No account is needed.
 }
 ```
 
+## Languages (English, Spanish, Catalan)
+
+- **First load:** the prototype picks the language from `navigator.languages`: Catalan if it appears anywhere before English (many devices in Barcelona keep Spanish first and add Catalan below it), otherwise the first of Spanish or English, else English. `GET /api/profile` applies the same rule to `Accept-Language` for a new user (`ui_language`). `?lang=ca` opens the prototype in a language for a demo.
+- **The user's choice wins:** the EN / ES / CA switcher in the top bar, or the language picked in the Lab ("Tell Claude who you are"), is saved as `profile.language`. The screen, the cards, Clawd's buttons and the offline texts follow `profile.language`, else `ui_language`, else English (`uiLanguage()` in `src/lib/i18n.ts`).
+- **The agents:** they still answer in the language the user writes in. When the user's words don't show one (a photo, a tapped button, a return visit), they use the saved language, or else the app language (`appLanguage()` in `src/lib/prompts.ts`).
+- **Strings:** the prototype keeps its own `I18N` table (it must work as a single file); the backend's are in `src/lib/i18n.ts` and in each catalog item's `tr`. `test/i18n.test.ts` checks that all three languages have the same keys.
+
 ## Code map
 
 | File | Role |
@@ -82,7 +89,8 @@ The user is identified by an anonymous `clawd_uid` cookie. No account is needed.
 | `src/lib/prompts.ts` | System prompts and the coach's context |
 | `src/lib/profile.ts` | "About the user" block, facts, export |
 | `src/lib/lab.ts` | Lab missions: validate answers, save profile and skills, award a card |
-| `src/lib/catalog.ts` | Fixed cards, Lab missions and real-life challenges |
+| `src/lib/catalog.ts` | Fixed cards, Lab missions and real-life challenges, with Spanish and Catalan text |
+| `src/lib/i18n.ts` | Language detection, the user's app language, and the backend's own on-screen words |
 | `src/lib/store.ts` | JSON-file user store with a per-user lock (swap for SQLite or Postgres later) |
 
 ## Models and settings

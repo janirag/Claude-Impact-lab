@@ -1,4 +1,5 @@
-import { labById } from "@/lib/catalog";
+import { labById, labInLanguage } from "@/lib/catalog";
+import { guessLanguage, isLanguage, parseAcceptLanguage } from "@/lib/i18n";
 import { completeLab, validateAnswers } from "@/lib/lab";
 import { json, userIdFrom } from "@/lib/session";
 import { withUser } from "@/lib/store";
@@ -7,10 +8,14 @@ export const runtime = "nodejs";
 
 type Ctx = { params: Promise<{ missionId: string }> };
 
-// GET -> the mission and its steps, for the Lab screen.
-export async function GET(_req: Request, { params }: Ctx) {
+// GET ?lang=ca|es|en -> the mission and its steps, for the Lab screen. Without ?lang, the browser's Accept-Language.
+// Each step's `labels` are shown; its `options` (English) are what POST accepts.
+export async function GET(req: Request, { params }: Ctx) {
   const m = labById((await params).missionId);
-  return m ? json(m) : json({ error: "not found" }, { status: 404 });
+  if (!m) return json({ error: "not found" }, { status: 404 });
+  const q = new URL(req.url).searchParams.get("lang");
+  const lang = isLanguage(q) ? q : guessLanguage(parseAcceptLanguage(req.headers.get("accept-language")));
+  return json(labInLanguage(m, lang));
 }
 
 // POST { answers: { [stepKey]: option | option[] } } -> { saved: [...], events }

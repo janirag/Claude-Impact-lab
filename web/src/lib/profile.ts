@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { policy } from "./config";
-import type { Fact, Language, Topic, User } from "./types";
+import { LANG_NAME } from "./i18n";
+import type { Fact, Topic, User } from "./types";
 
-const LANG_NAME: Record<Language, string> = { ca: "Catalan", es: "Spanish", en: "English" };
 const STYLE_NAME = { short: "short and simple", steps: "step by step", detailed: "detailed", visual: "visual, with lists" } as const;
 const TOPIC_NAME: Record<Topic, string> = {
   paperwork: "letters and paperwork", health: "health questions", money: "money, bills and taxes",

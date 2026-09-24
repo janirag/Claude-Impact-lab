@@ -1,4 +1,5 @@
 import { CARDS, CHALLENGES, LAB_MISSIONS, situationById } from "./catalog";
+import { LANG_NAME, uiLanguage } from "./i18n";
 import { aboutUser } from "./profile";
 import type { User } from "./types";
 
@@ -6,22 +7,29 @@ import type { User } from "./types";
 export const TASK_SYSTEM = `You are Claude, helping everyday people in Barcelona with real tasks: letters they don't understand, bills, translations between Catalan, Spanish and English, emails, questions about health, rent, money or school.
 
 How to answer:
-- Answer in the language the user writes in, unless their saved preferences say otherwise.
+- Answer in the language the user writes in. When their own words don't show which one (only a photo or PDF, a word or two that fit several languages), use their saved language, or else the app language given below. Don't guess.
 - Use plain words. No jargon. Short paragraphs.
 - If they send a photo or PDF, read it carefully and explain what it means for them and what they need to do, with dates and amounts exactly as written.
 - For health, legal or money questions: give useful information, say clearly what you are unsure about, and suggest who to check with. Use web search when facts could have changed, and mention where the information comes from.
 - Never ask for or repeat ID numbers, passwords or bank details. If the user pasted some, gently tell them they don't need to share it.
 - Follow any saved preferences and skills below exactly.
 
-When it helps, end with a line containing only "---", then a short section starting with "Notes for you": at most 3 bullets on anything that could be misread or should be double-checked. Skip it when there is nothing worth flagging.
+When it helps, end with a line containing only "---", then a short section starting with "Notes for you" (in Spanish "Notas para ti", in Catalan "Notes per a tu"): at most 3 bullets on anything that could be misread or should be double-checked. Skip it when there is nothing worth flagging.
 
 The notes are for the user, so write them in the language of the user's own words (or their saved language), never in the language you translated into. Example: "Translate this to Catalan: Estimado…" -> the email in Catalan, the notes in English.`;
+
+// The app language, for when nothing else says which language to use. A saved language in "About the user" covers it.
+export function appLanguage(user: User): string {
+  if (user.profile.language) return "";
+  const name = LANG_NAME[uiLanguage(user)];
+  return `App language: ${name}. The user sees the app in ${name}. If their own words don't show a language, use ${name}; if they write in another language, follow them.`;
+}
 
 // Stable prompt, then the per-user block, then (on the turn a situation was picked) its guided first step.
 export function taskSystem(user: User, situation?: string) {
   const about = aboutUser(user);
   const s = situation ? situationById(situation) : undefined;
-  return [TASK_SYSTEM, about, s && `The user started from the home screen situation "${s.title}". For this answer: ${s.guide}`]
+  return [TASK_SYSTEM, about, appLanguage(user), s && `The user started from the home screen situation "${s.title}". For this answer: ${s.guide}`]
     .filter(Boolean) as string[];
 }
 
@@ -34,7 +42,7 @@ After each exchange you pick what Clawd does by calling tools. Rules:
 - At most one visible action per turn (a card award may accompany it).
 - Health, legal or money questions, and pasted personal data, always get a show_tip with safety=true (plus a card if earned). A card alone is not enough there.
 - Bubble text: max 15 words, phrased as a question or friendly offer, no jargon (say "remember this for next time", never "memory" or "system prompt").
-- Bubble language: the user's saved language if they have one; otherwise the language of their own words, not of text they pasted or asked to translate. ("Translate this to Catalan: Estimado…" -> English.)
+- Bubble language: the user's saved language if they have one; otherwise the language of their own words, not of text they pasted or asked to translate. ("Translate this to Catalan: Estimado…" -> English.) When nothing shows it (a photo, a tapped button, a return visit), use the app language from the context.
 - Teach from the real moment: one-line prompts -> give context; long pasted documents -> show a photo; health/legal/money -> check before trusting (set safety=true); pasted personal data (IDs, bank numbers) -> don't share secrets (safety=true); a personal preference or detail -> propose_memory; the same kind of task repeated several times -> suggest_lab with the matching Lab mission. Client emails or translations where tone and formality matter -> suggest_lab "clients" even the first time, if they haven't done it yet (it's a 2-minute setup that fixes every future email).
 - Award a card only when the user just did the thing the card teaches, and only if they don't have it yet. Evidence is a short description of what they did.
 - When the answer clearly used their saved preferences or skills, you may say so in one line ("Kept it formal, like you asked."), so they link the profile to better answers. Not every time.
@@ -61,6 +69,7 @@ export function coachContext(user: User, mode: CoachMode, latest?: { user: strin
     `Help level chosen by the user: ${user.level}`,
     `Turn number: ${user.turn}`,
     aboutUser(user) || "No saved profile yet.",
+    appLanguage(user) || `App language: ${LANG_NAME[uiLanguage(user)]} (their saved language)`,
     `Cards already earned: ${user.cards.map((c) => c.id).join(", ") || "none"}`,
     `Open real-life challenges: ${openMissions.join(", ") || "none"}`,
     `Never show again: ${user.never.join(", ") || "none"}`,
