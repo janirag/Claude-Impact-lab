@@ -2,7 +2,7 @@
 
 *Working plan, September 2026. Claude Impact Lab. Still in the design phase: items marked **Open** are not decided yet.*
 
-**Builds on:** [basic chat AI users in Barcelona](barcelona-ai-users.md) and the [onboarding mockup meeting note](../notes/2026-09-24-claude-onboarding-mockup.md).
+**Builds on:** [basic chat AI users in Barcelona](barcelona-ai-users.md), the [onboarding mockup meeting note](../notes/2026-09-24-claude-onboarding-mockup.md), the [Clawd Guide prototype](../prototype/index.html) and the [mascot animation clips](../animations/). See section 4.
 
 ---
 
@@ -213,6 +213,146 @@ The profile is small, so it's sent in full every time. No memory search is neede
 5. **Missions:** `assign_mission` and the return-visit check-in (a "one week later" button for the demo).
 6. **Later, not in the MVP:** scheduled reminders, real Barcelona places and partners, more specialist agents.
 
+### Technical architecture
+
+Updated with what we learned from the prototype (Clawd, the Lab, help levels, before/after). See section 4.
+
+**Components**
+
+```
+┌───────────────────────────── BROWSER (mobile-first) ─────────────────────────────┐
+│                                                                                   │
+│  Chat UI              Clawd layer                     Panels                      │
+│  ├ thread + stream    ├ Mascot state machine          ├ Lab (practice flow)       │
+│  ├ composer + upload  │  idle·busy·curious·talking·   ├ Missions / cards          │
+│  └ "Notes for you"    │  celebrate·flag·roam·sleep    ├ "What Clawd remembers"    │
+│                       ├ Sprite (clips/SVG) + anchors  └ Before/after compare      │
+│  Explainers           └ Signals: typing · scrolling · idle · reduced-motion       │
+│  (orange dots)                                                                    │
+│                                   ▲  SSE: answer tokens + coach events            │
+└───────────────────────────────────┼───────────────────────────────────────────────┘
+                                    │  HTTPS (anon cookie ID)
+┌───────────────────────────────────┼──────────── BACKEND (Next.js API routes) ─────┐
+│                                   ▼                                               │
+│   ┌──────────────────────────────────────────────────────────┐                    │
+│   │ ORCHESTRATOR (code)                                       │                   │
+│   │ • event router      • help level: guide / useful / off    │                   │
+│   │ • tip budget + dismissals (back off after 2)              │                   │
+│   │ • safety overrides  • pause gate (from UI signals)        │                   │
+│   │ • validates + filters coach actions before they reach UI  │                   │
+│   └───────┬───────────────────────┬───────────────────┬───────┘                   │
+│           │                       │                   │                           │
+│   ┌───────▼────────┐     ┌────────▼────────┐   ┌──────▼────────┐                  │
+│   │ TASK AGENT     │     │ COACH AGENT     │   │ LAB ENGINE    │                  │
+│   │ Claude, stream │     │ Claude + strict │   │ (code) steps  │                  │
+│   │ vision, web    │     │ tools, runs     │   │ from catalog; │                  │
+│   │ search, profile│     │ after answer    │   │ writes profile│                  │
+│   │ in system      │     │ (background)    │   │ + skills      │                  │
+│   └───────┬────────┘     └────────┬────────┘   └──────┬────────┘                  │
+│           └───────────────┬───────┴───────────────────┘                           │
+│                   ┌───────▼─────────────────────────────┐   ┌───────────────────┐ │
+│                   │ USER STORE (SQLite / Postgres)      │   │ CATALOGS (JSON)   │ │
+│                   │ profile · skills · cards · missions │   │ cards · missions  │ │
+│                   │ tip_history · dismissals · level    │   │ lab steps · anchors│ │
+│                   └─────────────────────────────────────┘   └───────────────────┘ │
+└───────────────────────────────────────┬───────────────────────────────────────────┘
+                                        │
+                              ┌─────────▼─────────┐
+                              │ Anthropic API     │
+                              │ Messages + tools, │
+                              │ web search, vision│
+                              └───────────────────┘
+```
+
+**One chat turn, step by step**
+
+```
+User        UI                 Orchestrator          Task agent        Coach agent       Store
+ │ send msg  │                      │                      │                 │              │
+ │──────────▶│ POST /api/turn ─────▶│ load user ──────────────────────────────────────────▶│
+ │           │                      │ build system prompt  │                 │              │
+ │           │                      │ (base + "About user" │                 │              │
+ │           │                      │  + skills) ─────────▶│ stream          │              │
+ │           │◀══ SSE tokens ═══════│◀═════════════════════│                 │              │
+ │           │ Clawd: busy          │                      │ done            │              │
+ │           │                      │ (in parallel, first turn only:         │              │
+ │           │                      │  intent classifier learn vs do)        │              │
+ │           │                      │── exchange + profile + progress ──────▶│              │
+ │           │                      │                      │   tool call:    │              │
+ │           │                      │◀──────── show_tip / award_card / ... ──│              │
+ │           │                      │ filter: level? budget? dismissed?      │              │
+ │           │                      │ safety override? ───────────── log ──────────────────▶│
+ │           │◀══ SSE coach event ══│ {action, text, mood, point_at}         │              │
+ │           │ Clawd: curious "!"   │                      │                 │              │
+ │           │ (waits for pause,    │                      │                 │              │
+ │           │  then walks to anchor + bubble)             │                 │              │
+ │ tap "yes" │ POST /api/coach/ack ▶│ apply (save memory / start Lab) ────────────────────▶│
+```
+
+The user never waits for the coach. Answer tokens stream immediately, and the coach event arrives on the same connection 1–2 seconds after the answer ends.
+
+**API surface**
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/turn` | Message and optional file → SSE stream: `token` events, then `answer_done`, then an optional `coach` event |
+| `POST /api/coach/ack` | The user's response to a bubble: `accept` / `later` / `never` (updates dismissals and budget, applies memory) |
+| `POST /api/mascot` | Messages sent directly to Clawd (coach in conversation mode) |
+| `GET/POST /api/lab/:missionId` | Lab steps from the catalog; on the last step, writes to the profile and skills |
+| `GET/PATCH/DELETE /api/profile` | "What Clawd remembers": view, edit or delete each item |
+| `GET /api/profile/export` | "My AI profile" as plain text for any assistant |
+| `POST /api/session/return` | Return visit: runs the mission check-in (the demo's "one week later" button) |
+
+**Coach tool output** (strict schema, so it's always valid JSON)
+
+```ts
+type CoachAction = {
+  action: "stay_silent" | "show_tip" | "award_card" | "propose_memory"
+        | "suggest_lab" | "assign_mission" | "check_in_mission";
+  text?: string;                 // ≤ ~15 words, user's language
+  ref?: string;                  // card_id | mission_id | lab mission id
+  fact?: string;                 // for propose_memory
+  mood: "curious" | "happy" | "thoughtful" | "celebrate";
+  point_at?: "upload_button" | "composer" | "answer_notes" | "card_shelf" | "lab_button";
+  safety?: boolean;              // bypasses the tip budget
+};
+```
+
+**User record**
+
+```ts
+type User = {
+  id: string;                                  // anon cookie
+  level: "guide" | "useful" | "off";
+  profile: { name?: string; language: "ca"|"es"|"en"; answer_style: "short"|"detailed"|"visual";
+             context: "personal"|"work"|"study"; facts: Fact[] };   // ≤ ~20 facts
+  skills: { id: string; title: string; instructions: string }[];     // from the Lab
+  cards: { id: string; earned_at: string; evidence: string }[];
+  missions: { id: string; status: "open"|"done"; assigned_at: string }[];
+  tip_history: { at: string; action: string; outcome: "accepted"|"later"|"never" }[];
+};
+```
+
+**Mascot state machine (frontend):** `coach event + UI signals → state → clip or SVG + position`. The mood comes from the coach and the position from `point_at`. **When** it moves is decided only by the pause gate.
+
+**Stack and deployment**
+
+| Layer | Choice |
+|---|---|
+| Frontend | Next.js (React) plus the prototype's styles; clips converted to sprite sheets or WebM loops |
+| Backend | Next.js API routes on Node, SSE for streaming |
+| Claude | Anthropic TypeScript SDK. The task agent uses `messages.stream`; the coach runs through the tool runner with `strict` tools; server-side refusal fallback on both |
+| Models | Claude Opus 5 for both agents; the coach can move to Sonnet 5 or Haiku 4.5 (**Open**) |
+| Storage | SQLite for the demo, Postgres if hosted |
+| Hosting | Vercel (**Open**); the API key stays on the server, never in the browser |
+| Backup demo | The current `prototype/index.html` artifact with its offline answers, in case the network fails on stage |
+
+**What reuses the prototype and what's new**
+
+- **Reuse:** the layout, styles, help levels, explainers, Lab flow, before/after compare, and the "Notes for you" format.
+- **Replace:** `window.claude.use("sample")` becomes `/api/turn`; `localStorage` becomes the user store.
+- **New:** the orchestrator, the coach agent, catalogs, the roaming sprite with anchors, and memory screens.
+
 ---
 
 ## 3. The mascot: a pet companion
@@ -269,7 +409,83 @@ People don't like being taught, and low confidence is the real barrier. So the m
 
 ---
 
-## 4. Open decisions
+## 4. Prototypes, mockups and design resources
+
+Status on 2026-09-24. Everything below is on `main`.
+
+| Resource | Where | Who | What it is |
+|---|---|---|---|
+| Meeting note | [`notes/2026-09-24-claude-onboarding-mockup.md`](../notes/2026-09-24-claude-onboarding-mockup.md) ([Granola original](https://notes.granola.ai/d/78865f1d-b82d-434b-b752-5d2b773aa70b)) | Team | The first concept: Clippy-style mascot, gamified 5–10 step tutorial, memory education, skip/later/never |
+| Clawd Guide prototype v1 | [`prototype/index.html`](../prototype/index.html) (PR #1) | Janira | Working one-file clickable prototype. Details below. |
+| Mascot animation clips | [`animations/`](../animations/) (7 × MP4, 1920 px wide, 2–21 s) | Ridvan | Pixel-art Clawd animation states. Details below. |
+| Desk research | [`research/barcelona-ai-users.md`](barcelona-ai-users.md) | Francesc | Who basic chat users in Barcelona are, with 4 personas |
+
+### Clawd Guide prototype v1
+
+A single HTML page styled like the Claude chat interface, with **Clawd** (the pixel-art mascot) in a side panel. Open `prototype/index.html` in a browser; "Reset demo" in the top banner restarts it.
+
+**Demo flow (persona: Carmen López, office admin):**
+
+1. Carmen sends a one-line request: "Translate this to Catalan", followed by a client email about an invoice.
+2. Claude answers with a generic translation, tagged **Before**.
+3. Clawd nudges: *"You've translated client emails four times this week. Want to teach me how you like them? It takes 2 minutes, and I'll remember next time."* The options are **Open the Lab** / **Not now** / **Don't suggest this again**.
+4. **The Lab**, a separate practice conversation ("never touches your real chat"), asks 3 questions: role, tone (formal *vostè*, friendly *tu*, short) and rules that must never go wrong (keep prices and dates, flag anything a client could misread, just the email, keep my signature).
+5. **Mission complete:** "From now on, Claude will…", with **Memory updated** and **Skill saved** chips.
+6. **Try it on your email:** the same request now gives a polished email tagged **After the Lab**, plus **Notes for you** (for example, *"divendres" could be misread, add the date*).
+7. **Compare before and after:** the two answers side by side. This is the demo's strongest moment: same request, only the context changed.
+
+**Other features:**
+
+- **Three help levels:** *Guide me* / *Only when useful* / *Off*, the same idea as the plan's learn vs just-do mode.
+- **Explainers:** in *Guide me* mode, UI elements (Projects, model picker, attach, connectors, memory and skill chips) get an orange dot; tapping one shows a one-line plain-language explanation, some with "Try it in the Lab".
+- **Backs off by itself:** after 2 dismissals, Clawd offers to switch to *Only when useful*.
+- **Lab missions list:** "Teach Claude how you write to clients" (ready), "Tell Claude who you are" and "Connect a tool you use" (marked *Soon*).
+- **Responsive:** three columns on desktop, no chat list on tablet, and on phone Clawd becomes a bottom sheet opened from a floating Clawd button with a badge.
+- Dark mode, reduced-motion support, and live Claude answers through the artifact runtime, with built-in offline example answers as a fallback.
+
+### Mascot animation clips
+
+Seven short pixel-art clips of Clawd (orange body, black square eyes, four legs) on a light background. The files have auto-generated names, so they're listed by their first characters. *Descriptions come from sample frames and are our interpretation of the intent.*
+
+| Clip | Length | What it shows | Maps to plan mood |
+|---|---|---|---|
+| `1C8B…` | 2 s | Clawd standing, front view | **Resting** (idle) |
+| `294D…` | 5 s | Clawd tilting and wobbling in place | **Busy** or walking |
+| `61C1…` | 6 s | Clawd with a blue sweatband and round black props, side and front view; reads as "training" | **Lab / practising** |
+| `7FB0…` | 4 s | Clawd in side view with confetti | **Celebrating** (card or save) |
+| `88A6…` | 4 s | Happy closed eyes (^ ^), holding a checkered flag | **Mission complete** |
+| `9B28…` | 21 s | All the states together on one canvas | Showreel / overview |
+| `BE89…` | 11 s | Clawd moving across the screen: left, centre, top right | **Roaming** (moving around the screen) |
+
+### How the prototype and clips fit the plan
+
+**Already matching the plan:**
+- A nudge triggered by repetition, with skip, later and never options.
+- Help levels that back off automatically.
+- Memory saved only after the user takes an action, and shown visibly.
+- A before/after comparison that proves the value of a profile.
+- A mobile bottom sheet, reduced motion, and dark mode.
+- The clips already cover 5 of the plan's moods (resting, busy, lab, celebrating, mission complete) plus roaming.
+
+**Gaps and differences to decide** (added to section 5):
+
+1. **Name and brand.** The prototype uses **Clawd**, Anthropic's own mascot, and a Claude-style interface (with a "Not an Anthropic product" banner). The plan suggested a character of our own (Espurna). Clawd is instantly recognisable to a Claude community audience, but needs Anthropic's OK for anything public beyond the hackathon.
+2. **Hero persona.** The prototype's Carmen is an office admin translating client emails, which fits the research persona **Núria**. The plan's Carmen (52, letter from Hisenda) is a different story. The prototype's flow is built and demos well, so either make it the hero story (and rename the persona to Núria) or build the letter story as a second scenario.
+3. **What "missions" means.** The prototype's *Lab missions* are practice tasks inside the app. The plan's *missions* are tasks in the real world ("when your next bill arrives…"). Both are useful. Proposal: keep **Lab missions** for in-app setup, and call the real-world ones **Real-life challenges** (name open).
+4. **Where the mascot lives.** The prototype keeps Clawd in a side panel or bottom sheet with a gentle bob. The roaming clip and the plan's "walks to what it's talking about" need a small sprite that can leave the panel. Proposal: the panel is where conversation happens, and the sprite is Clawd's ambient presence on the screen.
+5. **Cards vs chips.** The prototype shows progress as *Memory updated* / *Skill saved* chips. The plan has a card collection. Chips could be the moment and cards the collection they add to.
+6. **Runtime.** The prototype has no backend (it uses the artifact runtime plus offline answers). That's ideal for demo reliability. The plan's Next.js backend is needed for the real orchestrator, coach and user store. Decide whether the hackathon demo stays as an artifact or moves to the backend.
+7. **Missing from the clips:** *Watching*, *Curious* (the "!" glow), *Talking* and *Sleeping*.
+8. **Clip file names** should be renamed by state (for example `clawd-idle.mp4`, `clawd-celebrate.mp4`) so they're easy to reference in code.
+
+**New ideas from the prototype to adopt in the plan:**
+- **Explainers:** orange dots with one-line explanations of the interface.
+- **The Lab** as a safe practice space separate from the real chat.
+- **"Notes for you"** under answers, flagging what could be misread. This works well with the "check before trusting" lesson.
+
+---
+
+## 5. Open decisions
 
 | # | Decision | Recommendation |
 |---|---|---|
@@ -278,12 +494,17 @@ People don't like being taught, and low confidence is the real barrier. So the m
 | 3 | Demo hosting | Hosted, so judges can open it on their phones |
 | 4 | Demo language | A Catalan / Spanish / English switcher |
 | 5 | More agents planned beyond task and coach? | Decides whether the classifier step is enough or a full LLM router is needed |
-| 6 | Mascot look | A spark or blob shape, easy to animate |
+| 6 | Mascot character and name | **Clawd** (already designed and animated) for the hackathon; ask Anthropic before any public use beyond it. Espurna as a fallback. |
 | 7 | Personality strength | Gentle by default, cheeky in small doses |
-| 8 | Mascot name | Espurna, or choose one as a team |
+| 8 | Hero demo story | The prototype's client-email before/after, with the persona renamed Núria; Carmen's letter as a second scenario if time allows |
+| 9 | "Missions" naming | *Lab missions* (in-app) vs *Real-life challenges* (outside) |
+| 10 | Mascot placement | Panel for conversation, plus a small roaming sprite |
+| 11 | Demo runtime | Keep the artifact version as a safe backup; build the backend version alongside it |
 
-## 5. Next steps
+## 6. Next steps
 
 - [ ] Confirm the open decisions above.
-- [ ] Interactive prototype of the mascot's moods and movement rules, to test the feel before the visual design.
-- [ ] Build step 1: Next.js project with the task agent and an empty mascot slot for the design.
+- [x] ~~Interactive prototype of the mascot~~: Clawd Guide v1 is done (chat, side panel, Lab, before/after).
+- [ ] Rename the animation clips by state, and add the missing states (watching, curious, talking, sleeping).
+- [ ] Prototype v2: add the roaming sprite (using the roaming clip) and play the celebrate and flag clips at the Lab's save moment.
+- [ ] Build step 1: Next.js project with the task agent and an empty mascot slot, reusing the prototype's look.
