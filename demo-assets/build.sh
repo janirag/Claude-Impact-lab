@@ -9,7 +9,7 @@ mkdir -p pdf png txt
 chrome() { "$CHROME" --headless=new --disable-gpu --hide-scrollbars --no-pdf-header-footer --allow-file-access-from-files "$@" 2>/dev/null; }
 
 # A4 documents: PDF (all pages) + PNG of page 1 at 2x (1588 x 2246 px).
-for name in carta-ibi carta-banc factura-llum contracte-lloguer deures-fraccions; do
+for name in carta-ibi carta-banc factura-llum contracte-lloguer contracte-lloguer-sense-dades contracte-lloguer-sense-signar contracte-lloguer-vencut deures-fraccions; do
   url="file://$PWD/src/$name.html"
   chrome --print-to-pdf="pdf/$name.pdf" "$url"
   chrome --window-size=794,1123 --force-device-scale-factor=2 --screenshot="png/$name.png" "$url"
